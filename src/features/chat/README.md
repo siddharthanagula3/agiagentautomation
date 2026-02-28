@@ -1,6 +1,6 @@
 # 💬 Multi-Agent Chat Feature
 
-The chat feature is the centerpiece of AGI Agent Automation, providing a best-in-class interface for interacting with AI employees that collaborate transparently to complete complex tasks.
+The chat feature is the centerpiece of AGI Workforce, providing a best-in-class interface for interacting with AI employees that collaborate transparently to complete complex tasks.
 
 ## Overview
 

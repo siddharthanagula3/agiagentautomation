@@ -19,14 +19,14 @@ const TermsOfServicePage: React.FC = () => {
     {
       icon: CheckCircle2,
       title: 'Acceptance of Terms',
-      content: `By accessing and using AGI Agent Automation Platform, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+      content: `By accessing and using AGI Workforce, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
 
 These terms apply to all users, including visitors, registered users, and paid subscribers. We reserve the right to modify these terms at any time, and will notify users of significant changes.`,
     },
     {
       icon: FileText,
       title: 'Services Description',
-      content: `AGI Agent provides:
+      content: `AGI Workforce provides:
 
 • AI employee creation and management platform
 • Workflow automation tools
@@ -104,8 +104,8 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Terms of Service | AGI Agent Automation"
-        description="Terms of Service for AGI Agent Automation platform. Read our terms and conditions for using our AI employee and automation services."
+        title="Terms of Service | AGI Workforce"
+        description="Terms of Service for AGI Workforce platform. Read our terms and conditions for using our AI employee and automation services."
         keywords={[
           'terms of service',
           'terms and conditions',
@@ -188,11 +188,11 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
             </p>
             <div className="flex flex-col justify-center gap-4 text-sm sm:flex-row">
               <div>
-                <strong>Email:</strong> legal@agiagentautomation.com
+                <strong>Email:</strong> legal@agiworkforce.com
               </div>
               <div className="hidden text-muted-foreground sm:block">|</div>
               <div>
-                <strong>Support:</strong> support@agiagentautomation.com
+                <strong>Support:</strong> support@agiworkforce.com
               </div>
             </div>
           </motion.div>

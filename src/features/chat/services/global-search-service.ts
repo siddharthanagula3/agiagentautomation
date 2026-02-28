@@ -63,7 +63,7 @@ interface MessageWithSession {
   content: string;
   created_at: string;
   updated_at: string;
-  chat_sessions: {
+  web_conversations: {
     id: string;
     title: string | null;
   } | null;
@@ -249,7 +249,7 @@ class GlobalSearchService {
     if (!filters.query.trim()) return [];
 
     let query = supabase
-      .from('chat_sessions')
+      .from('web_conversations')
       .select('id, title, created_at, updated_at, is_archived')
       .eq('user_id', userId)
       .ilike('title', `%${filters.query}%`);
@@ -306,7 +306,7 @@ class GlobalSearchService {
 
     // First, get user's session IDs to filter messages
     let sessionQuery = supabase
-      .from('chat_sessions')
+      .from('web_conversations')
       .select('id')
       .eq('user_id', userId);
 
@@ -334,7 +334,7 @@ class GlobalSearchService {
 
     // Search messages
     let messageQuery = supabase
-      .from('chat_messages')
+      .from('web_messages')
       .select(
         `
         id,
@@ -343,7 +343,7 @@ class GlobalSearchService {
         content,
         created_at,
         updated_at,
-        chat_sessions!inner (
+        web_conversations!inner (
           id,
           title
         )
@@ -387,7 +387,7 @@ class GlobalSearchService {
       return {
         type: 'message' as const,
         sessionId: message.session_id,
-        sessionTitle: message.chat_sessions?.title || 'Untitled Chat',
+        sessionTitle: message.web_conversations?.title || 'Untitled Chat',
         messageId: message.id,
         content: message.content,
         role: message.role as 'user' | 'assistant' | 'system',
@@ -478,7 +478,7 @@ class GlobalSearchService {
     try {
       // Get recent unique words/phrases from session titles
       const { data, error } = await supabase
-        .from('chat_sessions')
+        .from('web_conversations')
         .select('title')
         .eq('user_id', userId)
         .eq('is_active', true)

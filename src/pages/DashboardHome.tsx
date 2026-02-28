@@ -1,62 +1,72 @@
 /**
- * Dashboard Home Page - Modern AI Workforce Interface
- * Professional design with glassmorphism and smooth animations
+ * Dashboard Home Page - Chat-First Design
+ * Chat is the primary interface with a collapsible right panel for workforce stats.
+ * The DashboardLayout provides the app navigation sidebar and header.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useAgentMetricsStore } from '@shared/stores/agent-metrics-store';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@shared/ui/card';
+import { useWorkforceStore } from '@shared/stores/workforce-store';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
-import { BentoGrid, BentoCard } from '@shared/ui/bento-grid';
-import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
+import { ScrollArea } from '@shared/ui/scroll-area';
 import {
-  TrendingUp,
-  Users,
-  Bot,
-  Zap,
-  DollarSign,
-  Target,
-  ArrowRight,
-  Sparkles,
-  MessageSquare,
-  BarChart3,
   Brain,
-  Rocket,
-  Clock,
+  Target,
+  Zap,
   CheckCircle2,
-  Play,
-  TrendingDown,
+  PanelRightClose,
+  PanelRightOpen,
+  Users,
   Activity,
+  TrendingUp,
+  ArrowRight,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import {
-  motion,
-  useSpring,
-  useMotionValue,
-  useTransform,
-  animate,
-} from 'framer-motion';
-import {
-  DashboardLoading,
-  SkeletonCard,
-  SkeletonText,
-} from '@shared/ui/premium-loading';
+import { motion, animate } from 'framer-motion';
 
-interface DashboardHomePageProps {
-  className?: string;
-}
+// Chat components (reuse existing)
+import { ChatSidebar } from '@features/chat/components/Sidebar/ChatSidebar';
+import { ChatHeader } from '@features/chat/components/Main/ChatHeader';
+import { MessageList } from '@features/chat/components/Main/MessageList';
+import { ChatComposer } from '@features/chat/components/Composer/ChatComposer';
+import { ToolProgressIndicator } from '@features/chat/components/workflows/ToolProgressIndicator';
+import { KeyboardShortcutsDialog } from '@features/chat/components/dialogs/KeyboardShortcutsDialog';
+import { GlobalSearchDialog } from '@features/chat/components/dialogs/GlobalSearchDialog';
+import { TokenAnalyticsDialog } from '@features/chat/components/dialogs/TokenAnalyticsDialog';
+import { EnhancedExportDialog } from '@features/chat/components/dialogs/EnhancedExportDialog';
+import { BookmarksDialog } from '@features/chat/components/dialogs/BookmarksDialog';
+import {
+  UsageWarningBanner,
+  useUsageMonitoring,
+} from '@features/chat/components/tokens/UsageWarningBanner';
+import { UsageWarningModal } from '@features/chat/components/dialogs/UsageWarningModal';
+import { useUsageWarningStore } from '@shared/stores/usage-warning-store';
+import { useUserUsage } from '@shared/stores/user-profile-store';
+import { useNotificationStore } from '@shared/stores/notification-store';
 
-// Animated Counter Component
+// Chat hooks (reuse existing)
+import { useChat } from '@features/chat/hooks/use-chat-interface';
+import { useChatHistory } from '@features/chat/hooks/use-conversation-history';
+import { useTools } from '@features/chat/hooks/use-tool-integration';
+import { useExport } from '@features/chat/hooks/use-export-conversation';
+import { useKeyboardShortcuts } from '@features/chat/hooks/use-keyboard-shortcuts';
+import { useAIPreferences } from '@features/chat/hooks/use-ai-preferences';
+import type { ChatSession, ChatMode } from '@features/chat/types';
+
+const DEFAULT_TOKEN_LIMITS = {
+  free: 10000,
+  pro: 100000,
+  enterprise: 500000,
+} as const;
+
+const FREE_TIER_DEFAULT_LIMIT = DEFAULT_TOKEN_LIMITS.free;
+
+// Animated Counter for stats panel
 const AnimatedCounter: React.FC<{
   value: number;
   format?: (val: number) => string;
@@ -65,14 +75,12 @@ const AnimatedCounter: React.FC<{
 
   useEffect(() => {
     const controls = animate(0, value, {
-      duration: 1.5,
+      duration: 1.2,
       ease: 'easeOut',
       onUpdate: (latest) => {
-        // Use queueMicrotask to batch state updates and avoid synchronous setState during animation callback
         queueMicrotask(() => setDisplayValue(latest));
       },
     });
-
     return () => controls.stop();
   }, [value]);
 
@@ -81,476 +89,611 @@ const AnimatedCounter: React.FC<{
   );
 };
 
-export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
-  className,
-}) => {
-  const { user } = useAuthStore();
-  const navigate = useNavigate();
+// Collapsible right panel with workforce stats
+const WorkforcePanel: React.FC<{
+  isOpen: boolean;
+  onToggle: () => void;
+}> = ({ isOpen, onToggle }) => {
   const metricsStore = useAgentMetricsStore();
-  const [isLoading, setIsLoading] = useState(true);
-  // Store current time in state to avoid impure Date.now() during render
-  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const { hiredEmployees, fetchHiredEmployees } = useWorkforceStore();
+  const navigate = useNavigate();
 
-  // Update current time periodically for "time ago" display
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 60000); // Update every minute
-    return () => clearInterval(interval);
-  }, []);
+    fetchHiredEmployees();
+  }, [fetchHiredEmployees]);
 
-  // Get live metrics from store
-  const stats = {
-    activeEmployees: metricsStore.totalAgents, // Total agents available
-    activeWorkingAgents: metricsStore.activeAgents, // Agents currently working
-    totalTasks: metricsStore.completedTasks + metricsStore.failedTasks,
-    completedTasks: metricsStore.completedTasks,
-    tokensUsed: metricsStore.totalTokensUsed,
-    successRate: metricsStore.getSuccessRate(),
-    activeSessions: metricsStore.getActiveSessionsCount(),
-  };
-
-  const quickActions = [
-    {
-      id: 'chat',
-      title: 'Start New Task',
-      description: 'Tell AI what you need in natural language',
-      icon: MessageSquare,
-      iconColor: 'text-primary',
-      bgColor: 'bg-primary/10',
-      action: () => navigate('/chat'),
-    },
-    {
-      id: 'marketplace',
-      title: 'Explore Capabilities',
-      description: 'See what your AI workforce can do',
-      icon: Sparkles,
-      iconColor: 'text-accent',
-      bgColor: 'bg-accent/10',
-      action: () => navigate('/marketplace'),
-    },
-    {
-      id: 'automation',
-      title: 'View Workflows',
-      description: 'Manage automated processes',
-      icon: Zap,
-      iconColor: 'text-success',
-      bgColor: 'bg-success/10',
-      action: () => navigate('/mission-control'),
-    },
-    {
-      id: 'analytics',
-      title: 'See Analytics',
-      description: 'Track performance and usage',
-      icon: BarChart3,
-      iconColor: 'text-warning',
-      bgColor: 'bg-warning/10',
-      action: () => navigate('/billing'),
-    },
-  ];
-
-  // Helper to format time ago - uses currentTime state to be pure
-  const formatTimeAgo = useCallback(
-    (date: Date): string => {
-      const seconds = Math.floor((currentTime - new Date(date).getTime()) / 1000);
-      if (seconds < 60) return 'Just now';
-      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-      return `${Math.floor(seconds / 86400)}d ago`;
-    },
-    [currentTime]
+  const stats = useMemo(
+    () => ({
+      totalAgents: metricsStore.totalAgents,
+      activeAgents: metricsStore.activeAgents,
+      completedTasks: metricsStore.completedTasks,
+      failedTasks: metricsStore.failedTasks,
+      tokensUsed: metricsStore.totalTokensUsed,
+      successRate: metricsStore.getSuccessRate(),
+      activeSessions: metricsStore.getActiveSessionsCount(),
+    }),
+    [metricsStore]
   );
 
-  // Get recent activity from metrics store
-  const recentActivity =
-    metricsStore.recentActivity.length > 0
-      ? metricsStore.recentActivity.slice(0, 10).map((activity) => ({
-          type:
-            activity.type.includes('failed') || activity.type.includes('error')
-              ? 'error'
-              : 'info',
-          message: activity.message,
-          time: formatTimeAgo(activity.timestamp),
-        }))
-      : [
-          {
-            type: 'info' as const,
-            message:
-              'Welcome to your AI Workforce! Start by asking AI to help with a task.',
-            time: 'Just now',
-          },
-        ];
-
-  // Simulate loading for better UX
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <DashboardLoading className="min-h-screen" />;
+  if (!isOpen) {
+    return (
+      <div className="flex flex-col items-center border-l border-border bg-card/30 py-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          className="mb-2"
+          aria-label="Open workforce panel"
+        >
+          <PanelRightOpen className="h-4 w-4" />
+        </Button>
+        <div className="flex flex-col items-center gap-3 pt-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <Brain className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10">
+            <Target className="h-4 w-4 text-green-500" />
+          </div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+            <Activity className="h-4 w-4 text-blue-500" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div
-      className={cn(
-        'min-h-screen space-y-4 p-4 md:space-y-6 md:p-6',
-        className
-      )}
-    >
-      {/* Welcome Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="glass-strong relative overflow-hidden rounded-3xl p-4 md:p-8"
-      >
-        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
-        <div className="relative z-10">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <Badge className="glass mb-4">
-                <Sparkles className="mr-2 h-3 w-3" />
-                AI Workforce Dashboard
-              </Badge>
-              <h1 className="mb-2 text-2xl font-bold md:text-4xl">
-                Welcome back{user?.name ? `, ${user.name}` : ''}! 👋
-              </h1>
-              <p className="text-base text-muted-foreground md:text-xl">
-                Your AI workforce is ready. Just ask what you need.
+    <div className="flex w-72 flex-shrink-0 flex-col border-l border-border bg-card/30">
+      {/* Panel header */}
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold">Workforce</h3>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          className="h-7 w-7"
+          aria-label="Close workforce panel"
+        >
+          <PanelRightClose className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <ScrollArea className="flex-1">
+        <div className="space-y-4 p-4">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-border bg-background/50 p-3">
+              <div className="flex items-center gap-1.5">
+                <Brain className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs text-muted-foreground">Agents</span>
+              </div>
+              <p className="mt-1 text-lg font-bold">
+                <AnimatedCounter value={stats.totalAgents} />
+              </p>
+              {stats.activeAgents > 0 && (
+                <Badge variant="secondary" className="mt-1 text-[10px]">
+                  <Zap className="mr-0.5 h-2.5 w-2.5 animate-pulse" />
+                  {stats.activeAgents} active
+                </Badge>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-border bg-background/50 p-3">
+              <div className="flex items-center gap-1.5">
+                <Target className="h-3.5 w-3.5 text-green-500" />
+                <span className="text-xs text-muted-foreground">Tasks</span>
+              </div>
+              <p className="mt-1 text-lg font-bold">
+                <AnimatedCounter value={stats.completedTasks} />
+              </p>
+              {stats.activeSessions > 0 && (
+                <Badge variant="secondary" className="mt-1 text-[10px]">
+                  <Activity className="mr-0.5 h-2.5 w-2.5 animate-pulse" />
+                  {stats.activeSessions} running
+                </Badge>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-border bg-background/50 p-3">
+              <div className="flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-yellow-500" />
+                <span className="text-xs text-muted-foreground">Tokens</span>
+              </div>
+              <p className="mt-1 text-lg font-bold">
+                <AnimatedCounter
+                  value={stats.tokensUsed}
+                  format={(v) => {
+                    const rounded = Math.round(v);
+                    if (rounded >= 1000) return `${(rounded / 1000).toFixed(1)}k`;
+                    return String(rounded);
+                  }}
+                />
               </p>
             </div>
-            <Button
-              size="lg"
-              className="btn-glow gradient-primary w-full text-white sm:w-auto"
-              onClick={() => navigate('/chat')}
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Start New Task
-            </Button>
-          </div>
-        </div>
-      </motion.div>
 
-      {/* Stats Grid - Enhanced with BentoGrid */}
-      <BentoGrid className="grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <BentoCard
-          gradient={true}
-          className="glass-strong"
-          icon={<Brain className="h-6 w-6 text-primary" />}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <Badge variant="secondary" className="text-xs">
-              {stats.activeWorkingAgents > 0 ? (
-                <>
-                  <Zap className="mr-1 h-3 w-3 animate-pulse" />
-                  {stats.activeWorkingAgents} Working
-                </>
-              ) : (
-                <>
-                  <TrendingUp className="mr-1 h-3 w-3" />
-                  Ready
-                </>
-              )}
-            </Badge>
-          </div>
-          <p className="mb-1 text-sm text-muted-foreground">AI Workforce</p>
-          <InteractiveHoverCard>
-            <p className="text-3xl font-bold">
-              <AnimatedCounter value={stats.activeEmployees} />
-            </p>
-          </InteractiveHoverCard>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {stats.activeEmployees > 0
-              ? `${stats.activeEmployees} agents ready`
-              : 'Deploy agents to start'}
-          </p>
-        </BentoCard>
-
-        <BentoCard
-          gradient={true}
-          className="glass-strong"
-          icon={<Target className="h-6 w-6 text-accent" />}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <Badge variant="secondary" className="text-xs">
-              {stats.activeSessions > 0 ? (
-                <>
-                  <Activity className="mr-1 h-3 w-3 animate-pulse" />
-                  {stats.activeSessions} Active
-                </>
-              ) : (
-                'All Time'
-              )}
-            </Badge>
-          </div>
-          <p className="mb-1 text-sm text-muted-foreground">Tasks Completed</p>
-          <InteractiveHoverCard>
-            <p className="text-3xl font-bold">
-              <AnimatedCounter
-                value={stats.completedTasks}
-                format={(val) => Math.round(val).toLocaleString()}
-              />
-            </p>
-          </InteractiveHoverCard>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {stats.totalTasks > 0
-              ? `${stats.totalTasks} total tasks`
-              : 'Start your first task'}
-          </p>
-        </BentoCard>
-
-        <BentoCard
-          gradient={true}
-          className="glass-strong"
-          icon={<Zap className="h-6 w-6 text-secondary" />}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <Badge variant="secondary" className="text-xs">
-              <Clock className="mr-1 h-3 w-3" />
-              Free tier
-            </Badge>
-          </div>
-          <p className="mb-1 text-sm text-muted-foreground">Tokens Used</p>
-          <InteractiveHoverCard>
-            <p className="text-3xl font-bold">
-              <AnimatedCounter
-                value={stats.tokensUsed}
-                format={(val) => Math.round(val).toLocaleString()}
-              />
-            </p>
-          </InteractiveHoverCard>
-          <p className="mt-2 text-xs text-muted-foreground">
-            5,000 free monthly
-          </p>
-        </BentoCard>
-
-        <BentoCard
-          gradient={true}
-          className="glass-strong"
-          icon={<CheckCircle2 className="h-6 w-6 text-success" />}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <Badge variant="secondary" className="text-xs">
-              {stats.successRate >= 90 ? (
-                <TrendingUp className="mr-1 h-3 w-3" />
-              ) : (
-                <TrendingDown className="mr-1 h-3 w-3" />
-              )}
-              {stats.totalTasks > 0 ? 'Tracking' : 'N/A'}
-            </Badge>
-          </div>
-          <p className="mb-1 text-sm text-muted-foreground">Success Rate</p>
-          <InteractiveHoverCard>
-            <p className="text-3xl font-bold">
-              {stats.totalTasks > 0 ? (
-                <>
-                  <AnimatedCounter value={stats.successRate} />%
-                </>
-              ) : (
-                '--'
-              )}
-            </p>
-          </InteractiveHoverCard>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {stats.totalTasks > 0
-              ? `${metricsStore.completedTasks} completed`
-              : 'Complete tasks to track'}
-          </p>
-        </BentoCard>
-      </BentoGrid>
-
-      {/* Quick Actions - Enhanced with BentoGrid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <div className="mb-6">
-          <div className="mb-2 flex items-center gap-3">
-            <Rocket className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Quick Actions</h2>
-          </div>
-          <p className="text-muted-foreground">
-            Start working with your AI workforce
-          </p>
-        </div>
-
-        <BentoGrid className="grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {quickActions.map((action, index) => {
-            const IconComponent = action.icon;
-            const isFirst = index === 0;
-            return (
-              <BentoCard
-                key={action.id}
-                gradient={true}
-                colSpan={isFirst ? 2 : 1}
-                className="cursor-pointer"
-                onClick={action.action}
-              >
-                <div
-                  className={cn(
-                    'mb-4 flex h-14 w-14 items-center justify-center rounded-xl',
-                    action.bgColor
-                  )}
-                >
-                  <IconComponent className={cn('h-7 w-7', action.iconColor)} />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold transition-colors group-hover:text-primary">
-                  {action.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {action.description}
-                </p>
-                <ArrowRight className="mt-4 h-5 w-5 text-primary transition-transform group-hover:translate-x-1" />
-              </BentoCard>
-            );
-          })}
-        </BentoGrid>
-      </motion.div>
-
-      {/* Getting Started Guide */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.9 }}
-      >
-        <Card className="card-premium">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <CardTitle>Getting Started</CardTitle>
+            <div className="rounded-lg border border-border bg-background/50 p-3">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
+                <span className="text-xs text-muted-foreground">Success</span>
+              </div>
+              <p className="mt-1 text-lg font-bold">
+                {stats.completedTasks + stats.failedTasks > 0 ? (
+                  <>
+                    <AnimatedCounter value={stats.successRate} />%
+                  </>
+                ) : (
+                  '--'
+                )}
+              </p>
             </div>
-            <CardDescription>
-              Three simple steps to unlock your AI workforce
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                {
-                  step: '1',
-                  title: 'Tell AI What You Need',
-                  description:
-                    'Just describe your task in plain English. No technical knowledge required.',
-                  action: 'Start Chat',
-                  route: '/chat',
-                  color: 'primary',
-                },
-                {
-                  step: '2',
-                  title: 'Watch It Think & Execute',
-                  description:
-                    'AI reasons through the problem and implements every step automatically.',
-                  action: 'See Examples',
-                  route: '/demo',
-                  color: 'accent',
-                },
-                {
-                  step: '3',
-                  title: 'Get Your Results',
-                  description:
-                    'Receive complete, ready-to-use outputs. From idea to execution in minutes.',
-                  action: 'View Analytics',
-                  route: '/analytics',
-                  color: 'secondary',
-                },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="glass card-hover flex items-start gap-4 rounded-2xl p-6"
-                >
+          </div>
+
+          {/* Active Employees */}
+          {hiredEmployees.length > 0 && (
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Hired Employees
+                </h4>
+                <Badge variant="outline" className="text-[10px]">
+                  {hiredEmployees.length}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                {hiredEmployees.slice(0, 5).map((emp) => (
                   <div
-                    className={cn(
-                      'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full font-bold',
-                      item.color === 'primary' &&
-                        'bg-primary text-primary-foreground',
-                      item.color === 'accent' &&
-                        'bg-accent text-accent-foreground',
-                      item.color === 'secondary' &&
-                        'bg-secondary text-secondary-foreground'
-                    )}
+                    key={emp.id}
+                    className="flex items-center gap-2 rounded-lg border border-border bg-background/50 p-2"
                   >
-                    {item.step}
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                      <Brain className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-medium">{emp.name}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">
+                        {emp.role}
+                      </p>
+                    </div>
+                    {emp.is_active && (
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="mb-2 text-lg font-semibold">{item.title}</h3>
-                    <p className="mb-4 text-sm text-muted-foreground">
-                      {item.description}
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(item.route)}
-                    >
-                      {item.action}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.1 }}
-      >
-        <Card className="glass-strong">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Your latest interactions and updates
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div
-                  key={index}
-                  className="glass flex items-start gap-4 rounded-xl p-4"
-                >
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Brain className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm">{activity.message}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {activity.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-
-              {/* Empty State */}
-              <div className="py-12 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
-                  <MessageSquare className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold">No Activity Yet</h3>
-                <p className="mx-auto mb-4 max-w-md text-muted-foreground">
-                  Your activity feed will appear here once you start working
-                  with your AI workforce
-                </p>
-                <Button
-                  className="btn-glow gradient-primary text-white"
-                  onClick={() => navigate('/chat')}
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  Start Your First Task
-                </Button>
+                ))}
+                {hiredEmployees.length > 5 && (
+                  <p className="text-center text-xs text-muted-foreground">
+                    +{hiredEmployees.length - 5} more
+                  </p>
+                )}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+          )}
+
+          {/* Quick Links */}
+          <div className="space-y-1.5">
+            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Quick Links
+            </h4>
+            {[
+              { label: 'Workforce', href: '/workforce', icon: Users },
+              { label: 'Mission Control', href: '/mission-control', icon: Target },
+              { label: 'VIBE Workspace', href: '/vibe', icon: Zap },
+              { label: 'Marketplace', href: '/hire', icon: TrendingUp },
+            ].map((link) => (
+              <Button
+                key={link.href}
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-xs"
+                onClick={() => navigate(link.href)}
+              >
+                <link.icon className="mr-2 h-3.5 w-3.5" />
+                {link.label}
+                <ArrowRight className="ml-auto h-3 w-3" />
+              </Button>
+            ))}
+          </div>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+};
+
+export const DashboardHomePage: React.FC = () => {
+  const navigate = useNavigate();
+  const userUsage = useUserUsage();
+  const aiPreferences = useAIPreferences();
+
+  // Chat state - reuse exact same hooks as ChatPage
+  const {
+    messages: rawMessages,
+    isLoading,
+    error,
+    activeTools,
+    toolProgress,
+    sendMessage,
+    regenerateMessage,
+    editMessage,
+    deleteMessage,
+    clearMessages,
+  } = useChat(undefined); // No sessionId - uses current/new session
+
+  const messages = useMemo(() => {
+    return rawMessages.map((msg) => {
+      let createdAt: Date;
+      if (msg.createdAt instanceof Date) {
+        createdAt = msg.createdAt;
+      } else if (
+        typeof msg.createdAt === 'string' ||
+        typeof msg.createdAt === 'number'
+      ) {
+        createdAt = new Date(msg.createdAt);
+      } else {
+        createdAt = new Date();
+      }
+      if (isNaN(createdAt.getTime())) {
+        createdAt = new Date();
+      }
+      return { ...msg, createdAt };
+    });
+  }, [rawMessages]);
+
+  const {
+    sessions,
+    currentSession,
+    isLoading: isLoadingSessions,
+    createSession,
+    renameSession,
+    deleteSession,
+    loadSessions,
+    loadSession,
+    toggleStarSession,
+    togglePinSession,
+    toggleArchiveSession,
+    duplicateSession,
+    shareSession,
+  } = useChatHistory();
+
+  const { availableTools, executeTool, activeTool, toolResults } = useTools();
+  const {
+    exportAsMarkdown,
+    exportAsJSON,
+    exportAsHTML,
+    exportAsText,
+    copyToClipboard,
+    isExporting,
+  } = useExport();
+
+  // Local state
+  const [chatSidebarOpen, setChatSidebarOpen] = useState(() => {
+    try {
+      const stored = localStorage.getItem('dashboard-chat-sidebar');
+      return stored !== null ? JSON.parse(stored) : true;
+    } catch {
+      return true;
+    }
+  });
+  const [rightPanelOpen, setRightPanelOpen] = useState(() => {
+    try {
+      const stored = localStorage.getItem('dashboard-right-panel');
+      return stored !== null ? JSON.parse(stored) : true;
+    } catch {
+      return true;
+    }
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMode, setSelectedMode] = useState<ChatMode>('team');
+  const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [bookmarksOpen, setBookmarksOpen] = useState(false);
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
+  const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);
+
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const { showError, showSuccess } = useNotificationStore();
+
+  // Filter sessions
+  const filteredSessions = useMemo(() => {
+    if (!searchQuery.trim()) return sessions;
+    const query = searchQuery.toLowerCase();
+    return sessions.filter(
+      (s) =>
+        s.title.toLowerCase().includes(query) ||
+        s.summary?.toLowerCase().includes(query) ||
+        s.tags?.some((t) => t.toLowerCase().includes(query))
+    );
+  }, [sessions, searchQuery]);
+
+  // Persist sidebar states
+  useEffect(() => {
+    localStorage.setItem(
+      'dashboard-chat-sidebar',
+      JSON.stringify(chatSidebarOpen)
+    );
+  }, [chatSidebarOpen]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'dashboard-right-panel',
+      JSON.stringify(rightPanelOpen)
+    );
+  }, [rightPanelOpen]);
+
+  // Load sessions on mount
+  useEffect(() => {
+    loadSessions();
+  }, [loadSessions]);
+
+  // Create new session if none exists
+  useEffect(() => {
+    if (!currentSession) {
+      createSession('New Chat').catch((err) => {
+        console.error('Failed to create session:', err);
+      });
+    }
+  }, [currentSession, createSession]);
+
+  // Handlers
+  const handleSendMessage = async (
+    content: string,
+    options?: { attachments?: File[]; employees?: string[] }
+  ) => {
+    if (!content.trim()) return;
+    try {
+      await sendMessage({
+        content,
+        attachments: options?.attachments,
+        mode: selectedMode,
+        tools: availableTools,
+      });
+    } catch (err) {
+      console.error('Failed to send message:', err);
+    }
+  };
+
+  const handleNewChat = useCallback(() => {
+    createSession('New Chat')
+      .then((session) => {
+        navigate(`/chat/${session.id}`);
+      })
+      .catch((err) => {
+        console.error('Failed to create new chat:', err);
+        showError('Unable to create a new chat. Please try again.', 'Chat Creation Failed');
+      });
+  }, [createSession, navigate, showError]);
+
+  const handleSessionSelect = (session: ChatSession) => {
+    navigate(`/chat/${session.id}`);
+  };
+
+  const handleSessionRename = (sessionId: string, newTitle: string) => {
+    renameSession(sessionId, newTitle);
+  };
+
+  const handleSessionDelete = (sessionId: string) => {
+    deleteSession(sessionId);
+    if (currentSession?.id === sessionId) {
+      navigate('/dashboard');
+    }
+  };
+
+  const handleToolExecute = async (
+    toolId: string,
+    args?: Record<string, unknown>
+  ) => {
+    try {
+      await executeTool(toolId, args);
+    } catch (err) {
+      console.error('Tool execution failed:', err);
+    }
+  };
+
+  const handleShare = useCallback(async () => {
+    if (!currentSession) return;
+    try {
+      await shareSession(currentSession.id);
+      showSuccess('Share link generated successfully', 'Session Shared');
+    } catch (err) {
+      console.error('Failed to share session:', err);
+      showError('Unable to generate share link.', 'Share Failed');
+    }
+  }, [currentSession, shareSession, showSuccess, showError]);
+
+  const handleCopyLastMessage = useCallback(async () => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage) {
+      try {
+        await navigator.clipboard.writeText(lastMessage.content);
+        showSuccess('Message copied to clipboard', 'Copied');
+      } catch (err) {
+        showError('Unable to copy message.', 'Copy Failed');
+      }
+    }
+  }, [messages, showSuccess, showError]);
+
+  const handleRegenerateLastMessage = useCallback(() => {
+    const lastAssistant = [...messages]
+      .reverse()
+      .find((m) => m.role === 'assistant');
+    if (lastAssistant) {
+      regenerateMessage(lastAssistant.id);
+    }
+  }, [messages, regenerateMessage]);
+
+  const handleFocusComposer = useCallback(() => {
+    composerRef.current?.focus();
+  }, []);
+
+  const { shortcuts } = useKeyboardShortcuts({
+    onNewChat: handleNewChat,
+    onSearch: () => setGlobalSearchOpen(true),
+    onShowShortcuts: () => setShortcutsDialogOpen(true),
+    onToggleSidebar: () => setChatSidebarOpen(!chatSidebarOpen),
+    onFocusComposer: handleFocusComposer,
+    onCopyLastMessage: handleCopyLastMessage,
+    onRegenerateLastMessage: handleRegenerateLastMessage,
+  });
+
+  // Token usage warnings
+  const { usageData } = useUsageMonitoring(currentSession?.userId || null);
+  const {
+    updateUsage,
+    shouldShowWarning,
+    markWarningShown,
+    usagePercentage,
+    currentUsage,
+    totalLimit,
+  } = useUsageWarningStore();
+
+  React.useEffect(() => {
+    if (usageData.length > 0) {
+      const totalUsed = usageData.reduce((sum, d) => sum + d.tokensUsed, 0);
+      const limit = userUsage?.tokensLimit ?? FREE_TIER_DEFAULT_LIMIT;
+      updateUsage(totalUsed, limit);
+      if (shouldShowWarning(95)) {
+        setWarningThreshold(95);
+        setWarningModalOpen(true);
+        markWarningShown(95);
+      } else if (shouldShowWarning(85)) {
+        setWarningThreshold(85);
+        setWarningModalOpen(true);
+        markWarningShown(85);
+      }
+    }
+  }, [usageData, userUsage?.tokensLimit, updateUsage, shouldShowWarning, markWarningShown]);
+
+  return (
+    <div className="-mx-4 -mt-0 flex h-[calc(100vh-4rem)] sm:-mx-6 lg:-mx-8">
+      {/* Left: Chat session sidebar */}
+      <div
+        className={cn(
+          'border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out',
+          chatSidebarOpen ? 'w-0 sm:w-64 md:w-72' : 'w-0',
+          'overflow-hidden'
+        )}
+      >
+        {chatSidebarOpen && (
+          <ChatSidebar
+            sessions={filteredSessions}
+            currentSession={currentSession}
+            searchQuery={searchQuery}
+            isLoading={isLoadingSessions}
+            onSearchChange={setSearchQuery}
+            onNewChat={handleNewChat}
+            onSessionSelect={handleSessionSelect}
+            onSessionRename={handleSessionRename}
+            onSessionDelete={handleSessionDelete}
+            onSessionStar={toggleStarSession}
+            onSessionPin={togglePinSession}
+            onSessionArchive={toggleArchiveSession}
+            onSessionShare={shareSession}
+            onSessionDuplicate={duplicateSession}
+            onToggleSidebar={() => setChatSidebarOpen(!chatSidebarOpen)}
+          />
+        )}
+      </div>
+
+      {/* Center: Main chat area */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Chat Header */}
+        <ChatHeader
+          session={currentSession}
+          onRename={(title) =>
+            currentSession && handleSessionRename(currentSession.id, title)
+          }
+          onShare={handleShare}
+          onExport={() => setExportDialogOpen(true)}
+          onSettings={() => navigate('/settings')}
+          onToggleSidebar={() => setChatSidebarOpen(!chatSidebarOpen)}
+          onSearch={() => setGlobalSearchOpen(true)}
+          onAnalytics={() => setAnalyticsOpen(true)}
+          onBookmarks={() => setBookmarksOpen(true)}
+        />
+
+        {/* Usage Warning Banner */}
+        {usageData.length > 0 && (
+          <div className="border-b border-border px-4 py-2">
+            <UsageWarningBanner usageData={usageData} />
+          </div>
+        )}
+
+        {/* Messages */}
+        <div className="flex-1 overflow-hidden">
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            onRegenerate={regenerateMessage}
+            onEdit={editMessage}
+            onDelete={deleteMessage}
+            onToolExecute={handleToolExecute}
+            toolResults={toolResults}
+            activeTool={activeTool}
+          />
+
+          {activeTools && activeTools.length > 0 && (
+            <div className="p-4">
+              <ToolProgressIndicator
+                activeTools={activeTools}
+                toolProgress={toolProgress || {}}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Composer */}
+        <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="mx-auto max-w-4xl p-3 sm:p-4">
+            <ChatComposer
+              onSendMessage={handleSendMessage}
+              isLoading={isLoading}
+              availableTools={availableTools}
+              onToolToggle={() => {}}
+              selectedMode={selectedMode}
+              onModeChange={setSelectedMode}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Right: Collapsible workforce panel */}
+      <WorkforcePanel
+        isOpen={rightPanelOpen}
+        onToggle={() => setRightPanelOpen(!rightPanelOpen)}
+      />
+
+      {/* Dialogs */}
+      <KeyboardShortcutsDialog
+        open={shortcutsDialogOpen}
+        onOpenChange={setShortcutsDialogOpen}
+        shortcuts={shortcuts}
+      />
+      <GlobalSearchDialog
+        open={globalSearchOpen}
+        onOpenChange={setGlobalSearchOpen}
+      />
+      <TokenAnalyticsDialog
+        open={analyticsOpen}
+        onOpenChange={setAnalyticsOpen}
+      />
+      <EnhancedExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        session={currentSession}
+        messages={messages}
+      />
+      <BookmarksDialog open={bookmarksOpen} onOpenChange={setBookmarksOpen} />
+      <UsageWarningModal
+        open={warningModalOpen}
+        onOpenChange={setWarningModalOpen}
+        threshold={warningThreshold}
+        currentUsage={currentUsage}
+        totalLimit={totalLimit}
+        usagePercentage={usagePercentage}
+      />
     </div>
   );
 };

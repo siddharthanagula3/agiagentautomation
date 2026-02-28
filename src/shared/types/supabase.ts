@@ -422,13 +422,16 @@ export type Database = {
         };
         Relationships: [];
       };
-      chat_messages: {
+      web_messages: {
         Row: {
           content: string;
           created_at: string | null;
           id: string;
           role: string;
           session_id: string;
+          updated_at: string | null;
+          edited: boolean | null;
+          edit_count: number | null;
         };
         Insert: {
           content: string;
@@ -436,6 +439,9 @@ export type Database = {
           id?: string;
           role: string;
           session_id: string;
+          updated_at?: string | null;
+          edited?: boolean | null;
+          edit_count?: number | null;
         };
         Update: {
           content?: string;
@@ -443,24 +449,32 @@ export type Database = {
           id?: string;
           role?: string;
           session_id?: string;
+          updated_at?: string | null;
+          edited?: boolean | null;
+          edit_count?: number | null;
         };
         Relationships: [
           {
-            foreignKeyName: 'chat_messages_session_id_fkey';
+            foreignKeyName: 'web_messages_session_id_fkey';
             columns: ['session_id'];
             isOneToOne: false;
-            referencedRelation: 'chat_sessions';
+            referencedRelation: 'web_conversations';
             referencedColumns: ['id'];
           },
         ];
       };
-      chat_sessions: {
+      web_conversations: {
         Row: {
           created_at: string | null;
           employee_id: string;
           id: string;
           is_active: boolean | null;
+          is_starred: boolean | null;
+          is_pinned: boolean | null;
+          is_archived: boolean | null;
+          shared_link: string | null;
           last_message_at: string | null;
+          metadata: Record<string, unknown> | null;
           provider: string;
           role: string;
           title: string | null;
@@ -469,12 +483,17 @@ export type Database = {
         };
         Insert: {
           created_at?: string | null;
-          employee_id: string;
+          employee_id?: string;
           id?: string;
           is_active?: boolean | null;
+          is_starred?: boolean | null;
+          is_pinned?: boolean | null;
+          is_archived?: boolean | null;
+          shared_link?: string | null;
           last_message_at?: string | null;
-          provider: string;
-          role: string;
+          metadata?: Record<string, unknown> | null;
+          provider?: string;
+          role?: string;
           title?: string | null;
           updated_at?: string | null;
           user_id: string;
@@ -484,7 +503,12 @@ export type Database = {
           employee_id?: string;
           id?: string;
           is_active?: boolean | null;
+          is_starred?: boolean | null;
+          is_pinned?: boolean | null;
+          is_archived?: boolean | null;
+          shared_link?: string | null;
           last_message_at?: string | null;
+          metadata?: Record<string, unknown> | null;
           provider?: string;
           role?: string;
           title?: string | null;

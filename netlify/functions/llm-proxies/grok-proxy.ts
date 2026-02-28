@@ -1,6 +1,5 @@
 import { Handler } from '@netlify/functions';
 import { AuthenticatedEvent } from '../utils/auth-middleware';
-import { createClient } from '@supabase/supabase-js';
 import {
   calculateTokenCost,
   storeTokenUsage,
@@ -18,6 +17,10 @@ import {
   createInsufficientBalanceResponse,
   estimateTokensFromMessages,
 } from '../utils/token-balance-check';
+import {
+  calculateCostCents,
+  deductCredits,
+} from '../utils/credit-system';
 
 /**
  * Netlify Function to proxy xAI Grok API calls
@@ -122,7 +125,13 @@ const grokHandler: Handler = async (event: AuthenticatedEvent) => {
     // Token balance check using shared utility
     if (authenticatedUserId) {
       const estimatedTokens = estimateTokensFromMessages(messages);
-      const balanceCheck = await checkTokenBalance(authenticatedUserId, estimatedTokens, '[Grok Proxy]');
+      const balanceCheck = await checkTokenBalance(
+        authenticatedUserId,
+        estimatedTokens,
+        '[Grok Proxy]',
+        'grok',
+        model
+      );
 
       if (!balanceCheck.hasBalance) {
         return createInsufficientBalanceResponse(
@@ -224,31 +233,40 @@ const grokHandler: Handler = async (event: AuthenticatedEvent) => {
         console.warn('[Grok Proxy] Token usage tracking failed:', storageResult.error);
       }
 
-      // Deduct tokens from user balance
-      // SECURITY FIX: Use verified userId from JWT
+      // Deduct credits from user balance using cents-based credit system
+      // REVENUE LEAK FIX: Return 402 if deduction fails (not 200)
       if (verifiedUserId) {
-        const supabaseAdmin = createClient(
-          process.env.VITE_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        const actualCostCents = calculateCostCents(
+          'grok',
+          model,
+          tokenUsage.inputTokens,
+          tokenUsage.outputTokens
         );
 
-        const totalTokens = tokenUsage.inputTokens + tokenUsage.outputTokens;
-        const { data: newBalance, error: deductError } = await supabaseAdmin.rpc('deduct_user_tokens', {
-          p_user_id: verifiedUserId,
-          p_tokens: totalTokens,
-          p_provider: 'grok',
-          p_model: model,
-        });
+        const deductResult = await deductCredits(
+          verifiedUserId,
+          actualCostCents,
+          `Grok ${model} usage`,
+          { provider: 'grok', model, inputTokens: tokenUsage.inputTokens, outputTokens: tokenUsage.outputTokens },
+          `grok-${verifiedUserId}-${Date.now()}`
+        );
 
-        if (deductError) {
-          console.error('[Grok Proxy] Token deduction failed:', deductError);
-          data.tokenTracking.deductionFailed = true;
-          data.tokenTracking.deductionError = deductError.message;
-        } else {
-          console.log('[Grok Proxy] Token deduction successful. New balance:', newBalance);
-          data.tokenTracking.newBalance = newBalance;
-          data.tokenTracking.deducted = true;
+        if (!deductResult.success) {
+          console.error('[Grok Proxy] Credit deduction failed:', deductResult.error);
+          // REVENUE LEAK FIX: Return 402 instead of silently succeeding
+          return {
+            statusCode: 402,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+            body: JSON.stringify({
+              error: 'Credit deduction failed — please try again',
+              code: 'DEDUCTION_FAILED',
+            }),
+          };
         }
+
+        data.tokenTracking.deducted = true;
+        data.tokenTracking.costCents = actualCostCents;
+        data.tokenTracking.newBalanceCents = deductResult.newBalanceCents;
       }
     }
 

@@ -140,3 +140,4 @@ docs/drafts/
 
 # Lighthouse CI
 .lighthouseci/
+.vercel

@@ -91,7 +91,7 @@ const SecurityPage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title="Security | AGI Agent Automation"
+        title="Security | AGI Workforce"
         description="Learn about our security measures, compliance standards, and data protection practices."
         keywords={[
           'security',

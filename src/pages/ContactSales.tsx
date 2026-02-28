@@ -161,7 +161,7 @@ const ContactSalesPage: React.FC = () => {
     {
       icon: Mail,
       title: 'Email Us',
-      value: 'sales@agiagentautomation.com',
+      value: 'sales@agiworkforce.com',
       description: 'Get a response within 24 hours',
     },
     {
@@ -213,7 +213,7 @@ const ContactSalesPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Contact Sales | Get Custom AI Employee Solutions | AGI Agent Automation"
+        title="Contact Sales | Get Custom AI Employee Solutions | AGI Workforce"
         description="Contact our sales team for custom AI employee solutions. Get personalized pricing, enterprise features, and dedicated support. Schedule a demo today."
         keywords={[
           'contact sales ai employees',
@@ -229,16 +229,16 @@ const ContactSalesPage: React.FC = () => {
         schema={{
           '@context': 'https://schema.org',
           '@type': 'ContactPage',
-          name: 'Contact Sales - AGI Agent Automation',
+          name: 'Contact Sales - AGI Workforce',
           description:
             'Contact our sales team for custom AI employee solutions',
           mainEntity: {
             '@type': 'Organization',
-            name: 'AGI Agent Automation',
+            name: 'AGI Workforce',
             contactPoint: {
               '@type': 'ContactPoint',
               contactType: 'Sales',
-              email: 'sales@agiagentautomation.com',
+              email: 'sales@agiworkforce.com',
               availableLanguage: ['en'],
             },
           },
@@ -263,7 +263,7 @@ const ContactSalesPage: React.FC = () => {
               Let's Talk About Your AI Automation Needs
             </h1>
             <p className="text-xl text-muted-foreground">
-              Speak with our sales team to learn how AGI Agent can transform
+              Speak with our sales team to learn how AGI Workforce can transform
               your business
             </p>
           </motion.div>
@@ -529,7 +529,7 @@ const ContactSalesPage: React.FC = () => {
                         Schedule a personalized demo
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        See AGI Agent in action
+                        See AGI Workforce in action
                       </p>
                     </div>
                   </div>

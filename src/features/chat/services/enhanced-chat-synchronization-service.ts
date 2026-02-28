@@ -190,7 +190,7 @@ export class EnhancedChatSynchronizationService {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'chat_messages',
+            table: 'web_messages',
             filter: `conversation_id=eq.${conversationId}`,
           },
           (payload) => {
@@ -202,7 +202,7 @@ export class EnhancedChatSynchronizationService {
           {
             event: 'UPDATE',
             schema: 'public',
-            table: 'chat_messages',
+            table: 'web_messages',
             filter: `conversation_id=eq.${conversationId}`,
           },
           (payload) => {
@@ -217,7 +217,7 @@ export class EnhancedChatSynchronizationService {
           {
             event: 'DELETE',
             schema: 'public',
-            table: 'chat_messages',
+            table: 'web_messages',
             filter: `conversation_id=eq.${conversationId}`,
           },
           (payload) => {
@@ -420,7 +420,7 @@ export class EnhancedChatSynchronizationService {
 
     try {
       const { data, error } = await supabase
-        .from('chat_messages')
+        .from('web_messages')
         .insert(this.transformLocalMessage(message))
         .select()
         .single();
@@ -488,7 +488,7 @@ export class EnhancedChatSynchronizationService {
 
     try {
       const { error } = await supabase
-        .from('chat_messages')
+        .from('web_messages')
         .update(this.transformLocalMessage(message as ChatMessage))
         .eq('id', message.id);
 
@@ -548,7 +548,7 @@ export class EnhancedChatSynchronizationService {
 
     try {
       const { error } = await supabase
-        .from('chat_messages')
+        .from('web_messages')
         .delete()
         .eq('id', messageId);
 

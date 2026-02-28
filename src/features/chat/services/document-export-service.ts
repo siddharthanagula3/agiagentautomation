@@ -176,7 +176,7 @@ export async function downloadAsDOCX(
         children: sections,
       },
     ],
-    creator: options?.author || 'AGI Agent Automation',
+    creator: options?.author || 'AGI Workforce',
     title: options?.title || 'Document',
     description: 'Generated document from chat',
   });

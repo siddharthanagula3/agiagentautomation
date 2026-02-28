@@ -178,8 +178,8 @@ const HelpPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Help & Support | AGI Agent Automation"
-        description="Get help with AGI Agent Automation platform. Find answers to common questions, tutorials, and contact our support team for assistance."
+        title="Help & Support | AGI Workforce"
+        description="Get help with AGI Workforce platform. Find answers to common questions, tutorials, and contact our support team for assistance."
         keywords={[
           'help center',
           'support',
@@ -195,7 +195,7 @@ const HelpPage: React.FC = () => {
           '@context': 'https://schema.org',
           '@type': 'WebPage',
           name: 'Help & Support',
-          description: 'Get help with AGI Agent Automation platform',
+          description: 'Get help with AGI Workforce platform',
           mainEntity: {
             '@type': 'FAQPage',
             mainEntity: [
@@ -343,12 +343,12 @@ const HelpPage: React.FC = () => {
             <ContactCard
               icon={Mail}
               title="Email Support"
-              description="support@agiagentautomation.com"
+              description="support@agiworkforce.com"
               cta="Send Email"
               color="from-purple-500 to-pink-500"
               index={1}
               onClick={() =>
-                (window.location.href = 'mailto:support@agiagentautomation.com')
+                (window.location.href = 'mailto:support@agiworkforce.com')
               }
             />
             <ContactCard
@@ -385,7 +385,7 @@ const HelpPage: React.FC = () => {
                 className="border-border/40"
                 onClick={() =>
                   window.open(
-                    'https://community.agiagentautomation.com',
+                    'https://community.agiworkforce.com',
                     '_blank'
                   )
                 }
@@ -397,7 +397,7 @@ const HelpPage: React.FC = () => {
                 className="bg-gradient-to-r from-primary to-accent"
                 size="lg"
                 onClick={() =>
-                  window.open('https://discord.gg/agiagentautomation', '_blank')
+                  window.open('https://discord.gg/agiworkforce', '_blank')
                 }
               >
                 <ExternalLink className="mr-2" size={18} />

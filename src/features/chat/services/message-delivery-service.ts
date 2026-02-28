@@ -450,7 +450,7 @@ export class MessageDeliveryService {
    */
   private async saveMessageToDatabase(message: ChatMessage): Promise<void> {
     try {
-      const { error } = await supabase.from('chat_messages').insert({
+      const { error } = await supabase.from('web_messages').insert({
         id: message.id,
         session_id: message.sessionId,
         role: message.role,

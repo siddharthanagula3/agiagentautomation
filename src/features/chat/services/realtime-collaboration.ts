@@ -89,7 +89,7 @@ export class RealtimeCollaborationService {
         {
           event: '*',
           schema: 'public',
-          table: 'chat_messages',
+          table: 'web_messages',
           filter: `session_id=eq.${sessionId}`,
         },
         (payload: RealtimePostgresChangesPayload<DatabaseChatMessage>) => {

@@ -13,6 +13,8 @@ import {
   googleVeoPollingSchema,
   formatValidationError,
 } from '../utils/validation-schemas';
+import { checkTokenBalance, estimateTokensFromCost, createInsufficientBalanceResponse } from '../utils/token-balance-check';
+import { deductCredits } from '../utils/credit-system';
 
 /**
  * Netlify Function to proxy Google Veo video generation API calls
@@ -99,68 +101,17 @@ async function handleGenerateRequest(
   // Get authenticated user ID from JWT
   const authenticatedUserId = event.user?.id;
 
-  // Estimate cost for pre-flight balance check
+  // Pre-flight credit balance check
   if (authenticatedUserId) {
     const pricePerSecond = VEO_PRICING[model as keyof typeof VEO_PRICING] || 0.02;
-    const estimatedCost = pricePerSecond * durationSeconds;
-    const estimatedTokens = Math.ceil(estimatedCost * 1000000);
+    const estimatedCostCents = estimateTokensFromCost(pricePerSecond, durationSeconds);
+    const balanceCheck = await checkTokenBalance(authenticatedUserId, estimatedCostCents, '[Veo Proxy]', 'google', model);
 
-    const supabaseAdmin = createClient(
-      process.env.VITE_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Check user's token balance
-    const { data: balanceData, error: balanceError } = await supabaseAdmin
-      .from('user_token_balances')
-      .select('token_balance, plan')
-      .eq('user_id', authenticatedUserId)
-      .maybeSingle();
-
-    if (!balanceData && !balanceError) {
-      // Create balance record if it doesn't exist
-      await supabaseAdmin.rpc('get_or_create_token_balance', { p_user_id: authenticatedUserId });
-      const { data: newBalanceData } = await supabaseAdmin
-        .from('user_token_balances')
-        .select('token_balance, plan')
-        .eq('user_id', authenticatedUserId)
-        .maybeSingle();
-
-      if (newBalanceData && newBalanceData.token_balance !== null && newBalanceData.token_balance < estimatedTokens) {
-        console.warn('[Google Veo Proxy] Insufficient token balance:', {
-          userId: authenticatedUserId,
-          required: estimatedTokens,
-          available: newBalanceData.token_balance,
-        });
-        return {
-          statusCode: 402,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            error: 'Insufficient token balance',
-            required: estimatedTokens,
-            available: newBalanceData.token_balance,
-            estimatedCost: `$${estimatedCost.toFixed(4)}`,
-            upgradeUrl: '/pricing',
-          }),
-        };
-      }
-    } else if (balanceData && balanceData.token_balance !== null && balanceData.token_balance < estimatedTokens) {
-      console.warn('[Google Veo Proxy] Insufficient token balance:', {
-        userId: authenticatedUserId,
-        required: estimatedTokens,
-        available: balanceData.token_balance,
-      });
-      return {
-        statusCode: 402,
-        headers: corsHeaders,
-        body: JSON.stringify({
-          error: 'Insufficient token balance',
-          required: estimatedTokens,
-          available: balanceData.token_balance,
-          estimatedCost: `$${estimatedCost.toFixed(4)}`,
-          upgradeUrl: '/pricing',
-        }),
-      };
+    if (!balanceCheck.hasBalance) {
+      return createInsufficientBalanceResponse(
+        { required: estimatedCostCents, available: balanceCheck.balance ?? 0 },
+        corsHeaders
+      );
     }
   }
 
@@ -428,7 +379,7 @@ async function handlePollRequest(
     isDone,
   });
 
-  // If completed, deduct tokens and update database
+  // If completed, deduct credits and update database
   if (isDone && authenticatedUserId && !data.error) {
     const supabaseAdmin = createClient(
       process.env.VITE_SUPABASE_URL!,
@@ -444,21 +395,22 @@ async function handlePollRequest(
       .maybeSingle();
 
     if (operationData && operationData.estimated_cost) {
-      const actualCost = operationData.estimated_cost;
-      const tokensToDeduct = Math.ceil(actualCost * 1000000);
+      // Convert estimated_cost (in dollars) to cents
+      const actualCostCents = Math.ceil(operationData.estimated_cost * 100);
 
-      // Deduct tokens
-      const { data: newBalance, error: deductError } = await supabaseAdmin.rpc('deduct_user_tokens', {
-        p_user_id: authenticatedUserId,
-        p_tokens: tokensToDeduct,
-        p_provider: 'google-veo',
-        p_model: operationData.model,
-      });
+      // REVENUE LEAK FIX: Deduct credits via credit system
+      const deductResult = await deductCredits(
+        authenticatedUserId,
+        actualCostCents,
+        `Veo ${operationData.model} - video generation`,
+        { model: operationData.model, durationSeconds: operationData.parameters?.durationSeconds, operationName }
+      );
 
-      if (deductError) {
-        console.error('[Google Veo Proxy] Token deduction failed:', deductError);
+      if (!deductResult.success) {
+        console.error('[Google Veo Proxy] Credit deduction failed:', deductResult.error);
+        // Video already generated — log failure but don't block response
       } else {
-        console.log('[Google Veo Proxy] Token deduction successful. New balance:', newBalance);
+        console.log('[Google Veo Proxy] Credit deduction successful. New balance:', deductResult.newBalanceCents);
       }
 
       // Update operation status
@@ -467,25 +419,9 @@ async function handlePollRequest(
         .update({
           status: 'completed',
           completed_at: new Date().toISOString(),
-          actual_cost: actualCost,
+          actual_cost: operationData.estimated_cost,
         })
         .eq('operation_name', operationName);
-
-      // Log usage
-      await supabaseAdmin.from('media_generation_usage').insert({
-        user_id: authenticatedUserId,
-        provider: 'google',
-        model: operationData.model,
-        type: 'video',
-        prompt_length: operationData.parameters?.prompt?.length || 0,
-        videos_generated: 1,
-        duration_seconds: operationData.parameters?.durationSeconds || 0,
-        parameters: operationData.parameters,
-        cost: actualCost,
-        created_at: new Date().toISOString(),
-      }).catch(err => {
-        console.warn('[Google Veo Proxy] Failed to log usage:', err);
-      });
     }
   } else if (isDone && data.error) {
     // Operation failed - update database without charging

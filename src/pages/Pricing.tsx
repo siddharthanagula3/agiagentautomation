@@ -319,7 +319,7 @@ const PricingPage: React.FC = () => {
             'Replace human employees with AI employees. Save 99%+ on costs. Free Forever to $99/month.',
           brand: {
             '@type': 'Brand',
-            name: 'AGI Agent Automation',
+            name: 'AGI Workforce',
           },
           offers: {
             '@type': 'AggregateOffer',

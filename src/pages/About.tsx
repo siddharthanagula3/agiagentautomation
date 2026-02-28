@@ -85,7 +85,7 @@ const AboutPage: React.FC = () => {
         title="About Us | Replace $100K Employees with $19/mo AI | Save 99.8%"
         description="We're on a mission to replace expensive human employees with affordable AI employees. Save 99.8% on payroll costs. 50,000+ AI employees created, $500M+ saved for businesses worldwide."
         keywords={[
-          'about agi agent automation',
+          'about agi workforce',
           'replace human employees with ai',
           'ai workforce cost savings',
           'save money on employees',
@@ -98,12 +98,12 @@ const AboutPage: React.FC = () => {
         schema={{
           '@context': 'https://schema.org',
           '@type': 'AboutPage',
-          name: 'About AGI Agent Automation',
+          name: 'About AGI Workforce',
           description:
             'Replace expensive human employees with affordable AI employees - save 99.8% on payroll costs',
           mainEntity: {
             '@type': 'Organization',
-            name: 'AGI Agent Automation',
+            name: 'AGI Workforce',
             description:
               'Complete Workforce Replacement Platform - AI Employees at 1/100th the cost',
             foundingDate: '2026',

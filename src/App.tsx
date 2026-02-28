@@ -84,6 +84,9 @@ const SalesTeamsPage = lazyWithRetry(
 // === RESOURCES PAGE ===
 const ResourcesPage = lazyWithRetry(() => import('./pages/Resources'));
 
+// === DEVICE AUTH PAGE ===
+const DeviceAuthPage = lazyWithRetry(() => import('./pages/DeviceAuth'));
+
 // === AUTH PAGES ===
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
 const RegisterPage = lazyWithRetry(
@@ -238,6 +241,16 @@ function App() {
                     element={<ResetPasswordPage />}
                   />
                 </Route>
+
+                {/* ===== DEVICE AUTH - Desktop App Authorization ===== */}
+                <Route
+                  path="/device-auth"
+                  element={
+                    <ErrorBoundary>
+                      <DeviceAuthPage />
+                    </ErrorBoundary>
+                  }
+                />
 
                 {/* ===== VIBE - Standalone Multi-Agent Workspace (Protected) ===== */}
                 <Route

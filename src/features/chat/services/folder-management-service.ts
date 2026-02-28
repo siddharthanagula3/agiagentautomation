@@ -203,7 +203,7 @@ class FolderManagementService {
    */
   async getFolderSessionCount(folderId: string): Promise<number> {
     const { count, error } = await supabase
-      .from('chat_sessions')
+      .from('web_conversations')
       .select('*', { count: 'exact', head: true })
       .eq('folder_id', folderId)
       .eq('is_active', true);
@@ -221,7 +221,7 @@ class FolderManagementService {
    */
   async getFolderSessions(folderId: string | null): Promise<string[]> {
     let query = supabase
-      .from('chat_sessions')
+      .from('web_conversations')
       .select('id')
       .eq('is_active', true);
 

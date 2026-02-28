@@ -92,28 +92,56 @@ export async function checkTokenSufficiency(
 }
 
 /**
- * Deduct tokens from user balance after an API call
- * MUST be called AFTER every API request completes
- * Uses the deduct_user_tokens RPC function which:
- * - Atomically deducts tokens from user_token_balances table
- * - Logs the transaction to token_transactions table
- * - Ensures balance never goes below 0
+ * Deduct tokens from user balance after an API call.
+ * NOTE: Client-side deduction is a legacy pattern. All actual deductions
+ * should happen server-side via Netlify Functions using deductCredits()
+ * from credit-system.ts. This function is kept for backwards compatibility
+ * but the server-side proxies are the source of truth for billing.
+ *
+ * TODO: Remove client-side deduction once all proxies use deductCredits() server-side.
+ * Client should only read balance, never deduct directly.
  */
 export async function deductTokens(
   userId: string,
   metadata: UsageMetadata
 ): Promise<TokenDeductionResult> {
   try {
-    const { provider, model, inputTokens, outputTokens, totalTokens } =
-      metadata;
+    const { provider, model, totalTokens } = metadata;
 
-    // Use the deduct_user_tokens RPC function for atomic deduction
-    // This function handles balance updates and transaction logging
+    // Try the new credit system RPC first
+    const { error: creditError } = await supabase.rpc('deduct_credits', {
+      p_user_id: userId,
+      p_amount_cents: totalTokens, // In the new system, this represents cents
+      p_description: `${provider}/${model} usage`,
+      p_metadata: { provider, model },
+      p_idempotency_key: `${userId}-${Date.now()}`,
+    });
+
+    if (!creditError) {
+      // Fetch new balance
+      const { data: balanceData } = await supabase.rpc('get_credit_balance', {
+        p_user_id: userId,
+      });
+
+      const newBalance = balanceData !== null ? Number(balanceData) : 0;
+      logger.info(
+        `[Token Enforcement] Deducted ${totalTokens} cents from user ${userId}. New balance: ${newBalance}`
+      );
+
+      return {
+        success: true,
+        newBalance,
+      };
+    }
+
+    logger.warn('[Token Enforcement] deduct_credits RPC failed, trying legacy:', creditError.message);
+
+    // Fallback: legacy deduct_user_tokens RPC
     const { data: newBalance, error } = await supabase.rpc(
       'deduct_user_tokens',
       {
         p_user_id: userId,
-        p_tokens: totalTokens, // Positive value - function handles the deduction
+        p_tokens: totalTokens,
         p_provider: provider,
         p_model: model,
       }
@@ -121,17 +149,6 @@ export async function deductTokens(
 
     if (error) {
       logger.error('[Token Enforcement] Error deducting tokens:', error);
-
-      // Log detailed error for debugging
-      logger.error('[Token Enforcement] Deduction details:', {
-        userId,
-        provider,
-        model,
-        totalTokens,
-        errorCode: error.code,
-        errorMessage: error.message,
-      });
-
       return {
         success: false,
         newBalance: 0,
@@ -140,7 +157,7 @@ export async function deductTokens(
     }
 
     logger.info(
-      `[Token Enforcement] Deducted ${totalTokens} tokens from user ${userId}. New balance: ${newBalance}`
+      `[Token Enforcement] Deducted ${totalTokens} tokens (legacy) from user ${userId}. New balance: ${newBalance}`
     );
 
     return {
@@ -162,94 +179,65 @@ export async function deductTokens(
 }
 
 /**
- * Get user's current token balance
- * Uses get_or_create_token_balance RPC to ensure balance record exists
- * Falls back to direct query if RPC not available
- * Returns free tier default if no balance record exists
+ * Get user's current credit balance in cents.
+ * Uses get_credit_balance RPC from the shared Supabase (cents-based billing).
+ * Falls back to querying token_credits table directly.
+ * Fails CLOSED on errors (returns null to trigger denial).
  */
 export async function getUserTokenBalance(
   userId: string
 ): Promise<number | null> {
   try {
-    // Try using the get_or_create_token_balance RPC function
-    // This ensures a balance record is created if it doesn't exist
+    // Try get_credit_balance RPC first (shared Supabase billing system)
     const { data: rpcData, error: rpcError } = await supabase.rpc(
-      'get_or_create_token_balance',
+      'get_credit_balance',
       { p_user_id: userId }
     );
 
-    if (!rpcError && rpcData && rpcData.length > 0) {
-      const balance = Math.max(rpcData[0].current_balance || 0, 0);
+    if (!rpcError && rpcData !== null && rpcData !== undefined) {
+      const balanceCents = Math.max(Number(rpcData), 0);
       logger.info(
-        `[Token Balance] Current balance (via RPC): ${balance.toLocaleString()}`
+        `[Token Balance] Credit balance (via RPC): ${balanceCents} cents`
       );
-      return balance;
+      return balanceCents;
     }
 
-    // Fallback: Query user_token_balances table directly
+    // Fallback: Query token_credits table directly
     if (rpcError) {
       logger.warn(
-        '[Token Balance] RPC failed, falling back to direct query:',
+        '[Token Balance] get_credit_balance RPC failed, falling back:',
         rpcError.message
       );
     }
 
-    const { data: balanceData, error: balanceError } = await supabase
-      .from('user_token_balances')
-      .select('current_balance')
+    const { data: creditsData, error: creditsError } = await supabase
+      .from('token_credits')
+      .select('credits_remaining_cents')
       .eq('user_id', userId)
       .maybeSingle();
 
-    if (balanceError || !balanceData) {
-      if (balanceError) {
-        logger.warn(
-          '[Token Balance] Error fetching balance record, checking user plan...',
-          balanceError.message
-        );
-      } else {
-        logger.warn(
-          '[Token Balance] No balance record found, checking user plan...'
-        );
-      }
-
-      // Get user's plan to determine appropriate default balance
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('plan')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (userError || !userData) {
-        logger.error('[Token Balance] Error fetching user plan:', userError);
-        // SECURITY FIX: Jan 15th 2026 - Fail closed on database errors
-        // Return null to trigger denial instead of allowing with default tokens
-        // This prevents exploitation via database errors
-        return null;
-      }
-
-      const isPro =
-        userData.plan === 'pro' ||
-        userData.plan === 'max' ||
-        userData.plan === 'enterprise';
-      const defaultBalance = isPro ? 10000000 : 1000000; // 10M for pro, 1M for free
-
-      logger.info(
-        `[Token Balance] User has no balance record. Plan: ${userData.plan}. Returning default: ${defaultBalance.toLocaleString()}`
-      );
-      return defaultBalance;
+    if (creditsError) {
+      logger.error('[Token Balance] Error fetching credit balance:', creditsError.message);
+      // SECURITY: Fail closed on database errors
+      return null;
     }
 
-    const balance = Math.max(balanceData.current_balance || 0, 0);
-    logger.info(`[Token Balance] Current balance: ${balance.toLocaleString()}`);
-    return balance;
+    if (!creditsData) {
+      logger.warn('[Token Balance] No credit account found for user:', userId);
+      // Return null to trigger denial — user needs to have a credit account
+      return null;
+    }
+
+    const balanceCents = Math.max(creditsData.credits_remaining_cents || 0, 0);
+    logger.info(`[Token Balance] Credit balance: ${balanceCents} cents`);
+    return balanceCents;
   } catch (error) {
     logger.error('[Token Enforcement] Error:', error);
     captureError(error as Error, {
       tags: { feature: 'billing', operation: 'get_user_token_balance' },
       extra: { userId },
     });
-    // SECURITY FIX: Jan 15th 2026 - Fail closed on unexpected errors
-    // Return null to trigger denial instead of allowing with default tokens
+    // SECURITY: Fail closed on unexpected errors
     return null;
   }
 }

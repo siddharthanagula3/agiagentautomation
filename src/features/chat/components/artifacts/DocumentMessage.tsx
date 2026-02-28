@@ -107,7 +107,7 @@ export const DocumentMessage: React.FC<DocumentMessageProps> = ({
             <DocumentActions
               content={document.content}
               title={document.title}
-              author="AGI Agent Automation"
+              author="AGI Workforce"
               onEnhance={onEnhance}
               variant="compact"
             />

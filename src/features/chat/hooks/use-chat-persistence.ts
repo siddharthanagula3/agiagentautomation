@@ -73,7 +73,7 @@ export function useChatPersistence(
     try {
       // Load session metadata
       const { data: sessionData, error: sessionError } = await supabase
-        .from('chat_sessions')
+        .from('web_conversations')
         .select('*')
         .eq('id', sid)
         .maybeSingle();
@@ -97,7 +97,7 @@ export function useChatPersistence(
 
       // Load messages
       const { data: messagesData, error: messagesError } = await supabase
-        .from('chat_messages')
+        .from('web_messages')
         .select('*')
         .eq('session_id', sid)
         .order('created_at', { ascending: true });
@@ -162,7 +162,7 @@ export function useChatPersistence(
 
       // Use upsert to avoid duplicates
       const { error: saveError } = await supabase
-        .from('chat_messages')
+        .from('web_messages')
         .upsert(messagesToSave, { onConflict: 'id' });
 
       if (saveError) throw saveError;
@@ -178,7 +178,7 @@ export function useChatPersistence(
       );
 
       const { error: updateError } = await supabase
-        .from('chat_sessions')
+        .from('web_conversations')
         .update({
           metadata: {
             messageCount: messages.length,
@@ -230,7 +230,7 @@ export function useChatPersistence(
 
       try {
         const { data, error: createError } = await supabase
-          .from('chat_sessions')
+          .from('web_conversations')
           .insert([
             {
               user_id: uid,
@@ -282,7 +282,7 @@ export function useChatPersistence(
 
       try {
         const { error: updateError } = await supabase
-          .from('chat_sessions')
+          .from('web_conversations')
           .update({ title, updated_at: new Date().toISOString() })
           .eq('id', currentSession.id);
 
@@ -308,7 +308,7 @@ export function useChatPersistence(
       try {
         // Delete messages first
         const { error: messagesError } = await supabase
-          .from('chat_messages')
+          .from('web_messages')
           .delete()
           .eq('session_id', sid);
 
@@ -316,7 +316,7 @@ export function useChatPersistence(
 
         // Delete session
         const { error: sessionError } = await supabase
-          .from('chat_sessions')
+          .from('web_conversations')
           .delete()
           .eq('id', sid);
 
@@ -348,7 +348,7 @@ export function useChatPersistence(
     async (uid: string, limit = 10): Promise<ChatSession[]> => {
       try {
         const { data, error } = await supabase
-          .from('chat_sessions')
+          .from('web_conversations')
           .select('*')
           .eq('user_id', uid)
           .order('updated_at', { ascending: false })
@@ -378,7 +378,7 @@ export function useChatPersistence(
     async (uid: string, query: string): Promise<ChatSession[]> => {
       try {
         const { data, error } = await supabase
-          .from('chat_sessions')
+          .from('web_conversations')
           .select('*')
           .eq('user_id', uid)
           .ilike('title', `%${query}%`)

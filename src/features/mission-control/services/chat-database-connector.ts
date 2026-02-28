@@ -31,7 +31,7 @@ export async function createSession(
   const { employeeId, role, provider } = params;
   const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
-    .from('chat_sessions')
+    .from('web_conversations')
     .insert({ user_id: uid, employee_id: employeeId, role, provider })
     .select('*')
     .single();
@@ -45,7 +45,7 @@ export async function listSessions(
   const uid = getUserIdOrThrow(userId);
   const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
-    .from('chat_sessions')
+    .from('web_conversations')
     .select('*')
     .eq('user_id', uid)
     .order('created_at', { ascending: false });
@@ -60,7 +60,7 @@ export async function listMessages(
   getUserIdOrThrow(userId); // validate auth; RLS enforces access
   const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
-    .from('chat_messages')
+    .from('web_messages')
     .select('*')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
@@ -77,7 +77,7 @@ export async function sendMessage(
   getUserIdOrThrow(userId); // validate auth; RLS enforces access
   const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
-    .from('chat_messages')
+    .from('web_messages')
     .insert({ session_id: sessionId, role, content })
     .select('*')
     .single();

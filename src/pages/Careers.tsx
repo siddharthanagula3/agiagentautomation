@@ -19,7 +19,7 @@ import {
 import { motion } from 'framer-motion';
 
 const MAILTO =
-  'mailto:contact@agiagentautomation.com?subject=Career%20Enquiry%20-%20AGI%20Agent%20Automation';
+  'mailto:contact@agiworkforce.com?subject=Career%20Enquiry%20-%20AGI%20Workforce';
 
 const roles = [
   {
@@ -237,7 +237,7 @@ const Careers: React.FC = () => {
             <Button asChild size="lg" className="gradient-primary text-white">
               <a href={MAILTO}>
                 <Mail className="mr-2 h-4 w-4" />
-                Mail your resume to contact@agiagentautomation.com
+                Mail your resume to contact@agiworkforce.com
               </a>
             </Button>
           </div>

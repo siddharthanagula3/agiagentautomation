@@ -496,8 +496,8 @@ class ToolInvocationService {
 
     // Security: For user-specific tables, always filter by user_id
     const userScopedTables = [
-      'chat_sessions',
-      'chat_messages',
+      'web_conversations',
+      'web_messages',
       'purchased_employees',
       'user_shortcuts',
       'token_transactions',

@@ -7,12 +7,18 @@
 // List of allowed origins for CORS
 const ALLOWED_ORIGINS: string[] = [
   // Production domains
+  'https://agiworkforce.com',
+  'https://www.agiworkforce.com',
+  'https://agiworkforce.netlify.app',
+  // Legacy (keep during transition)
   'https://agiagentautomation.netlify.app',
   'https://agiagentautomation.com',
-  'https://www.agiagentautomation.com',
+  // Vercel preview deployments
+  'https://agiworkforce.vercel.app',
   // Development
   'http://localhost:5173',
   'http://localhost:8888',
+  'http://localhost:3000',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:8888',
 ];
@@ -29,19 +35,36 @@ export function isAllowedOrigin(origin: string | undefined): boolean {
   if (ALLOWED_ORIGINS.includes(origin)) return true;
 
   // Check for Netlify deploy previews and branch deploys
-  // Format: https://deploy-preview-123--agiagentautomation.netlify.app
-  // Or: https://branch-name--agiagentautomation.netlify.app
+  // Format: https://deploy-preview-123--agiworkforce.netlify.app
+  // Or: https://branch-name--agiworkforce.netlify.app
   // SECURITY FIX: Use strict suffix matching to prevent subdomain spoofing
-  // e.g., agiagentautomation-evil.netlify.app would NOT be allowed
+  // e.g., agiworkforce-evil.netlify.app would NOT be allowed
   if (origin.endsWith('.netlify.app')) {
     // Extract the site name part (everything before .netlify.app)
     const sitePart = origin.replace('https://', '').replace('.netlify.app', '');
     // Valid patterns:
-    // - "agiagentautomation" (main site)
-    // - "deploy-preview-123--agiagentautomation" (deploy previews)
-    // - "branch-name--agiagentautomation" (branch deploys)
-    // Must either BE "agiagentautomation" or END with "--agiagentautomation"
-    if (sitePart === 'agiagentautomation' || sitePart.endsWith('--agiagentautomation')) {
+    // - "agiworkforce" (main site)
+    // - "deploy-preview-123--agiworkforce" (deploy previews)
+    // - "branch-name--agiworkforce" (branch deploys)
+    // Also allow legacy "agiagentautomation" during transition
+    if (
+      sitePart === 'agiworkforce' ||
+      sitePart.endsWith('--agiworkforce') ||
+      sitePart === 'agiagentautomation' ||
+      sitePart.endsWith('--agiagentautomation')
+    ) {
+      return true;
+    }
+  }
+
+  // Check for Vercel deploy previews (e.g., agiworkforce-<hash>.vercel.app)
+  if (origin.endsWith('.vercel.app')) {
+    const sitePart = origin.replace('https://', '').replace('.vercel.app', '');
+    if (
+      sitePart === 'agiworkforce' ||
+      sitePart.startsWith('agiworkforce-') ||
+      sitePart.startsWith('agiagentautomation-')
+    ) {
       return true;
     }
   }

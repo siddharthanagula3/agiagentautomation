@@ -160,30 +160,51 @@ const PRO_TIER_LIMIT = 10_000_000;
 const PRO_PROVIDER_LIMIT = 2_500_000;
 
 /**
- * Fetch token balance for a user
+ * Fetch credit balance for a user from the shared Supabase (token_credits table).
+ * Balance is returned in cents (e.g., 2900 = $29.00).
+ * NOTE: currentBalance/totalGranted/totalUsed are now in CENTS, not token counts.
  */
 async function fetchTokenBalance(userId: string): Promise<TokenBalance> {
-  const { data, error } = await supabase
-    .from('user_token_balances')
-    .select('current_balance')
-    .eq('user_id', userId)
-    .maybeSingle();
+  // Try get_credit_balance RPC first (shared Supabase billing)
+  const { data: rpcData, error: rpcError } = await supabase.rpc('get_credit_balance', {
+    p_user_id: userId,
+  });
 
-  if (error) {
-    logger.error('[BillingQuery] Token balance error:', error);
-    // Return free tier defaults on error
+  if (!rpcError && rpcData !== null && rpcData !== undefined) {
+    const creditsCents = Math.max(Number(rpcData), 0);
     return {
-      currentBalance: FREE_TIER_LIMIT,
-      totalGranted: FREE_TIER_LIMIT,
+      currentBalance: creditsCents,
+      totalGranted: creditsCents,
       totalUsed: 0,
     };
   }
 
-  const currentBalance = data?.current_balance ?? FREE_TIER_LIMIT;
+  if (rpcError) {
+    logger.warn('[BillingQuery] get_credit_balance RPC failed, falling back:', rpcError.message);
+  }
+
+  // Fallback: direct query to token_credits table
+  const { data, error } = await supabase
+    .from('token_credits')
+    .select('credits_remaining_cents, credits_allocated_cents')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    logger.error('[BillingQuery] Credit balance error:', error);
+    return { currentBalance: 0, totalGranted: 0, totalUsed: 0 };
+  }
+
+  if (!data) {
+    return { currentBalance: 0, totalGranted: 0, totalUsed: 0 };
+  }
+
+  const remaining = Math.max(data.credits_remaining_cents ?? 0, 0);
+  const allocated = data.credits_allocated_cents ?? 0;
   return {
-    currentBalance: Math.max(currentBalance, 0),
-    totalGranted: FREE_TIER_LIMIT,
-    totalUsed: FREE_TIER_LIMIT - currentBalance,
+    currentBalance: remaining,
+    totalGranted: allocated,
+    totalUsed: Math.max(allocated - remaining, 0),
   };
 }
 
@@ -414,7 +435,7 @@ export function useTokenAnalytics(
               : new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
       const { data: sessions, error } = await supabase
-        .from('chat_sessions')
+        .from('web_conversations')
         .select(
           `
           id,

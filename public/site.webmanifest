@@ -1,7 +1,7 @@
 {
-  "name": "AGI Agent Automation",
-  "short_name": "AGI Agents",
-  "description": "Transform your business with AI employees. Hire, manage, and scale your AI workforce.",
+  "name": "AGI Workforce",
+  "short_name": "AGI Workforce",
+  "description": "Your AI workforce, on demand. Chat with AI agents and automate your business.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

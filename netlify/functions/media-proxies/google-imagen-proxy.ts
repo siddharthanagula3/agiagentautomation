@@ -1,6 +1,5 @@
 import { Handler } from '@netlify/functions';
 import { AuthenticatedEvent } from '../utils/auth-middleware';
-import { createClient } from '@supabase/supabase-js';
 import { withRateLimit } from '../utils/rate-limiter';
 import { withAuth } from '../utils/auth-middleware';
 import {
@@ -12,6 +11,8 @@ import {
   googleImagenRequestSchema,
   formatValidationError,
 } from '../utils/validation-schemas';
+import { checkTokenBalance, estimateTokensFromCost, createInsufficientBalanceResponse } from '../utils/token-balance-check';
+import { deductCredits } from '../utils/credit-system';
 
 /**
  * Netlify Function to proxy Google Imagen image generation API calls
@@ -128,68 +129,17 @@ const googleImagenHandler: Handler = async (event: AuthenticatedEvent) => {
     // Get authenticated user ID from JWT
     const authenticatedUserId = event.user?.id;
 
-    // Estimate cost for pre-flight balance check
+    // Pre-flight credit balance check
     if (authenticatedUserId) {
       const pricePerImage = IMAGEN_PRICING[model as keyof typeof IMAGEN_PRICING] || 0.04;
-      const estimatedCost = pricePerImage * sampleCount;
-      const estimatedTokens = Math.ceil(estimatedCost * 1000000);
+      const estimatedCostCents = estimateTokensFromCost(pricePerImage, sampleCount);
+      const balanceCheck = await checkTokenBalance(authenticatedUserId, estimatedCostCents, '[Imagen Proxy]', 'google', model);
 
-      const supabaseAdmin = createClient(
-        process.env.VITE_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-
-      // Check user's token balance
-      const { data: balanceData, error: balanceError } = await supabaseAdmin
-        .from('user_token_balances')
-        .select('token_balance, plan')
-        .eq('user_id', authenticatedUserId)
-        .maybeSingle();
-
-      if (!balanceData && !balanceError) {
-        // Create balance record if it doesn't exist
-        await supabaseAdmin.rpc('get_or_create_token_balance', { p_user_id: authenticatedUserId });
-        const { data: newBalanceData } = await supabaseAdmin
-          .from('user_token_balances')
-          .select('token_balance, plan')
-          .eq('user_id', authenticatedUserId)
-          .maybeSingle();
-
-        if (newBalanceData && newBalanceData.token_balance !== null && newBalanceData.token_balance < estimatedTokens) {
-          console.warn('[Google Imagen Proxy] Insufficient token balance:', {
-            userId: authenticatedUserId,
-            required: estimatedTokens,
-            available: newBalanceData.token_balance,
-          });
-          return {
-            statusCode: 402,
-            headers: corsHeaders,
-            body: JSON.stringify({
-              error: 'Insufficient token balance',
-              required: estimatedTokens,
-              available: newBalanceData.token_balance,
-              estimatedCost: `$${estimatedCost.toFixed(4)}`,
-              upgradeUrl: '/pricing',
-            }),
-          };
-        }
-      } else if (balanceData && balanceData.token_balance !== null && balanceData.token_balance < estimatedTokens) {
-        console.warn('[Google Imagen Proxy] Insufficient token balance:', {
-          userId: authenticatedUserId,
-          required: estimatedTokens,
-          available: balanceData.token_balance,
-        });
-        return {
-          statusCode: 402,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            error: 'Insufficient token balance',
-            required: estimatedTokens,
-            available: balanceData.token_balance,
-            estimatedCost: `$${estimatedCost.toFixed(4)}`,
-            upgradeUrl: '/pricing',
-          }),
-        };
+      if (!balanceCheck.hasBalance) {
+        return createInsufficientBalanceResponse(
+          { required: estimatedCostCents, available: balanceCheck.balance ?? 0 },
+          corsHeaders
+        );
       }
     }
 
@@ -285,53 +235,33 @@ const googleImagenHandler: Handler = async (event: AuthenticatedEvent) => {
       imagesGenerated,
     });
 
-    // Deduct tokens from user balance
+    // Deduct credits from user balance
+    // REVENUE LEAK FIX: Return 402 if deduction fails
     if (authenticatedUserId) {
       const pricePerImage = IMAGEN_PRICING[model as keyof typeof IMAGEN_PRICING] || 0.04;
-      const actualCost = pricePerImage * imagesGenerated;
-      const tokensToDeduct = Math.ceil(actualCost * 1000000);
+      const actualCostCents = estimateTokensFromCost(pricePerImage, imagesGenerated);
 
-      const supabaseAdmin = createClient(
-        process.env.VITE_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      const deductResult = await deductCredits(
+        authenticatedUserId,
+        actualCostCents,
+        `Imagen ${model} - ${imagesGenerated} image(s)`,
+        { model, count: imagesGenerated, aspectRatio, personGeneration, safetyFilterLevel }
       );
 
-      const { data: newBalance, error: deductError } = await supabaseAdmin.rpc('deduct_user_tokens', {
-        p_user_id: authenticatedUserId,
-        p_tokens: tokensToDeduct,
-        p_provider: 'google-imagen',
-        p_model: model,
-      });
-
-      if (deductError) {
-        console.error('[Google Imagen Proxy] Token deduction failed:', deductError);
-        data.tokenTracking = {
-          deductionFailed: true,
-          deductionError: deductError.message,
-        };
-      } else {
-        console.log('[Google Imagen Proxy] Token deduction successful. New balance:', newBalance);
-        data.tokenTracking = {
-          cost: actualCost,
-          tokensDeducted: tokensToDeduct,
-          newBalance,
+      if (!deductResult.success) {
+        console.error('[Google Imagen Proxy] Credit deduction failed:', deductResult.error);
+        return {
+          statusCode: 402,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Credit deduction failed', details: deductResult.error }),
         };
       }
 
-      // Log usage for analytics
-      await supabaseAdmin.from('media_generation_usage').insert({
-        user_id: authenticatedUserId,
-        provider: 'google',
-        model,
-        type: 'image',
-        prompt_length: prompt.length,
-        images_generated: imagesGenerated,
-        parameters: { aspectRatio, personGeneration, safetyFilterLevel },
-        cost: actualCost,
-        created_at: new Date().toISOString(),
-      }).catch(err => {
-        console.warn('[Google Imagen Proxy] Failed to log usage:', err);
-      });
+      console.log('[Google Imagen Proxy] Credit deduction successful. New balance:', deductResult.newBalanceCents);
+      data.tokenTracking = {
+        costCents: actualCostCents,
+        newBalanceCents: deductResult.newBalanceCents,
+      };
     }
 
     // Transform response to a consistent format

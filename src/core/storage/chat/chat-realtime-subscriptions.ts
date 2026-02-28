@@ -232,7 +232,7 @@ export class ChatRealtimeSubscriptionManager {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'chat_messages',
+          table: 'web_messages',
           filter: `session_id=eq.${conversationId}`,
         },
         onMessage
@@ -242,7 +242,7 @@ export class ChatRealtimeSubscriptionManager {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'chat_messages',
+          table: 'web_messages',
           filter: `session_id=eq.${conversationId}`,
         },
         onMessage

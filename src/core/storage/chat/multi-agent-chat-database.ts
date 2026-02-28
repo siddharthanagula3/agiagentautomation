@@ -211,9 +211,9 @@ export async function getConversationWithDetails(
       console.error('Failed to fetch metadata:', metaError);
     }
 
-    // Get message count from chat_messages table
+    // Get message count from web_messages table
     const { count: messageCount, error: countError } = await supabase
-      .from('chat_messages')
+      .from('web_messages')
       .select('*', { count: 'exact', head: true })
       .eq('session_id', conversationId);
 

@@ -161,7 +161,7 @@ const BlogPostPage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title={`${post.title} | AGI Agent Automation Blog`}
+        title={`${post.title} | AGI Workforce Blog`}
         description={post.excerpt}
         image={post.image_url}
         url={`/blog/${post.slug}`}

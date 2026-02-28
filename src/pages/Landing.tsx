@@ -196,14 +196,14 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden">
       <SEOHead
-        title="AGI Agent Automation | #1 AI Employees Platform USA | Hire 165+ AI Agents"
+        title="AGI Workforce | #1 AI Employees Platform USA | Hire 165+ AI Agents"
         description="Hire Free AI Employees. Free plan: 1M tokens/month (250K per provider). Pro plan: 10M tokens/month (2.5M per provider). 165+ specialized AI agents. Best AI workforce platform. 24/7 operation. Start free today!"
         keywords={[
           'ai employees',
           'hire ai employees',
           'ai agents',
           'ai automation',
-          'agi agent automation',
+          'agi workforce',
           'cheapest ai employees',
           'best ai employees usa',
           'no 1 in usa',
@@ -212,7 +212,7 @@ const LandingPage: React.FC = () => {
           'asi',
           'hiring ai employees',
         ]}
-        ogImage="https://agiagentautomation.com/og-landing.jpg"
+        ogImage="https://agiworkforce.com/og-landing.jpg"
       />
 
       {/* Hero Section */}
@@ -759,7 +759,7 @@ const LandingPage: React.FC = () => {
                 company: 'TechFlow',
                 avatar: '👩‍💼',
                 content:
-                  'AGI Agent Automation reduced our development time by 70%. Our AI employees handle complex coding tasks while our team focuses on strategy. Game-changing platform.',
+                  'AGI Workforce reduced our development time by 70%. Our AI employees handle complex coding tasks while our team focuses on strategy. Game-changing platform.',
                 rating: 5,
                 metric: '70% faster development',
               },

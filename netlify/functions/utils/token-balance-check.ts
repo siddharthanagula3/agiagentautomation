@@ -1,14 +1,30 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+/**
+ * Token Balance Check Utility
+ *
+ * Server-side pre-flight credit checks for LLM and media proxy functions.
+ * Updated to use the shared Supabase's cents-based credit system (token_credits table).
+ *
+ * Migration note: Previously used user_token_balances table with token-count based billing.
+ * Now uses token_credits table with cents-based billing via credit-system.ts utility.
+ */
+
+import {
+  checkCreditsAvailable,
+  estimatePreflightCostCents,
+  createInsufficientCreditsResponse,
+  type CreditCheckResult,
+} from './credit-system';
 
 /**
- * Result of a token balance check operation
+ * Result of a credit balance check operation.
+ * Maintains backwards-compatible shape for existing proxy callers.
  */
 export interface TokenBalanceCheckResult {
-  /** Whether the user has sufficient balance */
+  /** Whether the user has sufficient credits */
   hasBalance: boolean;
-  /** Current token balance (null if user not found or balance check failed) */
+  /** Credit balance in cents (null if check failed) */
   balance: number | null;
-  /** User's subscription plan */
+  /** User's subscription plan (not available in new system — kept for compat) */
   plan: string | null;
   /** Error message if check failed */
   error?: string;
@@ -16,238 +32,112 @@ export interface TokenBalanceCheckResult {
   balanceCreated?: boolean;
 }
 
-/**
- * Options for the insufficient balance error response
- */
 export interface InsufficientBalanceResponseOptions {
-  /** Number of tokens required for the operation */
+  /** Estimated cost in cents required for the operation */
   required: number;
-  /** Current available balance */
+  /** Current available credits in cents */
   available: number;
-  /** Optional estimated cost string (e.g., "$0.04") */
+  /** Optional human-readable cost string (e.g., "$0.04") */
   estimatedCost?: string;
   /** URL to upgrade page (defaults to '/pricing') */
   upgradeUrl?: string;
 }
 
 /**
- * Creates a Supabase admin client using service role key
- * @returns Supabase client with admin privileges
- */
-function getSupabaseAdmin(): SupabaseClient {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Supabase configuration missing');
-  }
-
-  return createClient(supabaseUrl, supabaseKey);
-}
-
-/**
- * Checks if a user has sufficient token balance for an operation.
- * Creates a new balance record if one doesn't exist.
+ * Check if a user has sufficient credits for an LLM request.
  *
- * @param userId - The authenticated user's ID (from JWT)
- * @param estimatedTokens - Number of tokens required for the operation
- * @param logPrefix - Optional prefix for log messages (e.g., '[OpenAI Proxy]')
- * @returns TokenBalanceCheckResult indicating if user has sufficient balance
+ * Uses the shared Supabase's cents-based credit system.
+ * Fails CLOSED on any error (denies request rather than allowing free usage).
  *
- * @example
- * ```typescript
- * const result = await checkTokenBalance(userId, 5000, '[OpenAI Proxy]');
- * if (!result.hasBalance) {
- *   return createInsufficientBalanceResponse(
- *     { required: 5000, available: result.balance || 0 },
- *     corsHeaders
- *   );
- * }
- * ```
+ * @param userId - Authenticated user ID (from JWT — never trust client)
+ * @param estimatedTokens - Estimated token count for pre-flight check
+ * @param logPrefix - Optional log prefix for debugging
+ * @param provider - LLM provider (for cost calculation)
+ * @param model - LLM model (for cost calculation)
  */
 export async function checkTokenBalance(
   userId: string,
   estimatedTokens: number,
-  logPrefix = '[Token Check]'
+  logPrefix = '[Token Check]',
+  provider = 'openai',
+  model = 'gpt-4o'
 ): Promise<TokenBalanceCheckResult> {
   try {
-    const supabaseAdmin = getSupabaseAdmin();
+    // Calculate estimated cost in cents
+    const estimatedCostCents = estimatePreflightCostCents(provider, model, estimatedTokens);
 
-    // Query user's token balance from user_token_balances table
-    const { data: balanceData, error: balanceError } = await supabaseAdmin
-      .from('user_token_balances')
-      .select('token_balance, plan')
-      .eq('user_id', userId)
-      .maybeSingle();
+    const result: CreditCheckResult = await checkCreditsAvailable(
+      userId,
+      estimatedCostCents,
+      logPrefix
+    );
 
-    if (balanceError) {
-      console.error(`${logPrefix} Error fetching token balance:`, balanceError);
+    if (result.error) {
+      console.error(`${logPrefix} Credit check error:`, result.error);
       return {
         hasBalance: false,
-        balance: null,
+        balance: result.creditsCents,
         plan: null,
-        error: balanceError.message,
+        error: result.error,
       };
-    }
-
-    // If user has no balance record, create one via RPC
-    if (!balanceData) {
-      console.log(`${logPrefix} No token balance record found, creating one for user:`, userId);
-
-      await supabaseAdmin.rpc('get_or_create_token_balance', {
-        p_user_id: userId,
-      });
-
-      // Re-fetch after creation
-      const { data: newBalanceData, error: newBalanceError } = await supabaseAdmin
-        .from('user_token_balances')
-        .select('token_balance, plan')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (newBalanceError || !newBalanceData) {
-        console.error(`${logPrefix} Error fetching newly created token balance:`, newBalanceError);
-        return {
-          hasBalance: false,
-          balance: null,
-          plan: null,
-          error: newBalanceError?.message || 'Failed to create token balance record',
-          balanceCreated: true,
-        };
-      }
-
-      const balance = newBalanceData.token_balance;
-      const hasSufficientBalance = balance !== null && balance >= estimatedTokens;
-
-      if (!hasSufficientBalance) {
-        console.warn(`${logPrefix} Insufficient token balance:`, {
-          userId,
-          required: estimatedTokens,
-          available: balance,
-        });
-      }
-
-      return {
-        hasBalance: hasSufficientBalance,
-        balance,
-        plan: newBalanceData.plan,
-        balanceCreated: true,
-      };
-    }
-
-    // Check if existing balance is sufficient
-    const balance = balanceData.token_balance;
-    const hasSufficientBalance = balance !== null && balance >= estimatedTokens;
-
-    if (!hasSufficientBalance) {
-      console.warn(`${logPrefix} Insufficient token balance:`, {
-        userId,
-        required: estimatedTokens,
-        available: balance,
-      });
     }
 
     return {
-      hasBalance: hasSufficientBalance,
-      balance,
-      plan: balanceData.plan,
+      hasBalance: result.hasCredits,
+      balance: result.creditsCents,
+      plan: null,
     };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`${logPrefix} Token balance check failed:`, errorMessage);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error(`${logPrefix} checkTokenBalance unexpected error:`, message);
     return {
       hasBalance: false,
       balance: null,
       plan: null,
-      error: errorMessage,
+      error: message,
     };
   }
 }
 
 /**
- * Creates a standardized HTTP 402 (Payment Required) response for insufficient token balance.
- *
- * @param options - Options for the error response
- * @param corsHeaders - CORS headers to include in the response
- * @returns Netlify function response object
- *
- * @example
- * ```typescript
- * return createInsufficientBalanceResponse(
- *   { required: 5000, available: 1000, estimatedCost: '$0.04' },
- *   corsHeaders
- * );
- * ```
+ * Creates a standardized HTTP 402 response for insufficient credits.
+ * Maintains backwards-compatible signature for existing proxy callers.
  */
 export function createInsufficientBalanceResponse(
   options: InsufficientBalanceResponseOptions,
   corsHeaders: Record<string, string>
-): {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-} {
-  const { required, available, estimatedCost, upgradeUrl = '/pricing' } = options;
+): { statusCode: number; headers: Record<string, string>; body: string } {
+  const { required, available, upgradeUrl = '/pricing' } = options;
 
-  const responseBody: {
-    error: string;
-    required: number;
-    available: number;
-    upgradeUrl: string;
-    estimatedCost?: string;
-  } = {
-    error: 'Insufficient token balance',
-    required,
-    available,
-    upgradeUrl,
-  };
-
-  if (estimatedCost) {
-    responseBody.estimatedCost = estimatedCost;
-  }
-
-  return {
-    statusCode: 402,
-    headers: corsHeaders,
-    body: JSON.stringify(responseBody),
-  };
+  return createInsufficientCreditsResponse(
+    {
+      requiredCents: required,
+      availableCents: available,
+      upgradeUrl,
+    },
+    corsHeaders
+  );
 }
 
 /**
  * Estimates token count from message content.
- * Uses a conservative estimate of ~3 characters per token.
- *
- * @param messages - Array of messages or any content to estimate
- * @returns Estimated number of tokens (rounded up and multiplied by safety factor)
- *
- * @example
- * ```typescript
- * const estimated = estimateTokensFromMessages(messages);
- * const result = await checkTokenBalance(userId, estimated);
- * ```
+ * Conservative estimate of ~3 characters per token with 3x safety factor.
  */
 export function estimateTokensFromMessages(messages: unknown): number {
   const messageLength = JSON.stringify(messages).length;
-  // Conservative estimate: ~3 characters per token, with 3x safety factor
+  // Conservative estimate: ~3 characters per token, 3x safety factor
   return Math.ceil(messageLength / 3) * 3;
 }
 
 /**
- * Estimates token cost for media generation based on price and count.
- * Converts dollar cost to token units (1M tokens = $1).
+ * Estimates token cost for media generation (dollar cost → cents).
  *
- * @param pricePerUnit - Price per unit (image/second of video) in dollars
- * @param units - Number of units (images or seconds)
- * @returns Estimated tokens to deduct
- *
- * @example
- * ```typescript
- * // For DALL-E 3 at $0.04 per image, generating 2 images:
- * const tokens = estimateTokensFromCost(0.04, 2); // Returns 80000
- * ```
+ * @param pricePerUnit - Price per unit in dollars (e.g., 0.04 for DALL-E image)
+ * @param units - Number of units
+ * @returns Estimated cost in cents
  */
 export function estimateTokensFromCost(pricePerUnit: number, units: number): number {
-  const estimatedCost = pricePerUnit * units;
-  // Convert cost to tokens: approximately 1M tokens = $1
-  return Math.ceil(estimatedCost * 1000000);
+  const estimatedCostDollars = pricePerUnit * units;
+  // Convert to cents, rounding up
+  return Math.ceil(estimatedCostDollars * 100);
 }

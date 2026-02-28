@@ -146,7 +146,7 @@ export class ChatPersistenceService {
     // Save to server if online
     if (this.isOnline && this.supabase) {
       try {
-        await this.supabase.from('chat_sessions').insert({
+        await this.supabase.from('web_conversations').insert({
           id: session.id,
           user_id: userId,
           employee_id: employeeId,
@@ -198,7 +198,7 @@ export class ChatPersistenceService {
     // Save to server if online
     if (this.isOnline && this.supabase) {
       try {
-        await this.supabase.from('chat_messages').insert({
+        await this.supabase.from('web_messages').insert({
           id: message.id,
           session_id: sessionId,
           role: message.role,
@@ -257,7 +257,7 @@ export class ChatPersistenceService {
       if (this.isOnline && this.supabase) {
         try {
           await this.supabase
-            .from('chat_sessions')
+            .from('web_conversations')
             .update({ title, updated_at: session.updatedAt.toISOString() })
             .eq('id', sessionId);
         } catch (error) {
@@ -283,10 +283,10 @@ export class ChatPersistenceService {
 
     if (this.isOnline && this.supabase) {
       try {
-        await this.supabase.from('chat_sessions').delete().eq('id', sessionId);
+        await this.supabase.from('web_conversations').delete().eq('id', sessionId);
 
         await this.supabase
-          .from('chat_messages')
+          .from('web_messages')
           .delete()
           .eq('session_id', sessionId);
       } catch (error) {
@@ -321,7 +321,7 @@ export class ChatPersistenceService {
     try {
       // Sync sessions
       for (const session of this.state.sessions) {
-        const { error } = await this.supabase.from('chat_sessions').upsert({
+        const { error } = await this.supabase.from('web_conversations').upsert({
           id: session.id,
           user_id: session.userId,
           employee_id: session.employeeId,
@@ -341,7 +341,7 @@ export class ChatPersistenceService {
       // Sync messages
       for (const [sessionId, messages] of this.state.messages) {
         for (const message of messages) {
-          const { error } = await this.supabase.from('chat_messages').upsert({
+          const { error } = await this.supabase.from('web_messages').upsert({
             id: message.id,
             session_id: message.sessionId,
             role: message.role,
@@ -371,7 +371,7 @@ export class ChatPersistenceService {
     try {
       // Load sessions
       const { data: sessions, error: sessionsError } = await this.supabase
-        .from('chat_sessions')
+        .from('web_conversations')
         .select('*')
         .eq('user_id', userId)
         .order('updated_at', { ascending: false });
@@ -396,7 +396,7 @@ export class ChatPersistenceService {
       // Load messages for each session
       for (const session of this.state.sessions) {
         const { data: messages, error: messagesError } = await this.supabase
-          .from('chat_messages')
+          .from('web_messages')
           .select('*')
           .eq('session_id', session.id)
           .order('created_at', { ascending: true });

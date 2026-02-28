@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { checkRateLimitWithTier } from '../utils/rate-limiter';
+import { getOrCreateCreditAccount } from '../utils/credit-system';
 
 // Enhanced logging utility with structured logging
 const logger = {
@@ -552,18 +553,59 @@ async function processStripeEvent(
           );
         }
 
-        // Grant tokens based on plan (Pro: 10M, Max: 40M)
-        const tokenGrant = plan === 'pro' ? 10000000 : plan === 'max' ? 40000000 : 0;
+        // Allocate credits based on plan price (Pro: $29 = 2900 cents, Max: $99 = 9900 cents)
+        const creditsAllocatedCents = plan === 'pro' ? 2900 : plan === 'max' ? 9900 : 0;
 
-        if (tokenGrant > 0) {
+        if (creditsAllocatedCents > 0) {
           try {
-            logger.info(`Granting ${tokenGrant} tokens for ${plan} plan`, {
+            logger.info(`Allocating ${creditsAllocatedCents} cents of credits for ${plan} plan`, {
               userId,
               plan,
-              tokenGrant,
+              creditsAllocatedCents,
             });
 
-            const { data: newBalance, error: tokenError } = await supabase.rpc(
+            const now = new Date();
+            const periodEnd = new Date(now);
+            if (billingPeriod === 'yearly') {
+              periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+            } else {
+              periodEnd.setMonth(periodEnd.getMonth() + 1);
+            }
+
+            // Create credit account via new credit system
+            await getOrCreateCreditAccount(
+              userId,
+              subscriptionId,
+              now.toISOString(),
+              periodEnd.toISOString(),
+              creditsAllocatedCents
+            );
+
+            logger.info('Successfully created credit account for subscription', {
+              userId,
+              plan,
+              creditsAllocatedCents,
+              subscriptionId,
+            });
+
+            // Log audit trail
+            await logAuditTrail(
+              requestId,
+              stripeEvent.id,
+              'subscription_credit_grant',
+              'credits_allocated',
+              {
+                userId,
+                plan,
+                creditsAllocatedCents,
+                subscriptionId,
+              }
+            );
+
+            // Also grant legacy tokens for backwards compatibility
+            // TODO: Remove once fully migrated to credit system
+            const tokenGrant = plan === 'pro' ? 10000000 : plan === 'max' ? 40000000 : 0;
+            const { error: tokenError } = await supabase.rpc(
               'update_user_token_balance',
               {
                 p_user_id: userId,
@@ -582,44 +624,19 @@ async function processStripeEvent(
             );
 
             if (tokenError) {
-              logger.error('Failed to grant subscription tokens:', {
+              logger.warn('Legacy token grant failed (non-critical):', {
                 userId,
-                plan,
-                tokenGrant,
                 error: tokenError,
               });
-              // Don't throw - plan upgrade succeeded, token grant is supplementary
-            } else {
-              logger.info('Successfully granted subscription tokens', {
-                userId,
-                plan,
-                tokenGrant,
-                newBalance,
-              });
-
-              // Log audit trail
-              await logAuditTrail(
-                requestId,
-                stripeEvent.id,
-                'subscription_token_grant',
-                'tokens_granted',
-                {
-                  userId,
-                  plan,
-                  tokenGrant,
-                  newBalance,
-                  subscriptionId,
-                }
-              );
             }
           } catch (error) {
-            logger.error('Error granting subscription tokens:', {
+            logger.error('Error allocating credits:', {
               userId,
               plan,
-              tokenGrant,
+              creditsAllocatedCents,
               error,
             });
-            // Don't throw - plan upgrade succeeded, token grant is supplementary
+            // Don't throw - plan upgrade succeeded, credit allocation is supplementary
           }
         }
 
@@ -792,23 +809,62 @@ async function processStripeEvent(
             });
           }
 
-          // Grant monthly tokens for Pro/Max plans (recurring payment)
+          // Allocate monthly credits for Pro/Max plans (recurring payment)
           // Skip the first invoice (handled in checkout.session.completed)
           const isFirstInvoice = invoice.billing_reason === 'subscription_create';
 
           if (!isFirstInvoice && (user.plan === 'pro' || user.plan === 'max')) {
-            // Determine tokens based on plan type: Pro = 10M, Max = 40M
-            const monthlyTokens = user.plan === 'max' ? 40000000 : 10000000;
+            const creditsAllocatedCents = user.plan === 'max' ? 9900 : 2900;
 
-            logger.info('Granting monthly token allocation', {
+            logger.info('Allocating monthly credits', {
               userId: user.id,
               plan: user.plan,
-              monthlyTokens,
+              creditsAllocatedCents,
               invoiceId: invoice.id,
             });
 
             try {
-              const { data: newBalance, error: tokenError } = await supabase.rpc(
+              // Create/refresh credit account for new billing period
+              const periodStart = invoice.period_start
+                ? new Date(invoice.period_start * 1000).toISOString()
+                : new Date().toISOString();
+              const periodEnd = invoice.period_end
+                ? new Date(invoice.period_end * 1000).toISOString()
+                : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+              await getOrCreateCreditAccount(
+                user.id,
+                subscriptionId,
+                periodStart,
+                periodEnd,
+                creditsAllocatedCents
+              );
+
+              logger.info('Successfully allocated monthly credits', {
+                userId: user.id,
+                plan: user.plan,
+                creditsAllocatedCents,
+                invoiceId: invoice.id,
+              });
+
+              // Log audit trail
+              await logAuditTrail(
+                requestId,
+                stripeEvent.id,
+                'monthly_credit_grant',
+                'credits_allocated',
+                {
+                  userId: user.id,
+                  plan: user.plan,
+                  creditsAllocatedCents,
+                  invoiceId: invoice.id,
+                }
+              );
+
+              // Also grant legacy tokens for backwards compatibility
+              // TODO: Remove once fully migrated to credit system
+              const monthlyTokens = user.plan === 'max' ? 40000000 : 10000000;
+              const { error: tokenError } = await supabase.rpc(
                 'update_user_token_balance',
                 {
                   p_user_id: user.id,
@@ -828,37 +884,13 @@ async function processStripeEvent(
               );
 
               if (tokenError) {
-                logger.error('Failed to grant monthly tokens:', {
+                logger.warn('Legacy token grant failed (non-critical):', {
                   userId: user.id,
-                  plan: user.plan,
                   error: tokenError,
                 });
-                // Don't throw - payment processing succeeded
-              } else {
-                logger.info('Successfully granted monthly tokens', {
-                  userId: user.id,
-                  plan: user.plan,
-                  monthlyTokens,
-                  newBalance,
-                });
-
-                // Log audit trail
-                await logAuditTrail(
-                  requestId,
-                  stripeEvent.id,
-                  'monthly_token_grant',
-                  'tokens_granted',
-                  {
-                    userId: user.id,
-                    plan: user.plan,
-                    monthlyTokens,
-                    newBalance,
-                    invoiceId: invoice.id,
-                  }
-                );
               }
             } catch (error) {
-              logger.error('Error granting monthly tokens:', {
+              logger.error('Error allocating monthly credits:', {
                 userId: user.id,
                 plan: user.plan,
                 error,
@@ -1056,6 +1088,7 @@ async function processStripeEvent(
 
         // SECURITY: Cap token balance at free tier limit to prevent abuse
         // Users should not retain excess tokens after cancellation
+        // TODO: Update to cap credits in token_credits table (new credit system) instead of legacy tokens
         logger.info('Capping token balance for cancelled subscription', {
           requestId,
           userId: user.id,

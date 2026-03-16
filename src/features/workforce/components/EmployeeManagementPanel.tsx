@@ -28,13 +28,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/ui/dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu';
@@ -46,60 +44,21 @@ import {
   MoreVertical,
   Play,
   Pause,
-  Square,
   Calendar,
-  Clock,
   Target,
   BarChart3,
-  MessageSquare,
   Settings,
   UserPlus,
-  UserMinus,
   Edit,
   Trash2,
   Eye,
-  Share,
-  Download,
-  Upload,
-  Zap,
-  Brain,
-  Activity,
   TrendingUp,
-  TrendingDown,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
   Loader2,
   Star,
-  Award,
-  Briefcase,
   DollarSign,
-  Globe,
-  Network,
-  Layers,
-  GitBranch,
-  Flag,
-  MapPin,
-  Phone,
-  Mail,
-  ExternalLink,
-  FileText,
-  Image,
-  Video,
-  Archive,
-  Sparkles,
-  Shield,
-  Bot,
-  Cpu,
-  Database,
-  Code,
-  PenTool,
-  Palette,
-  Headphones,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
-import { analyticsService } from '@core/monitoring/analytics-tracker';
 
 // Types and Interfaces
 export interface AIWorkforce {
@@ -276,8 +235,6 @@ export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({
   const [selectedWorkforce, setSelectedWorkforce] =
     useState<AIWorkforce | null>(null);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
-  const [showAddMember, setShowAddMember] = useState(false);
-  const [showCreateProject, setShowCreateProject] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -686,7 +643,7 @@ interface WorkforceCardProps {
 
 const WorkforceCard: React.FC<WorkforceCardProps> = ({
   workforce,
-  viewMode,
+  viewMode: _viewMode,
   onClick,
 }) => {
   const getStatusColor = (status: AIWorkforce['status']) => {
@@ -1166,7 +1123,7 @@ interface AnalyticsViewProps {
   workforces: AIWorkforce[];
 }
 
-const AnalyticsView: React.FC<AnalyticsViewProps> = ({ workforces }) => {
+const AnalyticsView: React.FC<AnalyticsViewProps> = ({ workforces: _workforces }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white">Workforce Analytics</h2>

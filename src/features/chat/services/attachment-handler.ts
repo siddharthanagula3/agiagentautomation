@@ -125,7 +125,7 @@ export class AttachmentHandler {
     file: File,
     userId: string,
     sessionId: string,
-    onProgress?: (progress: UploadProgress) => void
+    _onProgress?: (progress: UploadProgress) => void
   ): Promise<UploadResult> {
     // Validate file
     const validation = this.validateFile(file);
@@ -201,8 +201,8 @@ export class AttachmentHandler {
   private async createThumbnail(
     file: File,
     originalPath: string,
-    userId: string,
-    sessionId: string
+    _userId: string,
+    _sessionId: string
   ): Promise<string | undefined> {
     try {
       // Create thumbnail using canvas

@@ -1,4 +1,4 @@
-import { Handler } from '@netlify/functions';
+import type { Handler } from '@netlify/functions';
 import { AuthenticatedEvent } from '../utils/auth-middleware';
 import { createClient } from '@supabase/supabase-js';
 import { withRateLimit } from '../utils/rate-limiter';

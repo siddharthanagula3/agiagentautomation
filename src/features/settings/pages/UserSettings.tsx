@@ -87,11 +87,6 @@ import {
   useToggle2FA,
   type CreateAPIKeyResult,
 } from '@features/settings/hooks/use-settings-queries';
-import type {
-  UserProfile,
-  UserSettings,
-  APIKey,
-} from '@features/settings/services/user-preferences';
 import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
 import { Particles } from '@shared/ui/particles';
 import {

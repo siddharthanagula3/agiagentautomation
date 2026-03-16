@@ -1,4 +1,4 @@
-import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import type { Handler, HandlerEvent } from '@netlify/functions';
 import Stripe from 'stripe';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimitTier } from '../utils/rate-limiter';
@@ -16,8 +16,7 @@ import {
 // Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
 // Updated: Jan 10th 2026 - Added rate limiting and Zod validation
 const authenticatedHandler: Handler = async (
-  event: HandlerEvent & { user: { id: string; email?: string } },
-  context: HandlerContext
+  event: HandlerEvent & { user: { id: string; email?: string } }
 ) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {

@@ -89,24 +89,6 @@ async function navigateAndWait(page: Page, url: string) {
 }
 
 /**
- * Check if user is authenticated by looking at the URL or page content
- */
-async function isAuthenticated(page: Page): Promise<boolean> {
-  const url = page.url();
-  // If redirected to login, not authenticated
-  if (url.includes('/login') || url.includes('/signup')) {
-    return false;
-  }
-  // Check for dashboard-specific elements
-  const dashboardElement = await page
-    .locator('[class*="dashboard"], [class*="sidebar"], nav')
-    .first()
-    .isVisible()
-    .catch(() => false);
-  return dashboardElement;
-}
-
-/**
  * Attempt to log in with test credentials
  */
 async function login(page: Page) {

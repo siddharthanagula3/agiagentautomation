@@ -13,7 +13,6 @@ import { employeeMemoryService } from '@core/ai/employees/employee-memory-servic
 import {
   consultingOrchestrator,
   type ConsultingDomain,
-  type ConsultationResult,
 } from '@core/ai/orchestration/consulting-orchestrator';
 import { ExpertiseTaxonomy } from '@core/ai/orchestration/intelligent-agent-router';
 import type { AIEmployee } from '@core/types/ai-employee';
@@ -1304,7 +1303,7 @@ export class EmployeeChatService {
     let bestEmployee = this.employees[0];
     let bestScore = 0;
     let bestReasons: string[] = ['general assistant'];
-    let bestExpertise: string[] = [];
+    let _bestExpertise: string[] = [];
 
     scores.forEach((data, employeeName) => {
       if (data.score > bestScore) {
@@ -1313,7 +1312,7 @@ export class EmployeeChatService {
           bestEmployee = employee;
           bestScore = data.score;
           bestReasons = data.reasons;
-          bestExpertise = data.matchedExpertise;
+          _bestExpertise = data.matchedExpertise;
         }
       }
     });

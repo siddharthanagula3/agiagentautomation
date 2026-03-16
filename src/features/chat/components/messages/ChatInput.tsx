@@ -9,7 +9,6 @@ import {
   MicOff,
   Users,
   User,
-  ChevronDown,
   Loader2,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';

@@ -1,4 +1,4 @@
-import { Handler, HandlerEvent, HandlerContext, HandlerResponse } from '@netlify/functions';
+import type { Handler, HandlerEvent, HandlerContext, HandlerResponse } from '@netlify/functions';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /**

@@ -172,7 +172,7 @@ export class VibeMessageService {
 
     try {
       // Step 1: Create user message
-      const userMessage = await this.createMessage({
+      const _userMessage = await this.createMessage({
         sessionId,
         userId,
         role: 'user',

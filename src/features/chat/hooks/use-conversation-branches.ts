@@ -195,7 +195,7 @@ export function useDeleteBranch() {
   return useMutation({
     mutationFn: async ({
       branchId,
-      parentSessionId,
+      parentSessionId: _parentSessionId,
     }: {
       branchId: string;
       parentSessionId: string;

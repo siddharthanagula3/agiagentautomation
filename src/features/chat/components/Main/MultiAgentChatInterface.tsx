@@ -11,7 +11,7 @@
  * - Collapsible panels
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '@shared/lib/utils';
 import { Button } from '@shared/components/ui/button';
 import { ScrollArea } from '@shared/components/ui/scroll-area';
@@ -159,7 +159,7 @@ export function MultiAgentChatInterface({
 
   // Handle message send
   const handleSendMessage = useCallback(
-    (content: string, attachments?: File[]) => {
+    (content: string, _attachments?: File[]) => {
       const mentions = extractMentions(content);
       onSendMessage?.(content, mentions);
     },

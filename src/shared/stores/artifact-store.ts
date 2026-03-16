@@ -153,7 +153,7 @@ export const useArtifactStore = create<ArtifactState>()(
         }
 
         // Generate unique share ID
-        const shareId = `share-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const shareId = `share-${Date.now()}-${crypto.randomUUID().slice(0, 9)}`;
 
         try {
           // Get current user for tracking

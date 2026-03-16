@@ -62,16 +62,16 @@ interface ConversationListItemProps {
 }
 
 export const ConversationListItem = memo(function ConversationListItem({
-  id,
+  id: _id,
   title,
-  summary,
+  summary: _summary,
   updatedAt,
-  totalMessages,
+  totalMessages: _totalMessages,
   isActive,
   isStarred,
   isPinned,
   isArchived,
-  tags = [],
+  tags: _tags = [],
   onClick,
   onRename,
   onDelete,

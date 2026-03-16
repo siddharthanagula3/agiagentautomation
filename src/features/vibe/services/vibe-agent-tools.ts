@@ -335,7 +335,7 @@ export const deployPreviewTool: ToolDefinition = {
   name: 'deploy_preview',
   description: 'Deploy the current project to a preview environment',
   parameters: {},
-  execute: async (_args, context) => {
+  execute: async (_args, _context) => {
     const orchestrator = useVibeOrchestrator.getState();
 
     orchestrator.processEvent({ type: 'preview_ready', url: '/preview' });

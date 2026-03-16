@@ -1,4 +1,4 @@
-import { Handler } from '@netlify/functions';
+import type { Handler } from '@netlify/functions';
 import { AuthenticatedEvent } from '../utils/auth-middleware';
 import {
   calculateTokenCost,
@@ -122,7 +122,6 @@ const googleHandler: Handler = async (event: AuthenticatedEvent) => {
     // Pre-flight token check to prevent overdraft
     // SECURITY FIX: Use verified user ID from JWT (via withAuth middleware) instead of request body
     const authenticatedUserId = event.user?.id;
-    const { sessionId } = extractRequestMetadata(event); // Only get sessionId from body (safe)
 
     if (authenticatedUserId) {
       const estimatedTokens = estimateTokensFromMessages(messages);

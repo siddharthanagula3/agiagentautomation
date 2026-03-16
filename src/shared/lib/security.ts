@@ -133,16 +133,9 @@ export class SecurityManager {
       const encoder = new TextEncoder();
       const data = encoder.encode(plaintext);
 
-      // Generate a random 16-byte nonce
+      // Generate a random 16-byte nonce using crypto API
       const nonce = new Uint8Array(16);
-      if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
-        window.crypto.getRandomValues(nonce);
-      } else {
-        // Fallback for non-browser environments
-        for (let i = 0; i < 16; i++) {
-          nonce[i] = Math.floor(Math.random() * 256);
-        }
-      }
+      crypto.getRandomValues(nonce);
 
       // Encrypt using XOR with key stream derived from key + nonce
       const encrypted = new Uint8Array(data.length);
@@ -555,10 +548,12 @@ export class SecurityManager {
       ).join('');
     }
 
-    // Fallback for older browsers
-    return Array.from({ length }, () =>
-      Math.floor(Math.random() * 16).toString(16)
-    ).join('');
+    // Fallback using crypto.getRandomValues
+    const fallbackArray = new Uint8Array(Math.ceil(length / 2));
+    crypto.getRandomValues(fallbackArray);
+    return Array.from(fallbackArray, (byte) =>
+      byte.toString(16).padStart(2, '0')
+    ).join('').slice(0, length);
   }
 
   // Hash sensitive data (client-side hashing for non-security-critical use)

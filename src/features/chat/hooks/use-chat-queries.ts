@@ -17,7 +17,6 @@ import { queryKeys } from '@shared/stores/query-client';
 import { supabase } from '@shared/lib/supabase-client';
 import {
   chatPersistenceService,
-  type PaginatedResponse,
 } from '../services/conversation-storage';
 import type { ChatSession, ChatMessage } from '../types';
 import { toast } from 'sonner';
@@ -98,14 +97,6 @@ interface SessionMutationResult {
 interface SessionMutationContext {
   previousSessions: ChatSession[] | undefined;
   userId: string;
-}
-
-/**
- * Optimistic update context for message mutations
- */
-interface MessageMutationContext {
-  previousMessages: ChatMessage[] | undefined;
-  sessionId: string;
 }
 
 /**

@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { Button } from '@shared/ui/button';
@@ -15,10 +14,8 @@ import { Textarea } from '@shared/ui/textarea';
 import { Switch } from '@shared/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { Alert, AlertDescription } from '@shared/ui/alert';
-import { Separator } from '@shared/ui/separator';
 import {
   Bot,
-  Key,
   Settings,
   CheckCircle,
   AlertCircle,
@@ -27,22 +24,12 @@ import {
   Eye,
   EyeOff,
   TestTube,
-  Zap,
-  Brain,
-  Search,
-  Shield,
   DollarSign,
   Clock,
-  Users,
   Save,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
-import {
-  getConfiguredProviders,
-  getAvailableModels,
-  createCustomSystemPrompt,
-} from '@/services/enhanced-ai-chat-service-v2';
 import { settingsService } from '@features/settings/services/user-preferences';
 import {
   Select,
@@ -323,7 +310,7 @@ const AIConfigurationPageContent: React.FC = () => {
       } else {
         toast.error(`${provider} API test failed. Check your API key.`);
       }
-    } catch (error) {
+    } catch (_error) {
       setTestResults((prev) => ({ ...prev, [provider]: 'error' }));
       toast.error(`Failed to test ${provider} API`);
     }

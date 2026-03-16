@@ -5,12 +5,13 @@
  * Updated: Jan 17th 2026 - Fixed CORS wildcard vulnerability with origin validation
  */
 
-import { HandlerContext, HandlerResponse } from '@netlify/functions';
+import type { HandlerResponse } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import {
   getSafeCorsHeaders,
   getMinimalCorsHeaders,
+  getSecurityHeaders,
   checkOriginAndBlock,
 } from '../utils/cors';
 import { withAuth, AuthenticatedEvent } from '../utils/auth-middleware';
@@ -42,19 +43,9 @@ const openai = new OpenAI({
   apiKey: openaiApiKey,
 });
 
-interface ExecuteRequest {
-  conversationId: string;
-  userId: string;
-  message: string;
-  threadId: string;
-  assistantId: string;
-  streaming?: boolean;
-}
-
 // Updated: Jan 30th 2026 - Replaced manual auth check with withAuth middleware
 const agentsExecuteHandler = async (
-  event: AuthenticatedEvent,
-  context: HandlerContext
+  event: AuthenticatedEvent
 ): Promise<HandlerResponse> => {
   // Extract origin for CORS validation
   // Updated: Jan 29th 2026 - Simplified using getSafeCorsHeaders (always returns non-null)
@@ -127,7 +118,7 @@ const agentsExecuteHandler = async (
     });
 
     // Save user message to database
-    const { data: userMessage, error: userMessageError } = await supabase
+    const { error: userMessageError } = await supabase
       .from('messages')
       .insert({
         conversation_id: conversationId,

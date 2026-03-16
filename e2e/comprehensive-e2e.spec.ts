@@ -9,9 +9,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 
 // Test report storage
@@ -27,7 +24,8 @@ const globalReport: Record<string, TestReport> = {};
 
 // Helper to capture screenshot
 async function screenshot(page: Page, name: string) {
-  const screenshotDir = path.join(__dirname, 'screenshots');
+  const _dirname = dirname(fileURLToPath(import.meta.url));
+  const screenshotDir = path.join(_dirname, 'screenshots');
   const screenshotPath = path.join(screenshotDir, `${name}-${Date.now()}.png`);
   await page.screenshot({ path: screenshotPath, fullPage: true });
   return screenshotPath;
@@ -274,7 +272,7 @@ test.describe('Public Pages - Parallel Tests', () => {
 // ============================================================
 test.describe('Navigation & Routing', () => {
   test('All main navigation links work', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'navigation');
+    setupPageMonitoring(page, 'navigation');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -288,7 +286,7 @@ test.describe('Navigation & Routing', () => {
   });
 
   test('Protected routes redirect to login', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'protected-routes');
+    setupPageMonitoring(page, 'protected-routes');
 
     // Test protected routes
     const protectedRoutes = [
@@ -324,7 +322,7 @@ test.describe('UI Components - Parallel Tests', () => {
   test.describe.configure({ mode: 'parallel' });
 
   test('Buttons are clickable and styled', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'buttons');
+    setupPageMonitoring(page, 'buttons');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -346,7 +344,7 @@ test.describe('UI Components - Parallel Tests', () => {
   });
 
   test('Forms have proper validation', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'forms');
+    setupPageMonitoring(page, 'forms');
 
     await page.goto(`${BASE_URL}/login`);
     await waitForAppLoad(page);
@@ -371,7 +369,7 @@ test.describe('UI Components - Parallel Tests', () => {
   });
 
   test('Modal/dialog components work', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'modals');
+    setupPageMonitoring(page, 'modals');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -486,7 +484,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('Bundle size check', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'bundle-size');
+    setupPageMonitoring(page, 'bundle-size');
 
     const resources: { url: string; size: number; type: string }[] = [];
 
@@ -527,7 +525,7 @@ test.describe('Performance Tests', () => {
 // ============================================================
 test.describe('Accessibility Tests', () => {
   test('Landing page accessibility', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'a11y-landing');
+    setupPageMonitoring(page, 'a11y-landing');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -558,7 +556,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('Color contrast check', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'contrast');
+    setupPageMonitoring(page, 'contrast');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -594,7 +592,7 @@ test.describe('Accessibility Tests', () => {
 // ============================================================
 test.describe('Error Handling', () => {
   test('404 page displays correctly', async ({ page }) => {
-    const report = setupPageMonitoring(page, '404');
+    setupPageMonitoring(page, '404');
 
     await page.goto(`${BASE_URL}/this-page-does-not-exist-12345`);
     await waitForAppLoad(page);
@@ -724,7 +722,7 @@ test.describe('State Management - Critical Tests', () => {
 // ============================================================
 test.describe('API & Network Tests', () => {
   test('No failed API requests on landing', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'api-landing');
+    setupPageMonitoring(page, 'api-landing');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -744,7 +742,7 @@ test.describe('API & Network Tests', () => {
   });
 
   test('Supabase connection works', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'supabase');
+    setupPageMonitoring(page, 'supabase');
 
     let supabaseRequests = 0;
     let supabaseErrors = 0;
@@ -778,7 +776,7 @@ test.describe('API & Network Tests', () => {
 // ============================================================
 test.describe('Security Tests', () => {
   test('No sensitive data in page source', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'security-source');
+    setupPageMonitoring(page, 'security-source');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -807,7 +805,7 @@ test.describe('Security Tests', () => {
   });
 
   test('CSP headers present', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'security-csp');
+    setupPageMonitoring(page, 'security-csp');
 
     const response = await page.goto(BASE_URL);
     const headers = response?.headers() || {};
@@ -830,7 +828,7 @@ test.describe('Security Tests', () => {
 // ============================================================
 test.describe('Lazy Loading Tests', () => {
   test('Code splitting works correctly', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'code-splitting');
+    setupPageMonitoring(page, 'code-splitting');
 
     const chunks: string[] = [];
 
@@ -859,7 +857,7 @@ test.describe('Lazy Loading Tests', () => {
   });
 
   test('Suspense fallbacks render correctly', async ({ page }) => {
-    const report = setupPageMonitoring(page, 'suspense');
+    setupPageMonitoring(page, 'suspense');
 
     await page.goto(BASE_URL);
 

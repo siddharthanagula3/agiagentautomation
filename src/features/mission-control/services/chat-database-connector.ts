@@ -1,5 +1,3 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@shared/types/supabase';
 import { supabase } from '@shared/lib/supabase-client';
 import type { ChatMessageRecord } from '@shared/types';
 
@@ -29,7 +27,6 @@ export async function createSession(
 ): Promise<ChatSessionRecord> {
   const uid = getUserIdOrThrow(userId);
   const { employeeId, role, provider } = params;
-  const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
     .from('web_conversations')
     .insert({ user_id: uid, employee_id: employeeId, role, provider })
@@ -43,7 +40,6 @@ export async function listSessions(
   userId: string | null | undefined
 ): Promise<ChatSessionRecord[]> {
   const uid = getUserIdOrThrow(userId);
-  const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
     .from('web_conversations')
     .select('*')
@@ -58,7 +54,6 @@ export async function listMessages(
   sessionId: string
 ): Promise<ChatMessageRecord[]> {
   getUserIdOrThrow(userId); // validate auth; RLS enforces access
-  const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
     .from('web_messages')
     .select('*')
@@ -75,7 +70,6 @@ export async function sendMessage(
   content: string
 ): Promise<ChatMessageRecord> {
   getUserIdOrThrow(userId); // validate auth; RLS enforces access
-  const supabaseClient: SupabaseClient<Database> = supabase;
   const { data, error } = await supabase
     .from('web_messages')
     .insert({ session_id: sessionId, role, content })

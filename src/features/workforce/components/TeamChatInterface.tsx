@@ -27,7 +27,6 @@ import {
 } from '@core/ai/orchestration/workforce-orchestrator';
 import {
   Task,
-  TaskStatus,
 } from '@core/ai/orchestration/reasoning/task-breakdown';
 import { Card } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';

@@ -48,12 +48,12 @@ export interface UseChatPersistenceReturn {
  */
 export function useChatPersistence(
   sessionId?: string,
-  userId?: string
+  _userId?: string
 ): UseChatPersistenceReturn {
   const messages = useMissionStore((state) => state.messages);
   const activeEmployees = useMissionStore((state) => state.activeEmployees);
   const mode = useMissionStore((state) => state.mode);
-  const activeChatSession = useMissionStore((state) => state.activeChatSession);
+  const _activeChatSession = useMissionStore((state) => state.activeChatSession);
 
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(
     null

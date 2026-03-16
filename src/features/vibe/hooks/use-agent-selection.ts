@@ -62,7 +62,7 @@ export interface UseAgentSelectionReturn {
  */
 export function useAgentSelection(): UseAgentSelectionReturn {
   const selectedAgentId = useVibeChatStore((state) => state.selectedAgent);
-  const messages = useVibeChatStore((state) => state.messages);
+  const _messages = useVibeChatStore((state) => state.messages);
   const setPrimaryAgent = useVibeAgentStore((state) => state.setPrimaryAgent);
 
   const [selectedAgent, setSelectedAgent] = useState<AIEmployee | null>(null);

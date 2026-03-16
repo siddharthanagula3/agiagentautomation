@@ -643,7 +643,10 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
    * Generate unique execution ID
    */
   private generateExecutionId(): string {
-    return `exec-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    const array = new Uint8Array(5);
+    crypto.getRandomValues(array);
+    const hex = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `exec-${Date.now()}-${hex}`;
   }
 
   /**

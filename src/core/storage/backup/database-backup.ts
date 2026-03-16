@@ -539,7 +539,10 @@ class BackupService {
    * Generate backup ID
    */
   private generateBackupId(): string {
-    return `backup_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const array = new Uint8Array(5);
+    crypto.getRandomValues(array);
+    const hex = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `backup_${Date.now()}_${hex}`;
   }
 
   /**

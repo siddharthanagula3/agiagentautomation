@@ -20,7 +20,6 @@ import {
 import {
   Menu,
   Share2,
-  Download,
   Settings,
   Edit3,
   Check,

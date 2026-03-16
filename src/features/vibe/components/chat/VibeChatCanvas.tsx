@@ -123,7 +123,7 @@ const VibeChatCanvas: React.FC = () => {
   const {
     messages,
     addMessage,
-    isLoading,
+    isLoading: _isLoading,
     currentSessionId,
     createNewSession,
     setLoading,

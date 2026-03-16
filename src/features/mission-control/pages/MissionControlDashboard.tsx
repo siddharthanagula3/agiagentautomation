@@ -35,7 +35,6 @@ import { AgentStatusPanel } from '../components/EmployeeStatusPanel';
 import { MissionLogEnhanced } from '../components/ActivityLog';
 import { useMultiAgentChat } from '@features/chat/hooks/use-multi-agent-chat';
 import { useAgentCollaboration } from '@features/chat/hooks/use-agent-collaboration';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import {
   Tooltip,
   TooltipContent,
@@ -47,7 +46,7 @@ import ErrorBoundary from '@shared/components/ErrorBoundary';
 const MissionControlPageRefactored: React.FC = () => {
   const { user } = useAuthStore();
   const { status, isOrchestrating, isPaused, error } = useMissionStatus();
-  const { pauseMission, resumeMission, reset, mode, setMode } =
+  const { pauseMission, resumeMission, reset, setMode } =
     useMissionStore();
 
   const [userInput, setUserInput] = useState('');

@@ -37,13 +37,10 @@ import { toast } from 'sonner';
 import {
   Folder,
   FolderOpen,
-  Plus,
   MoreVertical,
   Edit,
   Trash2,
   FolderPlus,
-  ChevronRight,
-  ChevronDown,
   Loader2,
 } from 'lucide-react';
 import {
@@ -73,13 +70,13 @@ const FOLDER_COLORS = [
 export function FolderManagement({
   selectedFolderId,
   onFolderSelect,
-  onMoveSession,
+  onMoveSession: _onMoveSession,
   className,
 }: FolderManagementProps) {
   const { user } = useAuthStore();
   const [folders, setFolders] = useState<ChatFolder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+  const [_expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
   );
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -208,7 +205,7 @@ export function FolderManagement({
     }
   };
 
-  const toggleFolderExpand = (folderId: string) => {
+  const _toggleFolderExpand = (folderId: string) => {
     setExpandedFolders((prev) => {
       const next = new Set(prev);
       if (next.has(folderId)) {

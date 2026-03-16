@@ -249,7 +249,7 @@ export class ChatExportService {
   /**
    * Generate shareable link for a chat session
    */
-  async generateShareLink(sessionId: string): Promise<string> {
+  async generateShareLink(_sessionId: string): Promise<string> {
     // Generate share token and store in database
     const shareToken = this.generateShareToken();
     const shareLink = `${window.location.origin}/share/${shareToken}`;

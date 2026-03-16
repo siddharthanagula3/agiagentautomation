@@ -141,8 +141,10 @@ export function isFeatureEnabled(
   // Percentage-based rollout
   if (config.percentage < 100) {
     if (!userId) {
-      // No user ID, use random chance
-      return Math.random() * 100 < config.percentage;
+      // No user ID, use cryptographic random chance
+      const randomByte = new Uint8Array(1);
+      crypto.getRandomValues(randomByte);
+      return (randomByte[0] / 255) * 100 < config.percentage;
     }
 
     // Deterministic based on user ID (consistent for same user)

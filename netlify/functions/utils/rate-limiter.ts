@@ -7,7 +7,7 @@
 
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { HandlerEvent, HandlerResponse } from '@netlify/functions';
+import type { HandlerEvent, HandlerResponse } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
@@ -89,13 +89,8 @@ function initializeRateLimiter(tier: RateLimitTier = 'authenticated'): Ratelimit
   return limiter;
 }
 
-// Backwards compatibility: default rate limiter
-function initializeDefaultRateLimiter(): Ratelimit | null {
-  return initializeRateLimiter('authenticated');
-}
-
 // Keep old function name for backwards compatibility
-const ratelimit = null; // Deprecated, use initializeRateLimiter(tier) instead
+// initializeDefaultRateLimiter() and ratelimit are deprecated - use initializeRateLimiter(tier) instead
 
 /**
  * Extract user identifier from request

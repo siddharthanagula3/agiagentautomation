@@ -12,10 +12,8 @@ import React, { useState, useRef, KeyboardEvent, useCallback } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@shared/ui/textarea';
 import {
-  Send,
   Paperclip,
   Loader2,
-  Sparkles,
   Palette,
   Plus,
   Wand2,

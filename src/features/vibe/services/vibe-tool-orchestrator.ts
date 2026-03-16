@@ -501,7 +501,7 @@ export class VibeToolOrchestrator {
     parameters: Record<string, unknown>
   ): Promise<unknown> {
     const command = parameters.command as string;
-    const timeout = (parameters.timeout as number) || 30000;
+    const _timeout = (parameters.timeout as number) || 30000;
 
     // Parse common commands and simulate output
     const parts = command.trim().split(/\s+/);
@@ -558,7 +558,7 @@ export class VibeToolOrchestrator {
    */
   private simulateLs(args: string[]): { output: string; exitCode: number } {
     const path = args[0] || '.';
-    const showAll = args.includes('-a') || args.includes('-la');
+    const _showAll = args.includes('-a') || args.includes('-la');
     const longFormat = args.includes('-l') || args.includes('-la');
 
     const files = Array.from(virtualFileSystem.values())
@@ -957,7 +957,7 @@ export class VibeToolOrchestrator {
    * @param sessionId - Optional session ID to filter by
    * @returns Array of tool results
    */
-  getExecutionHistory(sessionId?: string): ToolResult[] {
+  getExecutionHistory(_sessionId?: string): ToolResult[] {
     return Array.from(this.executionHistory.values());
   }
 

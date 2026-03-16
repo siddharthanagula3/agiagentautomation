@@ -396,7 +396,7 @@ function MessageBubbleComponent({
   isLastInCluster,
   onReaction,
 }: MessageBubbleComponentProps) {
-  const [showReactions, setShowReactions] = useState(false);
+  const [_showReactions, setShowReactions] = useState(false);
 
   const handleReaction = (emoji: string) => {
     onReaction?.(message.id, emoji);

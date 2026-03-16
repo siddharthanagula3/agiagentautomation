@@ -567,7 +567,7 @@ import { useCallback } from 'react';
 export function useDeployment() {
   const {
     deployments,
-    activeDeploymentId,
+    activeDeploymentId: _activeDeploymentId,
     previewSession,
     commandHistory,
     screenshots,

@@ -6,7 +6,7 @@
  * Created: January 2026
  */
 
-import { Handler, HandlerContext } from '@netlify/functions';
+import type { Handler } from '@netlify/functions';
 import { z } from 'zod';
 import { withAuth, AuthenticatedEvent } from '../utils/auth-middleware';
 import { checkRateLimitWithTier } from '../utils/rate-limiter';
@@ -602,8 +602,7 @@ async function sendEmail(
 // =============================================================================
 
 const sendEmailHandler = async (
-  event: AuthenticatedEvent,
-  context: HandlerContext
+  event: AuthenticatedEvent
 ) => {
   const origin = event.headers['origin'] || event.headers['Origin'];
   const headers = getSafeCorsHeaders(origin);

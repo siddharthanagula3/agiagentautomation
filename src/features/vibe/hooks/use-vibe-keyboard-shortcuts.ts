@@ -52,7 +52,7 @@ export function useVibeKeyboardShortcuts(
 
       // Don't trigger shortcuts when typing in input fields (except for specific keys)
       const target = event.target as HTMLElement;
-      const isInputField =
+      const _isInputField =
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
         target.isContentEditable;

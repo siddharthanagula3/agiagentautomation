@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@shared/ui/card';
 import { authService } from '@core/auth/authentication-manager';
-import { Bot, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Bot, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Particles } from '@shared/ui/particles';
 import { Spotlight } from '@shared/ui/spotlight';
@@ -61,7 +61,7 @@ const ResetPasswordPage: React.FC = () => {
           });
         }, 1500);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);

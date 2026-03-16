@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   VibeAgentActionService,
   type VibeAgentAction,
-  type AgentActionType,
 } from '../services/vibe-agent-action-service';
 
 export interface UseVibeAgentActionsOptions {

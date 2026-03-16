@@ -54,7 +54,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const componentName = this.props.componentName || 'Unknown';
-    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const errorId = `error_${Date.now()}_${crypto.randomUUID().slice(0, 9)}`;
 
     // Capture error with Sentry
     const eventId = Sentry.captureException(error, {

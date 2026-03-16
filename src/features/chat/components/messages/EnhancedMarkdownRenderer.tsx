@@ -167,10 +167,26 @@ const LinkComponent = ({
   href?: string;
   children: React.ReactNode;
 }) => {
-  const isExternal = href?.startsWith('http');
+  // Validate URL protocol to prevent javascript: and other dangerous schemes
+  // (CodeQL: js/incomplete-url-substring-sanitization)
+  let isExternal = false;
+  let safeHref = href;
+  if (href) {
+    try {
+      const parsed = new URL(href, window.location.origin);
+      const isSafeProtocol = parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:';
+      if (!isSafeProtocol) {
+        safeHref = undefined; // Strip dangerous protocols
+      } else {
+        isExternal = parsed.origin !== window.location.origin;
+      }
+    } catch {
+      // Relative URLs are fine, keep as-is
+    }
+  }
   return (
     <a
-      href={href}
+      href={safeHref}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
       className="text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
@@ -306,7 +322,7 @@ export const EnhancedMarkdownRenderer = memo(function EnhancedMarkdownRenderer({
   content,
   className,
   enableMath = true,
-  enableCodeCopy = true,
+  enableCodeCopy: _enableCodeCopy = true,
 }: EnhancedMarkdownRendererProps) {
   // Use pre-computed plugin arrays based on configuration
   const remarkPlugins = enableMath

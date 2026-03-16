@@ -63,7 +63,7 @@ interface StreamRecoveryState {
 }
 
 // Backpressure configuration
-const BACKPRESSURE_THRESHOLD = 100; // Max buffered chunks
+const _BACKPRESSURE_THRESHOLD = 100; // Max buffered chunks
 const BACKPRESSURE_HIGH_WATER = 80; // Start applying backpressure
 const BACKPRESSURE_LOW_WATER = 20; // Resume normal flow
 
@@ -486,7 +486,7 @@ export class ChatStreamingService {
       options: StreamingOptions;
     }>
   ): AsyncGenerator<MultiAgentStreamingUpdate> {
-    const sessionId =
+    const _sessionId =
       agentStreams[0]?.options.sessionId || `multiplex-${Date.now()}`;
     const generators: Array<{
       agentId: string;

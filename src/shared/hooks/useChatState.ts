@@ -127,7 +127,7 @@ export const useChatState = () => {
                   ...tab.messages,
                   {
                     ...message,
-                    id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    id: crypto.randomUUID(),
                     timestamp: new Date(),
                   },
                 ],

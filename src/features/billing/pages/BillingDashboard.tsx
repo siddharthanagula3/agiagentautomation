@@ -27,11 +27,8 @@ import {
   useInvalidateBillingQueries,
 } from '@features/billing/hooks/use-billing-queries';
 import {
-  CreditCard,
   DollarSign,
-  Calendar,
   Download,
-  Plus,
   CheckCircle,
   AlertTriangle,
   Loader2,
@@ -40,7 +37,6 @@ import {
   Building,
   Star,
   ArrowRight,
-  Clock,
   FileText,
   Brain,
   Code,
@@ -315,12 +311,12 @@ const BillingPage: React.FC = () => {
     try {
       await refetchBilling();
       toast.success('Billing information refreshed');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to refresh billing information. Please try again.');
     }
   };
 
-  const handleDownloadInvoice = (invoiceId: string) => {
+  const handleDownloadInvoice = (_invoiceId: string) => {
     // In a production environment, this would:
     // 1. Call the backend to get a signed download URL
     // 2. Trigger the download
@@ -692,7 +688,7 @@ const BillingPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {billing?.usage.llmUsage.map((llm, index) => {
+              {billing?.usage.llmUsage.map((llm) => {
                 const percentage = (llm.tokens / llm.limit) * 100;
                 const isNearLimit = percentage >= 80;
                 const isAtLimit = percentage >= 100;

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
-import { Brain, Sparkles, Loader2 } from 'lucide-react';
+import { Brain, Sparkles } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { employeeChatService } from '../../services/employee-chat-service';
 

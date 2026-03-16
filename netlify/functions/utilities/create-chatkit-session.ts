@@ -3,7 +3,7 @@
  * Creates a ChatKit session for AI Employee conversations
  */
 
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import type { Handler, HandlerEvent } from '@netlify/functions';
 import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimit } from '../utils/rate-limiter';
@@ -17,8 +17,7 @@ interface CreateSessionRequest {
 
 // Updated: Nov 16th 2025 - Fixed missing auth on ChatKit session creation by adding withAuth wrapper
 const chatkitHandler: Handler = async (
-  event: HandlerEvent,
-  context: HandlerContext
+  event: HandlerEvent
 ) => {
   // Get secure CORS headers
   const origin = event.headers.origin;

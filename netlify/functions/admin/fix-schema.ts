@@ -1,4 +1,4 @@
-import { Handler, HandlerContext, HandlerEvent } from '@netlify/functions';
+import type { Handler, HandlerEvent } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import { withAuth } from '../utils/auth-middleware';
 
@@ -9,8 +9,7 @@ const supabase = createClient(
 
 // Updated: Nov 16th 2025 - Fixed unauthenticated schema modification endpoint
 const authenticatedHandler: Handler = async (
-  event: HandlerEvent & { user: { id: string; email?: string } },
-  context: HandlerContext
+  event: HandlerEvent & { user: { id: string; email?: string } }
 ) => {
   // Disable in production for security
   if (process.env.NODE_ENV === 'production' || process.env.NETLIFY_ENV === 'production') {

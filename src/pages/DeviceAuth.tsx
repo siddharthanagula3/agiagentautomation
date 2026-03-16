@@ -69,7 +69,7 @@ const DeviceAuthPage: React.FC = () => {
       }
 
       setStatus('success');
-    } catch (err) {
+    } catch {
       setStatus('error');
       setErrorMessage('An unexpected error occurred. Please try again.');
     }

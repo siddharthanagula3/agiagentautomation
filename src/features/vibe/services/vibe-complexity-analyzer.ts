@@ -163,7 +163,7 @@ export class VibeComplexityAnalyzer {
   private async llmComplexityAnalysis(
     userMessage: string,
     conversationHistory: VibeMessage[],
-    availableEmployees: AIEmployee[]
+    _availableEmployees: AIEmployee[]
   ): Promise<ComplexityAnalysis> {
     const recentContext = conversationHistory
       .slice(-5)

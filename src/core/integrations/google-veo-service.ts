@@ -163,7 +163,9 @@ export class GoogleVeoService {
     }
 
     const model = request.model || 'veo-3.1-generate-preview';
-    const generationId = `vid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const _arr = new Uint8Array(5);
+    crypto.getRandomValues(_arr);
+    const generationId = `vid-${Date.now()}-${Array.from(_arr, (b) => b.toString(16).padStart(2, '0')).join('')}`;
 
     // Create initial response
     const response: VeoGenerationResponse = {

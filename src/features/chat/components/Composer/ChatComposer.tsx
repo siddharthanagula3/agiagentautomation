@@ -15,21 +15,12 @@ import { Badge } from '@shared/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@shared/ui/command';
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@shared/ui/tooltip';
 import {
-  Send,
   Paperclip,
   X,
   Loader2,
@@ -38,7 +29,6 @@ import {
   Video,
   FileText,
   Search,
-  Sparkles,
   ArrowUp,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';

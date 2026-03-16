@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import type { ArtifactData } from '../components/ArtifactPreview';
 
 /**
@@ -112,7 +113,7 @@ export function extractArtifactTitle(content: string): string | undefined {
   // Try first heading
   const headingMatch = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
   if (headingMatch) {
-    return headingMatch[1].replace(/<[^>]*>/g, '').trim();
+    return DOMPurify.sanitize(headingMatch[1], { ALLOWED_TAGS: [] }).trim();
   }
 
   return undefined;

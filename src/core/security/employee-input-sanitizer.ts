@@ -22,6 +22,7 @@
  * - Multi-language bypass attempts
  */
 
+import DOMPurify from 'dompurify';
 import { supabase } from '@shared/lib/supabase-client';
 import { logger } from '@shared/lib/logger';
 import {
@@ -587,8 +588,8 @@ function removeDelimiterInjections(input: string): string {
 function stripFormattingFromInput(input: string): string {
   let cleaned = input;
 
-  // Remove HTML tags
-  cleaned = cleaned.replace(/<[^>]*>/g, '');
+  // Remove HTML tags using DOMPurify (CodeQL: js/bad-tag-filter)
+  cleaned = DOMPurify.sanitize(cleaned, { ALLOWED_TAGS: [] });
 
   // Remove markdown code blocks
   cleaned = cleaned.replace(/```[\s\S]*?```/g, '');

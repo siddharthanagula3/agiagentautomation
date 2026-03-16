@@ -26,10 +26,7 @@ import {
   RefreshCw,
   ExternalLink,
   Loader2,
-  AlertCircle,
   Terminal,
-  ChevronDown,
-  ChevronUp,
   X,
   Hammer,
   Sparkles,
@@ -40,7 +37,7 @@ import { useVibeViewStore } from '../../stores/vibe-view-store';
 import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { toast } from 'sonner';
 import { SandpackPreviewPanel } from './SandpackPreviewPanel';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 // Build service API endpoint
@@ -286,6 +283,10 @@ function LivePreviewPanelContent({
     if (previewMode === 'sandpack') return; // Skip in sandpack mode
 
     const handleMessage = (event: MessageEvent) => {
+      // Security: validate message origin to prevent cross-origin attacks
+      // Allow same-origin and null origin (sandboxed iframes use null origin)
+      if (event.origin !== window.location.origin && event.origin !== 'null' && event.origin !== '') return;
+
       if (event.data?.type === 'console') {
         addConsoleMessage({
           type: event.data.level || 'log',

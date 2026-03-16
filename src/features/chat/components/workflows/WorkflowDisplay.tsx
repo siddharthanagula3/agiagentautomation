@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { Progress } from '@shared/ui/progress';
-import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
+import { Avatar, AvatarFallback } from '@shared/ui/avatar';
 import {
   CheckCircle2,
   Circle,
@@ -65,7 +65,7 @@ const StepStatusIcons = {
 
 export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
   workflow,
-  onStepClick,
+  onStepClick: _onStepClick,
   onArtifactClick,
   className,
 }) => {

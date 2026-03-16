@@ -11,6 +11,7 @@
  */
 
 import { z } from 'zod';
+import { generateSecureId } from '@shared/utils/secure-id';
 
 // ============================================================================
 // TOOL CATEGORIES AND PERMISSIONS
@@ -513,7 +514,7 @@ export function createToolCall(
   args: Record<string, unknown>
 ): ToolCall {
   return {
-    id: `call-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    id: `call-${Date.now()}-${generateSecureId(9)}`,
     name,
     canonicalName: resolveToolName(name),
     arguments: args,

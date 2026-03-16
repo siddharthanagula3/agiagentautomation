@@ -34,8 +34,6 @@ import ErrorBoundary from '@shared/components/ErrorBoundary';
 import {
   EmployeeCard,
   EmployeeGridSkeleton,
-  MarketplaceHeaderSkeleton,
-  MarketplaceFiltersSkeleton,
   type AIEmployee,
 } from '@features/marketplace/components';
 

@@ -130,7 +130,7 @@ export class VibeFileManager {
     file: File,
     userId: string,
     sessionId: string,
-    onProgress?: UploadProgressCallback
+    _onProgress?: UploadProgressCallback
   ): Promise<VibeFile> {
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
@@ -154,7 +154,7 @@ export class VibeFileManager {
 
     try {
       // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: _uploadData, error: uploadError } = await supabase.storage
         .from(this.STORAGE_BUCKET)
         .upload(filePath, file, {
           cacheControl: '3600',

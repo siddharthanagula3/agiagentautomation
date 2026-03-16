@@ -417,7 +417,10 @@ export class AgentCommunicator {
    * Generate unique message ID
    */
   private generateMessageId(): string {
-    return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const array = new Uint8Array(5);
+    crypto.getRandomValues(array);
+    const hex = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `msg-${Date.now()}-${hex}`;
   }
 
   /**

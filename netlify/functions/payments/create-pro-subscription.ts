@@ -1,4 +1,4 @@
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import type { Handler, HandlerEvent } from '@netlify/functions';
 import Stripe from 'stripe';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimitTier } from '../utils/rate-limiter';
@@ -6,9 +6,6 @@ import {
   createSubscriptionSchema,
   formatValidationError,
 } from '../utils/validation-schemas';
-import {
-  sanitizeBillingError,
-} from '../utils/billing-error-sanitizer';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
@@ -28,7 +25,7 @@ const PLAN_PRICES = {
 
 // Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
 // Updated: Jan 10th 2026 - Added rate limiting and Zod validation
-const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; email?: string } }, context: HandlerContext) => {
+const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; email?: string } }) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {

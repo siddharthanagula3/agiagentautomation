@@ -359,7 +359,28 @@ export const apiFetch = async <T = unknown>(
   options: RequestInit = {}
 ): Promise<APIResponse<T>> => {
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+  // Validate absolute URLs have http/https protocol (CodeQL: js/incomplete-url-substring-sanitization)
+  let fullUrl: string;
+  if (url.startsWith('/') || !url.includes('://')) {
+    fullUrl = `${baseUrl}${url}`;
+  } else {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        throw new APIException({
+          message: `Invalid URL protocol: ${parsed.protocol}`,
+          code: 'INVALID_URL',
+        });
+      }
+      fullUrl = parsed.href;
+    } catch (e) {
+      if (e instanceof APIException) throw e;
+      throw new APIException({
+        message: `Invalid URL: ${url}`,
+        code: 'INVALID_URL',
+      });
+    }
+  }
 
   // Get auth token from localStorage (in real app, this would come from auth store)
   const token = localStorage.getItem('auth_token');

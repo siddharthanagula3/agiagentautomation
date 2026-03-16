@@ -382,7 +382,7 @@ export function useAutocomplete(
    * Check if match is an agent
    */
   const isAgentMatch = useCallback(
-    (match: AutocompleteMatch): boolean => {
+    (_match: AutocompleteMatch): boolean => {
       return state.type === 'agent';
     },
     [state.type]
@@ -392,7 +392,7 @@ export function useAutocomplete(
    * Check if match is a file
    */
   const isFileMatch = useCallback(
-    (match: AutocompleteMatch): boolean => {
+    (_match: AutocompleteMatch): boolean => {
       return state.type === 'file';
     },
     [state.type]

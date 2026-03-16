@@ -5,7 +5,6 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import type { ChatSession, ChatMessage } from '../types';
 
 export interface SearchResult {
   type: 'session' | 'message';

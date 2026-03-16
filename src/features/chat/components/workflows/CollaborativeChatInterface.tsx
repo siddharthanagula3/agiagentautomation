@@ -19,13 +19,10 @@ import {
   SelectValue,
 } from '@shared/ui/select';
 import {
-  Bot,
   Send,
-  Users,
   Plus,
   Minimize2,
   Maximize2,
-  Settings,
   Loader2,
   Sparkles,
 } from 'lucide-react';
@@ -36,7 +33,6 @@ import {
   createCollaborationContext,
   AgentMessage,
   AgentCapability,
-  parseAgentMentions,
 } from '@core/ai/orchestration/agent-collaboration-protocol';
 import { CollaborativeMessageDisplay } from './CollaborativeMessageDisplay';
 import { useAuthStore } from '@shared/stores/authentication-store';

@@ -17,7 +17,6 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import type {
   ChatMessage,
   MultiAgentConversation,
-  SyncConflict,
 } from '@shared/stores/multi-agent-chat-store';
 
 // ============================================================================
@@ -294,7 +293,7 @@ export class EnhancedChatSynchronizationService {
    */
   private handleRemoteUpdate(
     remoteData: DatabaseChatMessage,
-    oldData: DatabaseChatMessage
+    _oldData: DatabaseChatMessage
   ): void {
     const store = useMultiAgentChatStore.getState();
     const conversation = store.conversations[remoteData.conversation_id];
@@ -419,7 +418,7 @@ export class EnhancedChatSynchronizationService {
     store.setSyncing(true);
 
     try {
-      const { data, error } = await supabase
+      const { data: _data, error } = await supabase
         .from('web_messages')
         .insert(this.transformLocalMessage(message))
         .select()

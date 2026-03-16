@@ -64,7 +64,7 @@ export function UsageWarningBanner({
   const isCritical = percentage >= 90;
   const isWarning = percentage >= 80 && percentage < 90;
 
-  const severity = isOverLimit ? 'error' : isCritical ? 'critical' : 'warning';
+  const _severity = isOverLimit ? 'error' : isCritical ? 'critical' : 'warning';
 
   const getMessage = () => {
     if (isOverLimit) {

@@ -5,7 +5,6 @@
 // work correctly and handle errors properly
 // ================================================================
 
-const { createClient } = require('@supabase/supabase-js');
 const fetch = require('node-fetch');
 
 // Configuration
@@ -13,9 +12,6 @@ const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
 const SUPABASE_ANON_KEY =
   process.env.VITE_SUPABASE_ANON_KEY || 'your_anon_key_here';
 const FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
-
-// Initialize Supabase client
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Test results tracking
 const testResults = {
@@ -66,7 +62,7 @@ async function testAiChatFunction() {
 
   try {
     // Test without authentication (should fail)
-    const { status, data } = await callEdgeFunction('ai-chat', {
+    const { status } = await callEdgeFunction('ai-chat', {
       messages: [{ role: 'user', content: 'Hello' }],
       provider: 'gemini',
     });
@@ -114,7 +110,7 @@ async function testBlogPostsFunction() {
     }
 
     // Test with filters
-    const { status: filterStatus, data: filterData } = await callEdgeFunction(
+    const { status: filterStatus } = await callEdgeFunction(
       'blog-posts',
       {
         limit: 5,
@@ -165,7 +161,7 @@ async function testContactFormFunction() {
     }
 
     // Test invalid form submission (missing required fields)
-    const { status: invalidStatus, data: invalidData } = await callEdgeFunction(
+    const { status: invalidStatus } = await callEdgeFunction(
       'contact-form',
       {
         firstName: 'John',
@@ -209,7 +205,7 @@ async function testNewsletterSubscribeFunction() {
     }
 
     // Test invalid email
-    const { status: invalidStatus, data: invalidData } = await callEdgeFunction(
+    const { status: invalidStatus } = await callEdgeFunction(
       'newsletter-subscribe',
       {
         email: 'invalid-email',
@@ -261,7 +257,7 @@ async function testWorkforceExecuteFunction() {
 
   try {
     // Test without authentication (should fail)
-    const { status, data } = await callEdgeFunction('workforce-execute', {
+    const { status } = await callEdgeFunction('workforce-execute', {
       task: 'Test task',
       agents: ['agent1', 'agent2'],
       tools: ['tool1'],
@@ -360,7 +356,7 @@ async function testErrorHandling() {
 async function runAllTests() {
   console.log('🧪 Starting Supabase Edge Functions Test Suite...');
   console.log(`📍 Testing against: ${FUNCTIONS_URL}`);
-  console.log('=' * 60);
+  console.log('='.repeat(60));
 
   // Check if Supabase is running
   try {
@@ -390,7 +386,7 @@ async function runAllTests() {
   await testWorkforceExecuteFunction();
 
   // Print summary
-  console.log('\n' + '=' * 60);
+  console.log('\n' + '='.repeat(60));
   console.log('📊 Test Summary:');
   console.log(`✅ Passed: ${testResults.passed}`);
   console.log(`❌ Failed: ${testResults.failed}`);

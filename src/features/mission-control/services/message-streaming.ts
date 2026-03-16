@@ -23,7 +23,6 @@ import {
 } from '@core/billing/token-enforcement-service';
 import {
   checkUserInput,
-  logInjectionAttempt,
 } from '@core/security/prompt-injection-detector';
 
 export interface StreamChunk {
@@ -141,7 +140,7 @@ async function getAuthenticatedUser(): Promise<{
  * Legacy helper for backward compatibility
  * @deprecated Use getAuthenticatedUser() instead
  */
-async function getAuthToken(): Promise<string | null> {
+async function _getAuthToken(): Promise<string | null> {
   const auth = await getAuthenticatedUser();
   return auth?.token || null;
 }

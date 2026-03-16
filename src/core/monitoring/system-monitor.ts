@@ -372,7 +372,10 @@ class MonitoringService {
    * Generate unique session ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const array = new Uint8Array(5);
+    crypto.getRandomValues(array);
+    const hex = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `session_${Date.now()}_${hex}`;
   }
 
   /**

@@ -9,7 +9,6 @@ import type { AIEmployee } from '@core/types/ai-employee';
 import type { VibeMessage } from '../types/vibe-message';
 import type {
   AgentMatch,
-  RoutingMode,
   RoutingResult,
   SupervisorPlan,
   TaskAssignment,
@@ -498,7 +497,7 @@ Respond in JSON format:
   detectContextSwitch(
     newMessage: string,
     currentAgent: AIEmployee,
-    conversationHistory: VibeMessage[]
+    _conversationHistory: VibeMessage[]
   ): boolean {
     // Extract main topic from new message
     const newTopic = this.extractTopic(newMessage);

@@ -5,7 +5,6 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ToolsExecutionService } from './tool-execution-handler';
-import type { Tool, ToolCall } from '../types';
 
 // Mock dependencies
 vi.mock('@core/integrations/web-search-handler', () => ({

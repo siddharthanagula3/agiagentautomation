@@ -57,7 +57,7 @@ export function useAgentCollaboration(
     sessionId,
     userId,
     maxConcurrentAgents = 5,
-    requireApproval = false,
+    requireApproval: _requireApproval = false,
   } = options;
 
   // Store state

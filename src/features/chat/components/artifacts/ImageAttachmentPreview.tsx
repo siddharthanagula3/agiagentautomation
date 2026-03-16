@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@shared/ui/dialog';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
-import { X, Download, ZoomIn, ExternalLink } from 'lucide-react';
+import { Download, ZoomIn, ExternalLink } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 
 interface ImageAttachment {

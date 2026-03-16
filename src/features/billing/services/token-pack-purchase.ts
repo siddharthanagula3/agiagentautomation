@@ -294,10 +294,8 @@ export async function getUserTokenBalance(userId: string): Promise<number> {
  * Check if Stripe is configured
  */
 export function isStripeConfigured(): boolean {
-  // Check if we're in development or production
-  const isDev = window.location.hostname === 'localhost';
-
   // In production, Stripe should always be configured
   // In development, it's optional
-  return true; // Always return true - backend will handle errors
+  // Backend will handle errors if Stripe is not configured
+  return true;
 }

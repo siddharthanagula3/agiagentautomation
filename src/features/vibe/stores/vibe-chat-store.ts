@@ -159,7 +159,7 @@ export interface SessionMetadata {
 
 export const useVibeChatStore = create<VibeChatState>()(
   devtools(
-    immer((set, get) => ({
+    immer((set, _get) => ({
       // Initial state
       currentSessionId: null,
       sessions: {},

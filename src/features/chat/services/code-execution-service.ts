@@ -286,7 +286,7 @@ class WebContainerManager {
   /**
    * Wrap code to capture console output
    */
-  private wrapCodeForCapture(code: string, language: string): string {
+  private wrapCodeForCapture(code: string, _language: string): string {
     // For simple code, add console capture wrapper
     const isExpression =
       !code.includes('console.') &&

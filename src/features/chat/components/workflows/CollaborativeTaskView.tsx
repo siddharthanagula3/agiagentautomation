@@ -12,7 +12,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { cn } from '@shared/lib/utils';
-import { Button } from '@shared/components/ui/button';
 import { Badge } from '@shared/components/ui/badge';
 import { Progress } from '@shared/components/ui/progress';
 import { ScrollArea } from '@shared/components/ui/scroll-area';
@@ -33,7 +32,6 @@ import {
   Calendar,
   Target,
   Zap,
-  TrendingUp,
   List,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -54,7 +52,7 @@ interface CollaborativeTaskViewProps {
 export function CollaborativeTaskView({
   tasks,
   agents,
-  viewMode = 'list',
+  viewMode: _viewMode = 'list',
   className,
 }: CollaborativeTaskViewProps) {
   const [selectedTask, setSelectedTask] = useState<string | null>(null);

@@ -5,7 +5,7 @@
  * Updated: Jan 10th 2026 - Added CORS validation, rate limiting, and Zod validation
  */
 
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import type { Handler, HandlerEvent } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { withAuth } from '../utils/auth-middleware';
@@ -51,8 +51,7 @@ interface SessionResponse {
 
 // Updated: Jan 10th 2026 - Refactored to use withAuth middleware
 const authenticatedHandler = async (
-  event: HandlerEvent & { user: { id: string; email?: string } },
-  context: HandlerContext
+  event: HandlerEvent & { user: { id: string; email?: string } }
 ) => {
   // Updated: Jan 29th 2026 - Fixed null CORS headers using getSafeCorsHeaders
   const origin = event.headers.origin || event.headers.Origin || '';

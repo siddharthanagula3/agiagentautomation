@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useAgentMetricsStore } from '@shared/stores/agent-metrics-store';
@@ -24,7 +24,6 @@ import {
   Activity,
   TrendingUp,
   ArrowRight,
-  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { motion, animate } from 'framer-motion';
@@ -304,20 +303,18 @@ const WorkforcePanel: React.FC<{
 export const DashboardHomePage: React.FC = () => {
   const navigate = useNavigate();
   const userUsage = useUserUsage();
-  const aiPreferences = useAIPreferences();
+  useAIPreferences();
 
   // Chat state - reuse exact same hooks as ChatPage
   const {
     messages: rawMessages,
     isLoading,
-    error,
     activeTools,
     toolProgress,
     sendMessage,
     regenerateMessage,
     editMessage,
     deleteMessage,
-    clearMessages,
   } = useChat(undefined); // No sessionId - uses current/new session
 
   const messages = useMemo(() => {
@@ -348,7 +345,6 @@ export const DashboardHomePage: React.FC = () => {
     renameSession,
     deleteSession,
     loadSessions,
-    loadSession,
     toggleStarSession,
     togglePinSession,
     toggleArchiveSession,
@@ -357,14 +353,8 @@ export const DashboardHomePage: React.FC = () => {
   } = useChatHistory();
 
   const { availableTools, executeTool, activeTool, toolResults } = useTools();
-  const {
-    exportAsMarkdown,
-    exportAsJSON,
-    exportAsHTML,
-    exportAsText,
-    copyToClipboard,
-    isExporting,
-  } = useExport();
+  // Export hooks are available but invoked via dialog
+  useExport();
 
   // Local state
   const [chatSidebarOpen, setChatSidebarOpen] = useState(() => {
@@ -509,7 +499,7 @@ export const DashboardHomePage: React.FC = () => {
       try {
         await navigator.clipboard.writeText(lastMessage.content);
         showSuccess('Message copied to clipboard', 'Copied');
-      } catch (err) {
+      } catch {
         showError('Unable to copy message.', 'Copy Failed');
       }
     }

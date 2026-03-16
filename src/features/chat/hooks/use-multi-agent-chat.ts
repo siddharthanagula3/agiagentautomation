@@ -59,8 +59,8 @@ export function useMultiAgentChat(
     mode: initialMode = 'chat',
     sessionId,
     userId,
-    selectedAgents = [],
-    autoSelectAgent = true,
+    selectedAgents: _selectedAgents = [],
+    autoSelectAgent: _autoSelectAgent = true,
   } = options;
 
   // Mission store state
@@ -79,7 +79,7 @@ export function useMultiAgentChat(
   const removeCollaborativeAgent = useMissionStore(
     (state) => state.removeCollaborativeAgent
   );
-  const startMission = useMissionStore((state) => state.startMission);
+  const _startMission = useMissionStore((state) => state.startMission);
   const reset = useMissionStore((state) => state.reset);
 
   // Local state

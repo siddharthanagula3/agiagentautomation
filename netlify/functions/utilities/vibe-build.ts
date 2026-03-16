@@ -1,4 +1,4 @@
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { transform } from 'esbuild';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimit } from '../utils/rate-limiter';

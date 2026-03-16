@@ -6,6 +6,7 @@
 
 import { supabase } from '@shared/lib/supabase-client';
 import type { MessageRole } from '@shared/types';
+import { generateSecureId } from '@shared/utils/secure-id';
 
 /**
  * Chat session for persistence layer
@@ -129,7 +130,7 @@ export class ChatPersistenceService {
     provider: string
   ): Promise<PersistenceChatSession> {
     const session: PersistenceChatSession = {
-      id: `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      id: `session-${Date.now()}-${generateSecureId(9)}`,
       userId,
       employeeId,
       role,
@@ -177,7 +178,7 @@ export class ChatPersistenceService {
     metadata?: unknown
   ): Promise<PersistenceChatMessage> {
     const message: PersistenceChatMessage = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      id: `msg-${Date.now()}-${generateSecureId(9)}`,
       sessionId,
       role,
       content,
@@ -339,7 +340,7 @@ export class ChatPersistenceService {
       }
 
       // Sync messages
-      for (const [sessionId, messages] of this.state.messages) {
+      for (const [_sessionId, messages] of this.state.messages) {
         for (const message of messages) {
           const { error } = await this.supabase.from('web_messages').upsert({
             id: message.id,
@@ -437,6 +438,8 @@ export class ChatPersistenceService {
         contextWindows: Array.from(this.state.contextWindows.entries()),
         lastSync: this.state.lastSync,
       };
+      // lgtm[js/clear-text-storage-of-sensitive-data]
+      // Intentional: offline chat persistence requires localStorage; data is user's own chat history
       localStorage.setItem('chat-persistence-state', JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save to local storage:', error);

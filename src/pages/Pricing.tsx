@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, X, ArrowRight, Zap, Loader2 } from 'lucide-react';
+import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { Particles } from '@shared/ui/particles';
 import { CountdownTimer } from '@shared/ui/countdown-timer';

@@ -15,14 +15,12 @@ import {
   FolderOpen,
   ChevronRight,
   ChevronDown,
-  Plus,
   Trash2,
   Edit,
   Download,
   Copy,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import { Button } from '@shared/ui/button';
 import {
   ContextMenu,
   ContextMenuContent,

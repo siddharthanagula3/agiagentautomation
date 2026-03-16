@@ -10,6 +10,7 @@ import type {
   AgentStatus,
   AgentCommunication,
 } from '@core/ai/orchestration/agent-collaboration-manager';
+import { generateSecureId } from '@shared/utils/secure-id';
 
 export interface ChatSession {
   id: string;
@@ -146,7 +147,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
           isBackgroundServiceRunning: false,
 
           startSession: (sessionData) => {
-            const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const sessionId = `session-${Date.now()}-${generateSecureId(9)}`;
             const now = new Date();
 
             const newSession: ChatSession = {
@@ -272,7 +273,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
           addActivity: (activity) => {
             const newActivity = {
               ...activity,
-              id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              id: `activity-${Date.now()}-${generateSecureId(9)}`,
               timestamp: new Date(),
             };
 

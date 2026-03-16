@@ -26,8 +26,8 @@ import type {
   AddParticipantRequest,
   ConversationListFilters,
   ConversationStats,
-  MultiAgentChatError,
 } from '@shared/types/multi-agent-chat';
+import { MultiAgentChatError } from '@shared/types/multi-agent-chat';
 
 // =============================================
 // CONVERSATION OPERATIONS
@@ -161,7 +161,7 @@ export async function getConversation(
 
     return {
       ...conversation,
-      participants: participants || [],
+      participants: participants ?? [],
     };
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
@@ -223,9 +223,9 @@ export async function getConversationWithDetails(
 
     return {
       ...conversation,
-      collaborations: collaborations || [],
-      metadata: metadata || ({} as ConversationMetadata),
-      message_count: messageCount || 0,
+      collaborations: collaborations ?? [],
+      metadata: metadata ?? ({} as ConversationMetadata),
+      message_count: messageCount ?? 0,
     };
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
@@ -294,7 +294,7 @@ export async function listConversations(
 
     // Pagination
     const limit = filters.limit || 50;
-    const offset = filters.offset || 0;
+    const offset = filters.offset ?? 0;
     query = query.range(offset, offset + limit - 1);
 
     // Ordering
@@ -314,7 +314,7 @@ export async function listConversations(
     }
 
     // Batch fetch participants for all conversations
-    const conversationIds = conversations?.map((c) => c.id) || [];
+    const conversationIds = (conversations ?? []).map((c) => c.id);
     let participantsMap: Record<string, ConversationParticipant[]> = {};
 
     if (conversationIds.length > 0) {
@@ -327,7 +327,7 @@ export async function listConversations(
         console.error('Failed to fetch participants:', partError);
       } else {
         // Group participants by conversation_id
-        participantsMap = (allParticipants || []).reduce(
+        participantsMap = (allParticipants ?? []).reduce(
           (acc, participant) => {
             if (!acc[participant.conversation_id]) {
               acc[participant.conversation_id] = [];
@@ -341,14 +341,14 @@ export async function listConversations(
     }
 
     const conversationsWithParticipants: ConversationWithParticipants[] =
-      conversations?.map((conv) => ({
+      (conversations ?? []).map((conv) => ({
         ...conv,
-        participants: participantsMap[conv.id] || [],
-      })) || [];
+        participants: participantsMap[conv.id] ?? [],
+      }));
 
     return {
       conversations: conversationsWithParticipants,
-      total: count || 0,
+      total: count ?? 0,
     };
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
@@ -543,7 +543,7 @@ export async function addParticipantsBatch(
       );
     }
 
-    return data || [];
+    return data ?? [];
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
       throw error;
@@ -577,7 +577,7 @@ export async function getParticipants(
       );
     }
 
-    return data || [];
+    return data ?? [];
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
       throw error;
@@ -740,10 +740,10 @@ export async function incrementParticipantStats(
 
   // Ensure at least one stat is being updated
   const hasStats =
-    (stats.message_count && stats.message_count > 0) ||
-    (stats.tokens_used && stats.tokens_used > 0) ||
-    (stats.cost_incurred && stats.cost_incurred > 0) ||
-    (stats.tasks_completed && stats.tasks_completed > 0);
+    (stats.message_count ?? 0) > 0 ||
+    (stats.tokens_used ?? 0) > 0 ||
+    (stats.cost_incurred ?? 0) > 0 ||
+    (stats.tasks_completed ?? 0) > 0;
 
   if (!hasStats) {
     // No-op if no stats to update - return early
@@ -755,16 +755,16 @@ export async function incrementParticipantStats(
       // Use atomic RPC function for increment - prevents race conditions
       const { error } = await supabase.rpc('increment_participant_stats', {
         p_participant_id: participantId,
-        p_message_count: stats.message_count || 0,
-        p_tokens_used: stats.tokens_used || 0,
-        p_cost_incurred: stats.cost_incurred || 0,
-        p_tasks_completed: stats.tasks_completed || 0,
+        p_message_count: stats.message_count ?? 0,
+        p_tokens_used: stats.tokens_used ?? 0,
+        p_cost_incurred: stats.cost_incurred ?? 0,
+        p_tasks_completed: stats.tasks_completed ?? 0,
       });
 
       if (error) {
         // Categorize the error for proper handling
-        const errorMessage = error.message?.toLowerCase() || '';
-        const errorCode = error.code || '';
+        const errorMessage = error.message?.toLowerCase() ?? '';
+        const errorCode = error.code ?? '';
 
         // Check if RPC function doesn't exist (migration not applied)
         if (
@@ -838,10 +838,10 @@ export async function incrementParticipantStats(
       console.log(
         `[incrementParticipantStats] Successfully updated participant ${participantId}:`,
         {
-          message_count: `+${stats.message_count || 0}`,
-          tokens_used: `+${stats.tokens_used || 0}`,
-          cost_incurred: `+${stats.cost_incurred || 0}`,
-          tasks_completed: `+${stats.tasks_completed || 0}`,
+          message_count: `+${String(stats.message_count ?? 0)}`,
+          tokens_used: `+${String(stats.tokens_used ?? 0)}`,
+          cost_incurred: `+${String(stats.cost_incurred ?? 0)}`,
+          tasks_completed: `+${String(stats.tasks_completed ?? 0)}`,
           retriesUsed,
         }
       );
@@ -870,7 +870,7 @@ export async function incrementParticipantStats(
 
   // All retries exhausted
   throw new MultiAgentChatError(
-    `Failed to increment participant stats after ${maxRetries + 1} attempts: ${lastError?.message || 'Unknown error'}`,
+    `Failed to increment participant stats after ${maxRetries + 1} attempts: ${lastError?.message ?? 'Unknown error'}`,
     'MAX_RETRIES_EXCEEDED',
     {
       participantId,
@@ -997,19 +997,28 @@ export async function getConversationStats(
       );
     }
 
-    const total_conversations = conversations?.length || 0;
-    const active_conversations =
-      conversations?.filter((c) => c.status === 'active').length || 0;
-    const total_messages =
-      conversations?.reduce((sum, c) => sum + c.total_messages, 0) || 0;
-    const total_tokens =
-      conversations?.reduce((sum, c) => sum + c.total_tokens, 0) || 0;
-    const total_cost =
-      conversations?.reduce((sum, c) => sum + c.total_cost, 0) || 0;
+    const safeConversations = conversations ?? [];
+    const total_conversations = safeConversations.length;
+    const active_conversations = safeConversations.filter(
+      (c) => c.status === 'active'
+    ).length;
+    const total_messages = safeConversations.reduce(
+      (sum, c) => sum + (Number(c.total_messages) || 0),
+      0
+    );
+    const total_tokens = safeConversations.reduce(
+      (sum, c) => sum + (Number(c.total_tokens) || 0),
+      0
+    );
+    const total_cost = safeConversations.reduce(
+      (sum, c) => sum + (Number(c.total_cost) || 0),
+      0
+    );
 
     // Calculate average duration
-    const completedConversations =
-      conversations?.filter((c) => c.completed_at && c.started_at) || [];
+    const completedConversations = safeConversations.filter(
+      (c) => c.completed_at && c.started_at
+    );
     const totalDuration = completedConversations.reduce((sum, c) => {
       const start = new Date(c.started_at).getTime();
       const end = new Date(c.completed_at!).getTime();
@@ -1021,7 +1030,7 @@ export async function getConversationStats(
         : 0;
 
     // Get most used agents
-    const conversationIds = conversations?.map((c) => c.id) || [];
+    const conversationIds = safeConversations.map((c) => c.id);
     let most_used_agents: Array<{
       employee_id: string;
       employee_name: string;
@@ -1037,8 +1046,8 @@ export async function getConversationStats(
       if (!partError && participants) {
         const agentCounts = participants.reduce(
           (acc, p) => {
-            const key = `${p.employee_id}|${p.employee_name}`;
-            acc[key] = (acc[key] || 0) + 1;
+            const key = `${p.employee_id ?? ''}|${p.employee_name ?? ''}`;
+            acc[key] = (acc[key] ?? 0) + 1;
             return acc;
           },
           {} as Record<string, number>

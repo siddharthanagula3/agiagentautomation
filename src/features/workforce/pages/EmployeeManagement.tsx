@@ -37,12 +37,9 @@ import {
   Sparkles,
   Zap,
   Target,
-  Clock,
   ArrowRight,
-  MessageSquare,
   Code,
 } from 'lucide-react';
-import { cn } from '@shared/lib/utils';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
 
 // Error fallback component for Workforce page

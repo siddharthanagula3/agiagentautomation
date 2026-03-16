@@ -17,7 +17,6 @@ import { Input } from '@shared/ui/input';
 import { Badge } from '@shared/ui/badge';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Textarea } from '@shared/ui/textarea';
-import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
 import {
   Bookmark,

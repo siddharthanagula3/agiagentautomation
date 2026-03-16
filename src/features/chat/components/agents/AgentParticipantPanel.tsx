@@ -24,7 +24,6 @@ import {
   ChevronRight,
   Info,
   Activity,
-  CheckCircle2,
   Clock,
   XCircle,
   MessageSquare,
@@ -44,12 +43,6 @@ interface AgentParticipantPanelProps {
   groupByRole?: boolean;
   /** Custom className */
   className?: string;
-}
-
-interface AgentGroup {
-  role: string;
-  agents: Agent[];
-  expanded: boolean;
 }
 
 export function AgentParticipantPanel({

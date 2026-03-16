@@ -3,13 +3,14 @@
  * Fetches and sanitizes web content while respecting robots.txt and rate limits
  */
 
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { Handler, HandlerEvent } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimit, checkRateLimitWithTier } from '../utils/rate-limiter';
 import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 import * as dns from 'dns';
 import { promisify } from 'util';
+import sanitize from 'sanitize-html';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -289,7 +290,6 @@ async function validateHostnameResolution(hostname: string): Promise<{
 
 const fetchPageHandler: Handler = async (
   event: HandlerEvent,
-  context: HandlerContext
 ) => {
   // Get origin for CORS validation
   // Updated: Jan 29th 2026 - Fixed null CORS headers vulnerability using getSafeCorsHeaders
@@ -514,7 +514,6 @@ async function checkRobotsTxt(url: URL): Promise<boolean> {
  */
 function parseRobotsTxt(robotsText: string, path: string): boolean {
   const lines = robotsText.split('\n');
-  let currentUserAgent = '';
   let isRelevantSection = false;
   const disallowedPaths: string[] = [];
 
@@ -523,7 +522,6 @@ function parseRobotsTxt(robotsText: string, path: string): boolean {
 
     if (trimmedLine.startsWith('user-agent:')) {
       const userAgent = trimmedLine.substring(11).trim();
-      currentUserAgent = userAgent;
       isRelevantSection =
         userAgent === '*' ||
         userAgent.includes('ai') ||
@@ -610,27 +608,28 @@ async function fetchPageContent(url: URL): Promise<{
 }
 
 /**
- * Sanitize HTML content
+ * Sanitize HTML content using sanitize-html library.
+ * Replaces previous regex-based approach to avoid incomplete sanitization
+ * (CodeQL: js/incomplete-multi-character-sanitization, js/bad-tag-filter).
  */
 function sanitizeHtml(html: string): string {
-  // SECURITY: Using non-backtracking [\s\S]*? patterns to prevent ReDoS
-  // Remove script tags and their content
-  let sanitized = html.replace(/<script[\s\S]*?<\/script>/gi, '');
-
-  // Remove style tags and their content
-  sanitized = sanitized.replace(/<style[\s\S]*?<\/style>/gi, '');
-
-  // Remove comments
-  sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
-
-  // Remove noscript tags
-  sanitized = sanitized.replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
-
-  // Remove potentially dangerous attributes
-  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
-  sanitized = sanitized.replace(/\s*javascript:/gi, '');
-
-  return sanitized;
+  return sanitize(html, {
+    allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'ul', 'ol', 'li',
+      'b', 'i', 'strong', 'em', 'br', 'div', 'span', 'img', 'table', 'thead',
+      'tbody', 'tr', 'th', 'td', 'pre', 'code', 'blockquote', 'hr', 'main',
+      'article', 'section', 'nav', 'header', 'footer', 'figure', 'figcaption',
+      'dl', 'dt', 'dd', 'sup', 'sub', 'mark', 'abbr', 'time', 'title', 'html',
+      'head', 'body', 'meta'],
+    allowedAttributes: {
+      a: ['href', 'title', 'rel'],
+      img: ['src', 'alt', 'title', 'width', 'height'],
+      td: ['colspan', 'rowspan'],
+      th: ['colspan', 'rowspan'],
+      html: ['lang'],
+      meta: ['charset', 'name', 'content'],
+    },
+    disallowedTagsMode: 'discard',
+  });
 }
 
 /**
@@ -689,7 +688,6 @@ function extractMainContent(html: string): {
  * Generate a summary of the content
  */
 function generateSummary(content: string): string {
-  const words = content.split(/\s+/);
   const sentences = content.split(/[.!?]+/);
 
   if (sentences.length <= 3) {

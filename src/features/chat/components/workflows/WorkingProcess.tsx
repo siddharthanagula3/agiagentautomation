@@ -21,7 +21,6 @@ import {
   Terminal,
   Code,
   Database,
-  Globe,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 
@@ -156,7 +155,7 @@ export function WorkingProcess({ process }: WorkingProcessProps) {
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleContent>
           <div className="space-y-3 p-4">
-            {process.steps.map((step, index) => (
+            {process.steps.map((step) => (
               <div
                 key={step.id}
                 className={cn(

@@ -16,8 +16,8 @@ import type {
   CreateCollaborationRequest,
   SessionType,
   TaskStatus,
-  MultiAgentChatError,
 } from '@shared/types/multi-agent-chat';
+import { MultiAgentChatError } from '@shared/types/multi-agent-chat';
 
 // =============================================
 // COLLABORATION SESSION OPERATIONS
@@ -142,7 +142,7 @@ export async function listCollaborations(
 
     // Pagination
     const limit = filters?.limit || 50;
-    const offset = filters?.offset || 0;
+    const offset = filters?.offset ?? 0;
     query = query.range(offset, offset + limit - 1);
 
     // Ordering
@@ -159,8 +159,8 @@ export async function listCollaborations(
     }
 
     return {
-      collaborations: data || [],
-      total: count || 0,
+      collaborations: data ?? [],
+      total: count ?? 0,
     };
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
@@ -699,39 +699,48 @@ export async function getCollaborationStats(conversationId: string): Promise<{
       );
     }
 
+    const safeCollaborations = collaborations ?? [];
+
     const stats = {
-      total_collaborations: collaborations?.length || 0,
-      active_collaborations:
-        collaborations?.filter((c) => c.task_status === 'in_progress').length ||
-        0,
-      completed_collaborations:
-        collaborations?.filter((c) => c.task_status === 'completed').length ||
-        0,
-      failed_collaborations:
-        collaborations?.filter((c) => c.task_status === 'failed').length || 0,
-      total_messages:
-        collaborations?.reduce((sum, c) => sum + c.total_messages, 0) || 0,
-      total_iterations:
-        collaborations?.reduce((sum, c) => sum + c.total_iterations, 0) || 0,
+      total_collaborations: safeCollaborations.length,
+      active_collaborations: safeCollaborations.filter(
+        (c) => c.task_status === 'in_progress'
+      ).length,
+      completed_collaborations: safeCollaborations.filter(
+        (c) => c.task_status === 'completed'
+      ).length,
+      failed_collaborations: safeCollaborations.filter(
+        (c) => c.task_status === 'failed'
+      ).length,
+      total_messages: safeCollaborations.reduce(
+        (sum, c) => sum + (Number(c.total_messages) || 0),
+        0
+      ),
+      total_iterations: safeCollaborations.reduce(
+        (sum, c) => sum + (Number(c.total_iterations) || 0),
+        0
+      ),
       average_consensus_score: 0,
       average_duration_seconds: 0,
       collaboration_types: {} as Record<string, number>,
     };
 
     // Calculate average consensus score
-    const collaborationsWithConsensus =
-      collaborations?.filter((c) => c.consensus_score !== null) || [];
+    const collaborationsWithConsensus = safeCollaborations.filter(
+      (c) => c.consensus_score !== null
+    );
     if (collaborationsWithConsensus.length > 0) {
       stats.average_consensus_score =
         collaborationsWithConsensus.reduce(
-          (sum, c) => sum + (c.consensus_score || 0),
+          (sum, c) => sum + (Number(c.consensus_score) || 0),
           0
         ) / collaborationsWithConsensus.length;
     }
 
     // Calculate average duration
-    const completedCollaborations =
-      collaborations?.filter((c) => c.completed_at && c.started_at) || [];
+    const completedCollaborations = safeCollaborations.filter(
+      (c) => c.completed_at && c.started_at
+    );
     if (completedCollaborations.length > 0) {
       const totalDuration = completedCollaborations.reduce((sum, c) => {
         const start = new Date(c.started_at).getTime();
@@ -744,9 +753,9 @@ export async function getCollaborationStats(conversationId: string): Promise<{
     }
 
     // Count collaboration types
-    collaborations?.forEach((c) => {
+    safeCollaborations.forEach((c) => {
       stats.collaboration_types[c.session_type] =
-        (stats.collaboration_types[c.session_type] || 0) + 1;
+        (stats.collaboration_types[c.session_type] ?? 0) + 1;
     });
 
     return stats;
@@ -784,7 +793,7 @@ export async function getActiveCollaborations(
       );
     }
 
-    return data || [];
+    return data ?? [];
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
       throw error;
@@ -820,7 +829,7 @@ export async function getParticipantCollaborationHistory(
       );
     }
 
-    return data || [];
+    return data ?? [];
   } catch (error) {
     if (error instanceof MultiAgentChatError) {
       throw error;

@@ -4,10 +4,8 @@ import React, {
   useEffect,
   useRef,
   useCallback,
-  useMemo,
 } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Separator } from '@shared/ui/separator';
 import { useChat } from '../hooks/use-chat-interface';
 import { useChatHistory } from '../hooks/use-conversation-history';
 import { useTools } from '../hooks/use-tool-integration';
@@ -18,23 +16,14 @@ import { ChatSidebar } from '../components/Sidebar/ChatSidebar';
 import { ChatHeader } from '../components/Main/ChatHeader';
 import { MessageList } from '../components/Main/MessageList';
 import { ChatComposer } from '../components/Composer/ChatComposer';
-import { ModeSelector } from '../components/Tools/ModeSelector';
 import { KeyboardShortcutsDialog } from '../components/dialogs/KeyboardShortcutsDialog';
 import { GlobalSearchDialog } from '../components/dialogs/GlobalSearchDialog';
 import { TokenAnalyticsDialog } from '../components/dialogs/TokenAnalyticsDialog';
 import { EnhancedExportDialog } from '../components/dialogs/EnhancedExportDialog';
 import { BookmarksDialog } from '../components/dialogs/BookmarksDialog';
 import { ToolProgressIndicator } from '../components/workflows/ToolProgressIndicator';
-import type { ChatSession, ChatMessage, ChatMode } from '../types';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@shared/ui/dropdown-menu';
+import type { ChatSession, ChatMode } from '../types';
 import { Button } from '@shared/ui/button';
-import { FileText, FileJson, FileCode, Download } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import {
   UsageWarningBanner,
@@ -63,20 +52,18 @@ const ChatPage: React.FC = () => {
   const userUsage = useUserUsage();
 
   // Load user AI preferences (applies to LLM service on mount)
-  const aiPreferences = useAIPreferences();
+  useAIPreferences();
 
   // Chat state management
   const {
     messages: rawMessages,
     isLoading,
-    error,
     activeTools,
     toolProgress,
     sendMessage,
     regenerateMessage,
     editMessage,
     deleteMessage,
-    clearMessages,
   } = useChat(sessionId);
 
   // Defensive: Ensure all message timestamps are valid Date objects
@@ -119,7 +106,6 @@ const ChatPage: React.FC = () => {
     createSession,
     renameSession,
     deleteSession,
-    searchSessions,
     loadSessions,
     loadSession,
     toggleStarSession,
@@ -131,16 +117,7 @@ const ChatPage: React.FC = () => {
 
   const { availableTools, executeTool, activeTool, toolResults } = useTools();
 
-  const {
-    exportAsMarkdown,
-    exportAsJSON,
-    exportAsHTML,
-    exportAsText,
-    copyToClipboard,
-    generateShareLink,
-    shareLink,
-    isExporting,
-  } = useExport();
+  useExport();
 
   // Local state
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -280,27 +257,6 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const handleExport = async (
-    format: 'markdown' | 'json' | 'html' | 'text'
-  ) => {
-    if (!currentSession) return;
-
-    switch (format) {
-      case 'markdown':
-        await exportAsMarkdown(currentSession, messages);
-        break;
-      case 'json':
-        await exportAsJSON(currentSession, messages);
-        break;
-      case 'html':
-        await exportAsHTML(currentSession, messages);
-        break;
-      case 'text':
-        await exportAsText(currentSession, messages);
-        break;
-    }
-  };
-
   const handleShare = useCallback(async () => {
     if (!currentSession) return;
     try {
@@ -314,20 +270,6 @@ const ChatPage: React.FC = () => {
       );
     }
   }, [currentSession, shareSession, showSuccess, showError]);
-
-  const handleCopyToClipboard = useCallback(async () => {
-    if (!currentSession) return;
-    try {
-      await copyToClipboard(currentSession, messages, 'markdown');
-      showSuccess('Conversation copied to clipboard', 'Copied');
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
-      showError(
-        'Unable to copy to clipboard. Please try again.',
-        'Copy Failed'
-      );
-    }
-  }, [currentSession, messages, copyToClipboard, showSuccess, showError]);
 
   // Monitor token usage for warnings
   const { usageData } = useUsageMonitoring(currentSession?.userId || null);
@@ -516,7 +458,7 @@ const ChatPage: React.FC = () => {
                 onSendMessage={handleSendMessage}
                 isLoading={isLoading}
                 availableTools={availableTools}
-                onToolToggle={(toolId) => {
+                onToolToggle={(_toolId) => {
                   // Tool toggle is handled by the ChatComposer component internally
                   // This callback can be used for future tool management features
                 }}

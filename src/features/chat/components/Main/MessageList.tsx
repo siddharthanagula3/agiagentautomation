@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useState } from 'react';
 import { ScrollArea } from '@shared/ui/scroll-area';
-import { Loader2, Bot } from 'lucide-react';
 import type { ChatMessage } from '../../types';
 import { MessageBubble } from '../messages/MessageBubble';
 import { EmployeeThinkingIndicator } from '../agents/EmployeeThinkingIndicator';

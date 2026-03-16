@@ -35,8 +35,8 @@ export const useChat = (sessionId?: string) => {
   const [error, setError] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState<string | null>(null);
+  const [isSearching, _setIsSearching] = useState(false);
+  const [searchQuery, _setSearchQuery] = useState<string | null>(null);
   const [activeTools, setActiveTools] = useState<ToolType[]>([]);
   const [toolProgress, setToolProgress] = useState<
     Record<ToolType, { status: string; progress?: number }>

@@ -26,7 +26,6 @@ import {
   Bot,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 
 interface VibeEmptyStateProps {

@@ -5,7 +5,7 @@
  * Updated: Jan 22nd 2026
  */
 
-import { Handler, HandlerEvent } from '@netlify/functions';
+import type { Handler, HandlerEvent } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import {
   getCorsHeaders,

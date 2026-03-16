@@ -11,7 +11,7 @@ import { supabase } from '@shared/lib/supabase-client';
 // Lazy loader with guard
 let stripePromise: Promise<import('@stripe/stripe-js').Stripe | null> | null =
   null;
-function getStripe() {
+function _getStripe() {
   const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
   if (!publishableKey || !publishableKey.startsWith('pk_')) {
     return Promise.resolve(null);
@@ -19,7 +19,7 @@ function getStripe() {
   if (!stripePromise) {
     try {
       stripePromise = loadStripe(publishableKey);
-    } catch (e) {
+    } catch (_e) {
       stripePromise = Promise.resolve(null);
     }
   }

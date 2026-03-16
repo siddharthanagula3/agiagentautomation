@@ -12,11 +12,6 @@ import {
   Paragraph,
   TextRun,
   HeadingLevel,
-  AlignmentType,
-  Table,
-  TableRow,
-  TableCell,
-  WidthType,
 } from 'docx';
 import type { DocumentFormat } from './document-generation-service';
 
@@ -490,9 +485,7 @@ function parseInlineMarkdown(text: string): TextRun[] {
       }
       i++; // Skip ]
       i++; // Skip (
-      let url = '';
       while (i < text.length && text[i] !== ')') {
-        url += text[i];
         i++;
       }
       runs.push(

@@ -79,12 +79,6 @@ async function attemptLogin(page: Page): Promise<boolean> {
   await waitForApp(page);
   await dismissCookieBanner(page);
 
-  // Check if demo mode
-  const isDemoMode = await page
-    .locator('text=Demo Mode')
-    .isVisible({ timeout: 2000 })
-    .catch(() => false);
-
   // Clear any pre-filled values and enter credentials
   const emailInput = page.locator('input[type="email"]');
   const passwordInput = page.locator('input[type="password"]');

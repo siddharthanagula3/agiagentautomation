@@ -93,7 +93,7 @@ const DEFAULT_RETRY_POLICY: RetryPolicy = {
 
 // Configuration
 const MESSAGE_TIMEOUT = 30000; // 30 seconds for message to be delivered
-const READ_RECEIPT_TIMEOUT = 60000; // 1 minute for read receipt
+const _READ_RECEIPT_TIMEOUT = 60000; // 1 minute for read receipt
 const CLEANUP_INTERVAL = 300000; // 5 minutes - cleanup old records
 
 export class MessageDeliveryService {

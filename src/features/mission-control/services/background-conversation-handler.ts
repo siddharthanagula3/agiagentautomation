@@ -167,9 +167,8 @@ class BackgroundChatService {
       }
 
       // Execute the plan with error handling
-      let results;
       try {
-        results = await multiAgentOrchestrator.executePlan(
+        await multiAgentOrchestrator.executePlan(
           plan,
           handleCommunication,
           handleStatusUpdate

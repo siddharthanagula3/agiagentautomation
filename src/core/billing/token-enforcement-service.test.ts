@@ -38,6 +38,8 @@ import { supabase } from '@shared/lib/supabase-client';
 describe('Token Enforcement Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(supabase.rpc).mockReset();
+    vi.mocked(supabase.from).mockReset();
     // Suppress console logs during tests
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});

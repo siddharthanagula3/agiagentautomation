@@ -39,6 +39,45 @@ export interface UsageMetadata {
   feature?: string;
 }
 
+const FREE_TIER_MONTHLY_TOKENS = 1000000;
+const PRO_TIER_MONTHLY_TOKENS = 10000000;
+const MAX_TIER_MONTHLY_TOKENS = 40000000;
+
+function coerceNonNegativeBalance(value: unknown): number | null {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return null;
+  }
+
+  return Math.max(numericValue, 0);
+}
+
+function extractCurrentBalance(data: unknown): number | null {
+  if (Array.isArray(data)) {
+    return coerceNonNegativeBalance(data[0]?.current_balance);
+  }
+
+  if (data && typeof data === 'object' && 'current_balance' in data) {
+    return coerceNonNegativeBalance(
+      (data as { current_balance?: unknown }).current_balance
+    );
+  }
+
+  return coerceNonNegativeBalance(data);
+}
+
+function defaultBalanceForPlan(plan: string | null | undefined): number {
+  switch (plan) {
+    case 'pro':
+      return PRO_TIER_MONTHLY_TOKENS;
+    case 'max':
+    case 'enterprise':
+      return MAX_TIER_MONTHLY_TOKENS;
+    default:
+      return FREE_TIER_MONTHLY_TOKENS;
+  }
+}
+
 /**
  * Check if user has sufficient tokens for an operation
  * MUST be called BEFORE making any API request
@@ -108,36 +147,7 @@ export async function deductTokens(
   try {
     const { provider, model, totalTokens } = metadata;
 
-    // Try the new credit system RPC first
-    const { error: creditError } = await supabase.rpc('deduct_credits', {
-      p_user_id: userId,
-      p_amount_cents: totalTokens, // In the new system, this represents cents
-      p_description: `${provider}/${model} usage`,
-      p_metadata: { provider, model },
-      p_idempotency_key: `${userId}-${Date.now()}`,
-    });
-
-    if (!creditError) {
-      // Fetch new balance
-      const { data: balanceData } = await supabase.rpc('get_credit_balance', {
-        p_user_id: userId,
-      });
-
-      const newBalance = balanceData !== null ? Number(balanceData) : 0;
-      logger.info(
-        `[Token Enforcement] Deducted ${totalTokens} cents from user ${userId}. New balance: ${newBalance}`
-      );
-
-      return {
-        success: true,
-        newBalance,
-      };
-    }
-
-    logger.warn('[Token Enforcement] deduct_credits RPC failed, trying legacy:', creditError.message);
-
-    // Fallback: legacy deduct_user_tokens RPC
-    const { data: newBalance, error } = await supabase.rpc(
+    const result = await supabase.rpc(
       'deduct_user_tokens',
       {
         p_user_id: userId,
@@ -146,6 +156,7 @@ export async function deductTokens(
         p_model: model,
       }
     );
+    const { data: newBalance, error } = result ?? {};
 
     if (error) {
       logger.error('[Token Enforcement] Error deducting tokens:', error);
@@ -162,7 +173,7 @@ export async function deductTokens(
 
     return {
       success: true,
-      newBalance: newBalance as number,
+      newBalance: coerceNonNegativeBalance(newBalance) ?? 0,
     };
   } catch (error) {
     logger.error('[Token Enforcement] Error:', error);
@@ -179,58 +190,71 @@ export async function deductTokens(
 }
 
 /**
- * Get user's current credit balance in cents.
- * Uses get_credit_balance RPC from the shared Supabase (cents-based billing).
- * Falls back to querying token_credits table directly.
+ * Get user's current token balance.
+ * Uses the local user_token_balances system defined in Supabase migrations.
  * Fails CLOSED on errors (returns null to trigger denial).
  */
 export async function getUserTokenBalance(
   userId: string
 ): Promise<number | null> {
   try {
-    // Try get_credit_balance RPC first (shared Supabase billing system)
-    const { data: rpcData, error: rpcError } = await supabase.rpc(
-      'get_credit_balance',
+    const rpcResult = await supabase.rpc(
+      'get_or_create_token_balance',
       { p_user_id: userId }
     );
+    const { data: rpcData, error: rpcError } = rpcResult ?? {};
 
     if (!rpcError && rpcData !== null && rpcData !== undefined) {
-      const balanceCents = Math.max(Number(rpcData), 0);
-      logger.info(
-        `[Token Balance] Credit balance (via RPC): ${balanceCents} cents`
-      );
-      return balanceCents;
+      const balance = extractCurrentBalance(rpcData);
+      if (balance !== null) {
+        logger.info(`[Token Balance] Token balance (via RPC): ${balance}`);
+        return balance;
+      }
     }
 
-    // Fallback: Query token_credits table directly
     if (rpcError) {
       logger.warn(
-        '[Token Balance] get_credit_balance RPC failed, falling back:',
+        '[Token Balance] get_or_create_token_balance RPC failed, falling back:',
         rpcError.message
       );
     }
 
-    const { data: creditsData, error: creditsError } = await supabase
-      .from('token_credits')
-      .select('credits_remaining_cents')
+    const { data: balanceData, error: balanceError } = await supabase
+      .from('user_token_balances')
+      .select('current_balance, monthly_allowance')
       .eq('user_id', userId)
       .maybeSingle();
 
-    if (creditsError) {
-      logger.error('[Token Balance] Error fetching credit balance:', creditsError.message);
+    if (balanceError) {
+      logger.error('[Token Balance] Error fetching token balance:', balanceError.message);
       // SECURITY: Fail closed on database errors
       return null;
     }
 
-    if (!creditsData) {
-      logger.warn('[Token Balance] No credit account found for user:', userId);
-      // Return null to trigger denial — user needs to have a credit account
+    if (balanceData) {
+      const balance = extractCurrentBalance(balanceData);
+      if (balance !== null) {
+        logger.info(`[Token Balance] Token balance: ${balance}`);
+        return balance;
+      }
+    }
+
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('plan')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (userError) {
+      logger.error('[Token Balance] Error fetching user plan:', userError.message);
       return null;
     }
 
-    const balanceCents = Math.max(creditsData.credits_remaining_cents || 0, 0);
-    logger.info(`[Token Balance] Credit balance: ${balanceCents} cents`);
-    return balanceCents;
+    const defaultBalance = defaultBalanceForPlan(user?.plan);
+    logger.warn(
+      `[Token Balance] No balance record found for user ${userId}; using ${defaultBalance} default for ${user?.plan || 'free'} plan`
+    );
+    return defaultBalance;
   } catch (error) {
     logger.error('[Token Enforcement] Error:', error);
     captureError(error as Error, {
@@ -289,7 +313,7 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
       return {
         allowed: true, // Allow request but with free tier limits
         used: 0,
-        limit: 1000000, // Free tier default: 1M tokens/month
+        limit: FREE_TIER_MONTHLY_TOKENS, // Free tier default: 1M tokens/month
         resetDate,
       };
     }
@@ -328,7 +352,7 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
       return {
         allowed: true, // Allow on error to prevent blocking users
         used: 0,
-        limit: 1000000,
+        limit: FREE_TIER_MONTHLY_TOKENS,
         resetDate,
       };
     }
@@ -336,7 +360,7 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
     const used = Math.abs(
       transactions?.reduce((sum, tx) => sum + tx.tokens, 0) || 0
     );
-    const limit = 1000000; // 1M tokens/month for free tier (matches billing dashboard)
+    const limit = FREE_TIER_MONTHLY_TOKENS; // 1M tokens/month for free tier (matches billing dashboard)
 
     return {
       allowed: used < limit,
@@ -357,7 +381,7 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
     return {
       allowed: false,
       used: 0,
-      limit: 1000000,
+      limit: FREE_TIER_MONTHLY_TOKENS,
       resetDate: new Date(),
     };
   }

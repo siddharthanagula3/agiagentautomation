@@ -15,6 +15,14 @@ const TEST_USER = {
   email: process.env.E2E_TEST_EMAIL || 'test@example.com',
   password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
+const HAS_TEST_CREDENTIALS = Boolean(
+  process.env.E2E_TEST_EMAIL && process.env.E2E_TEST_PASSWORD
+);
+
+test.skip(
+  !HAS_TEST_CREDENTIALS,
+  'Authenticated E2E tests require E2E_TEST_EMAIL and E2E_TEST_PASSWORD'
+);
 
 // Helper functions
 async function captureScreenshot(page: Page, name: string) {
@@ -63,7 +71,7 @@ async function waitForAppInit(page: Page, timeout = 20000) {
 async function login(page: Page): Promise<boolean> {
   console.log('🔐 Logging in with test credentials...');
 
-  await page.goto(`${BASE_URL}/login`);
+  await page.goto(`${BASE_URL}/auth/login`);
   await waitForAppInit(page);
 
   // Handle cookie consent if present
@@ -119,7 +127,7 @@ test.describe('Authentication', () => {
 
     // Verify we're on an authenticated page
     const url = page.url();
-    expect(url).not.toContain('/login');
+    expect(url).not.toContain('/auth/login');
     console.log('📍 Logged in, current URL:', url);
 
     await captureScreenshot(page, 'after-login');
@@ -143,7 +151,7 @@ test.describe('Authentication', () => {
       );
       if (await logoutButton.isVisible({ timeout: 3000 })) {
         await logoutButton.click();
-        await page.waitForURL(/\/(login|$)/, { timeout: 10000 });
+        await page.waitForURL(/\/(auth\/login|$)/, { timeout: 10000 });
         console.log('✅ Logged out successfully');
       }
     }

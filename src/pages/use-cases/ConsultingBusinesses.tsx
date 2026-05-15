@@ -24,7 +24,7 @@ const ConsultingBusinessesPage: React.FC = () => {
     if (user) {
       navigate('/dashboard');
     } else {
-      navigate('/register');
+      navigate('/auth/register');
     }
   };
 

@@ -13,12 +13,12 @@ const ALLOWED_ORIGINS: string[] = [
   // Legacy (keep during transition)
   'https://agiagentautomation.netlify.app',
   'https://agiagentautomation.com',
+  'https://www.agiagentautomation.com',
   // Vercel preview deployments
   'https://agiworkforce.vercel.app',
   // Development
   'http://localhost:5173',
   'http://localhost:8888',
-  'http://localhost:3000',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:8888',
 ];

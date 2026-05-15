@@ -14,13 +14,21 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const BASE_URL = 'https://agiagentautomation.com';
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 // Test credentials - MUST be set via environment variables in CI/CD
 // Never commit actual credentials to the repository
 const TEST_USER = {
   email: process.env.E2E_TEST_EMAIL || 'test@example.com',
   password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
+const HAS_TEST_CREDENTIALS = Boolean(
+  process.env.E2E_TEST_EMAIL && process.env.E2E_TEST_PASSWORD
+);
+
+test.skip(
+  !HAS_TEST_CREDENTIALS,
+  'Complete platform E2E tests require E2E_TEST_EMAIL and E2E_TEST_PASSWORD'
+);
 
 // Helper to take full page screenshots
 async function captureScreenshot(page: Page, name: string) {
@@ -61,7 +69,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
   test('2. Login Flow - Authenticate user', async ({ page }) => {
     console.log('\n🧪 TEST 2: Login Flow');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForPageLoad(page);
     await captureScreenshot(page, '02-login-page');
 
@@ -97,7 +105,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('\n🧪 TEST 3: Dashboard');
 
     // Login first
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -132,7 +140,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('\n🧪 TEST 4: Chat Interface (/chat)');
 
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -197,7 +205,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('\n🧪 TEST 5: VIBE Interface (/vibe)');
 
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -277,7 +285,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('\n🧪 TEST 6: Employee Marketplace');
 
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -315,7 +323,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('\n🧪 TEST 7: Mission Control');
 
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -360,7 +368,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('\n🧪 TEST 8: Settings');
 
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -384,7 +392,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('\n🧪 TEST 9: Navigation');
 
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -429,7 +437,7 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
 
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -472,7 +480,7 @@ test.describe('Bug Detection Tests', () => {
     });
 
     // Login and navigate
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
@@ -526,7 +534,7 @@ test.describe('Bug Detection Tests', () => {
     });
 
     // Login and navigate
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();

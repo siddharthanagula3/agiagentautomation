@@ -188,7 +188,7 @@ const Header: React.FC = () => {
                   Contact Sales
                 </Button>
                 <Button
-                  onClick={() => navigate('/register')}
+                  onClick={() => navigate('/auth/register')}
                   className="bg-gradient-to-r from-primary to-accent text-sm font-medium hover:opacity-90"
                 >
                   Get Started Free
@@ -274,7 +274,7 @@ const Header: React.FC = () => {
                         Contact Sales
                       </Button>
                       <Button
-                        onClick={() => handleNavigation('/register')}
+                        onClick={() => handleNavigation('/auth/register')}
                         className="w-full bg-gradient-to-r from-primary to-accent"
                       >
                         Get Started Free

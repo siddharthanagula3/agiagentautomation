@@ -180,7 +180,7 @@ test.describe('Public Pages - Parallel Tests', () => {
   test('Login page loads correctly', async ({ page }) => {
     const report = setupPageMonitoring(page, 'login');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForAppLoad(page);
 
     // Wait specifically for login form elements
@@ -206,7 +206,7 @@ test.describe('Public Pages - Parallel Tests', () => {
   test('Signup page loads correctly', async ({ page }) => {
     const report = setupPageMonitoring(page, 'signup');
 
-    await page.goto(`${BASE_URL}/signup`);
+    await page.goto(`${BASE_URL}/auth/register`);
     await waitForAppLoad(page);
 
     await screenshot(page, 'signup-page');
@@ -346,7 +346,7 @@ test.describe('UI Components - Parallel Tests', () => {
   test('Forms have proper validation', async ({ page }) => {
     setupPageMonitoring(page, 'forms');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForAppLoad(page);
 
     // Find submit button
@@ -611,7 +611,7 @@ test.describe('Error Handling', () => {
   test('No unhandled JavaScript errors', async ({ page }) => {
     const report = setupPageMonitoring(page, 'js-errors');
 
-    const pages = ['/', '/login', '/pricing', '/about'];
+    const pages = ['/', '/auth/login', '/pricing', '/about'];
 
     for (const pagePath of pages) {
       await page.goto(`${BASE_URL}${pagePath}`);
@@ -652,7 +652,7 @@ test.describe('State Management - Critical Tests', () => {
   test('No Immer frozen state errors on page transitions', async ({ page }) => {
     const report = setupPageMonitoring(page, 'state-transitions');
 
-    const routes = ['/', '/login', '/signup', '/pricing', '/about', '/help'];
+    const routes = ['/', '/auth/login', '/auth/register', '/pricing', '/about', '/help'];
 
     for (const route of routes) {
       await page.goto(`${BASE_URL}${route}`);
@@ -722,7 +722,7 @@ test.describe('State Management - Critical Tests', () => {
 // ============================================================
 test.describe('API & Network Tests', () => {
   test('No failed API requests on landing', async ({ page }) => {
-    setupPageMonitoring(page, 'api-landing');
+    const report = setupPageMonitoring(page, 'api-landing');
 
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
@@ -739,6 +739,8 @@ test.describe('API & Network Tests', () => {
         console.log(`      Error: ${req.error}`);
       });
     }
+
+    expect(report.networkFailures).toHaveLength(0);
   });
 
   test('Supabase connection works', async ({ page }) => {
@@ -762,7 +764,7 @@ test.describe('API & Network Tests', () => {
       }
     });
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForAppLoad(page);
 
     console.log(`\n📊 SUPABASE CHECK:`);
@@ -843,7 +845,7 @@ test.describe('Lazy Loading Tests', () => {
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForAppLoad(page);
 
     await page.goto(`${BASE_URL}/pricing`);

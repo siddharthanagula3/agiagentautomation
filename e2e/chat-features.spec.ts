@@ -16,6 +16,9 @@ const TEST_USER = {
   email: process.env.E2E_TEST_EMAIL || 'test@example.com',
   password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
+const HAS_TEST_CREDENTIALS = Boolean(
+  process.env.E2E_TEST_EMAIL && process.env.E2E_TEST_PASSWORD
+);
 
 // Helper functions
 async function captureScreenshot(page: Page, name: string) {
@@ -94,7 +97,14 @@ async function navigateAndWait(page: Page, url: string) {
 async function login(page: Page) {
   console.log('🔐 Attempting login...');
 
-  await navigateAndWait(page, `${BASE_URL}/login`);
+  if (!HAS_TEST_CREDENTIALS) {
+    console.log(
+      '⚠️ Skipping login: E2E_TEST_EMAIL and E2E_TEST_PASSWORD are not configured'
+    );
+    return false;
+  }
+
+  await navigateAndWait(page, `${BASE_URL}/auth/login`);
   await captureScreenshot(page, 'login-page-initial');
 
   // Wait for login form to appear
@@ -142,7 +152,7 @@ test.describe('Chat Interface - Core Functionality', () => {
     const currentUrl = page.url();
     console.log(`📍 Current URL: ${currentUrl}`);
 
-    if (currentUrl.includes('/login')) {
+    if (currentUrl.includes('/auth/login')) {
       console.log('⚠️ Redirected to login - authentication required');
       // This is expected behavior if not logged in
       const loginForm = page.locator('input[type="email"]');
@@ -165,7 +175,7 @@ test.describe('Chat Interface - Core Functionality', () => {
     await captureScreenshot(page, 'chat-message-input-initial');
 
     // Check if we're on the chat page or login page
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping input test');
       return;
     }
@@ -205,7 +215,7 @@ test.describe('Chat Interface - Core Functionality', () => {
 
     await navigateAndWait(page, `${BASE_URL}/chat`);
 
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping button test');
       return;
     }
@@ -249,7 +259,7 @@ test.describe('Chat Interface - Mode Selection', () => {
     await navigateAndWait(page, `${BASE_URL}/chat`);
     await captureScreenshot(page, 'chat-mode-selector-check');
 
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping mode selector test');
       return;
     }
@@ -288,7 +298,7 @@ test.describe('Chat Interface - Mode Selection', () => {
 
     await navigateAndWait(page, `${BASE_URL}/chat`);
 
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping employee UI test');
       return;
     }
@@ -323,7 +333,7 @@ test.describe('Chat Interface - Message Sending', () => {
 
     await navigateAndWait(page, `${BASE_URL}/chat`);
 
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping message test');
       return;
     }
@@ -360,7 +370,7 @@ test.describe('Chat Interface - UI Components', () => {
 
     await navigateAndWait(page, `${BASE_URL}/chat`);
 
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping header test');
       return;
     }
@@ -389,7 +399,7 @@ test.describe('Chat Interface - UI Components', () => {
 
     await navigateAndWait(page, `${BASE_URL}/chat`);
 
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping sidebar test');
       return;
     }
@@ -417,7 +427,7 @@ test.describe('Chat Interface - UI Components', () => {
 
     await navigateAndWait(page, `${BASE_URL}/chat`);
 
-    if (page.url().includes('/login')) {
+    if (page.url().includes('/auth/login')) {
       console.log('⚠️ Not authenticated - skipping message area test');
       return;
     }
@@ -590,7 +600,7 @@ test.describe('Public Pages - No Auth Required', () => {
   test('Login page loads correctly', async ({ page }) => {
     console.log('\n🧪 TEST: Login Page');
 
-    await navigateAndWait(page, `${BASE_URL}/login`);
+    await navigateAndWait(page, `${BASE_URL}/auth/login`);
     await captureScreenshot(page, 'login-page');
 
     // Login page should have email input
@@ -602,7 +612,7 @@ test.describe('Public Pages - No Auth Required', () => {
   test('Signup page loads correctly', async ({ page }) => {
     console.log('\n🧪 TEST: Signup Page');
 
-    await navigateAndWait(page, `${BASE_URL}/signup`);
+    await navigateAndWait(page, `${BASE_URL}/auth/register`);
     await captureScreenshot(page, 'signup-page');
 
     // Signup page should have form elements

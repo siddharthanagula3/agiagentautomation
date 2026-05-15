@@ -58,9 +58,23 @@ vi.mock('@shared/stores/authentication-store', () => ({
   },
 }));
 
+vi.mock('@shared/lib/logger', () => {
+  const logger = {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    auth: vi.fn(),
+    app: vi.fn(),
+  };
+
+  return { logger, default: logger };
+});
+
 vi.mock('@shared/lib/supabase-client', () => ({
   supabase: {
     from: vi.fn().mockReturnValue({
+      insert: vi.fn().mockResolvedValue({ error: null }),
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ data: [], error: null }),

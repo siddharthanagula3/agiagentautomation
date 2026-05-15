@@ -6,30 +6,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SystemPromptsService } from './prompt-management';
 
-// Mock gray-matter for markdown parsing
-vi.mock('gray-matter', () => ({
-  default: vi.fn((content: string) => {
-    // Simple mock that parses YAML-like frontmatter
-    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    if (frontmatterMatch) {
-      const frontmatterStr = frontmatterMatch[1];
-      const body = frontmatterMatch[2];
-
-      // Parse simple key: value pairs
-      const data: Record<string, unknown> = {};
-      frontmatterStr.split('\n').forEach((line) => {
-        const match = line.match(/^(\w+):\s*(.+)$/);
-        if (match) {
-          data[match[1]] = match[2];
-        }
-      });
-
-      return { data, content: body };
-    }
-    return { data: {}, content };
-  }),
-}));
-
 // Mock logger
 vi.mock('@shared/lib/logger', () => ({
   logger: {
@@ -419,9 +395,9 @@ describe('SystemPromptsService', () => {
 
       const result = service.validatePrompt(incompletePrompt);
 
-      expect(result.errors.some((e) => e.includes('Missing key elements'))).toBe(
-        true
-      );
+      expect(
+        result.errors.some((e) => e.includes('Missing key elements'))
+      ).toBe(true);
     });
 
     it('should handle unknown provider', () => {
@@ -439,9 +415,9 @@ describe('SystemPromptsService', () => {
       const result = service.validatePrompt(unknownPrompt);
 
       expect(result.isValid).toBe(false);
-      expect(
-        result.errors.some((e) => e.includes('No guidelines found'))
-      ).toBe(true);
+      expect(result.errors.some((e) => e.includes('No guidelines found'))).toBe(
+        true
+      );
     });
   });
 
@@ -607,7 +583,9 @@ describe('SystemPromptsService', () => {
     });
 
     it('should return undefined for non-existent employee', async () => {
-      const employee = await service.getEmployeeByName('definitely-non-existent-employee-xyz-123');
+      const employee = await service.getEmployeeByName(
+        'definitely-non-existent-employee-xyz-123'
+      );
 
       expect(employee).toBeUndefined();
     });

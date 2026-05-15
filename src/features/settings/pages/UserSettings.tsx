@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
@@ -146,6 +146,14 @@ const SettingsPageContent: React.FC = () => {
     },
     mode: 'onBlur', // Validate on blur for better UX
   });
+  const profileAvatarUrl = useWatch({
+    control: profileForm.control,
+    name: 'avatar_url',
+  });
+  const profileName = useWatch({
+    control: profileForm.control,
+    name: 'name',
+  });
 
   // Password Change Form
   const passwordForm = useForm<ChangePasswordFormData>({
@@ -210,8 +218,12 @@ const SettingsPageContent: React.FC = () => {
       profileForm.reset({
         name: serverProfile.name || '',
         phone: serverProfile.phone || '',
-        timezone: (serverProfile.timezone as ProfileSettingsFormData['timezone']) || 'America/New_York',
-        language: (serverProfile.language as ProfileSettingsFormData['language']) || 'en',
+        timezone:
+          (serverProfile.timezone as ProfileSettingsFormData['timezone']) ||
+          'America/New_York',
+        language:
+          (serverProfile.language as ProfileSettingsFormData['language']) ||
+          'en',
         bio: serverProfile.bio || '',
         avatar_url: serverProfile.avatar_url || undefined,
       });
@@ -237,12 +249,17 @@ const SettingsPageContent: React.FC = () => {
       });
 
       systemForm.reset({
-        theme: (serverSettings.theme as SystemSettingsFormData['theme']) ?? 'dark',
+        theme:
+          (serverSettings.theme as SystemSettingsFormData['theme']) ?? 'dark',
         auto_save: serverSettings.auto_save ?? true,
         debug_mode: serverSettings.debug_mode ?? false,
         analytics_enabled: serverSettings.analytics_enabled ?? true,
-        cache_size: (serverSettings.cache_size as SystemSettingsFormData['cache_size']) ?? '1GB',
-        backup_frequency: (serverSettings.backup_frequency as SystemSettingsFormData['backup_frequency']) ?? 'daily',
+        cache_size:
+          (serverSettings.cache_size as SystemSettingsFormData['cache_size']) ??
+          '1GB',
+        backup_frequency:
+          (serverSettings.backup_frequency as SystemSettingsFormData['backup_frequency']) ??
+          'daily',
         retention_period: serverSettings.retention_period ?? 30,
         max_concurrent_jobs: serverSettings.max_concurrent_jobs ?? 10,
       });
@@ -262,19 +279,12 @@ const SettingsPageContent: React.FC = () => {
     toggle2FAMutation.isPending;
 
   // UI states
-  const [activeSection, setActiveSection] = useState(section || 'profile');
+  const activeSection = section || 'profile';
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showAPIKeyDialog, setShowAPIKeyDialog] = useState(false);
   const [generatedAPIKey, setGeneratedAPIKey] = useState('');
   const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
-
-  // Update active section when URL changes
-  useEffect(() => {
-    if (section && section !== activeSection) {
-      setActiveSection(section);
-    }
-  }, [section, activeSection]);
 
   // ============================================================================
   // FORM SUBMIT HANDLERS
@@ -314,7 +324,10 @@ const SettingsPageContent: React.FC = () => {
   const handlePasswordChange = useCallback(
     (data: ChangePasswordFormData) => {
       changePasswordMutation.mutate(
-        { newPassword: data.newPassword, confirmPassword: data.confirmPassword },
+        {
+          newPassword: data.newPassword,
+          confirmPassword: data.confirmPassword,
+        },
         {
           onSuccess: () => {
             passwordForm.reset();
@@ -405,7 +418,7 @@ const SettingsPageContent: React.FC = () => {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-yellow-500" />
-          <p className="mb-4 text-muted-foreground">Failed to load settings</p>
+          <p className="text-muted-foreground mb-4">Failed to load settings</p>
           <Button onClick={() => refetch()} variant="outline">
             Retry
           </Button>
@@ -431,10 +444,10 @@ const SettingsPageContent: React.FC = () => {
         className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h1 className="text-2xl font-bold text-foreground md:text-3xl">
+          <h1 className="text-foreground text-2xl font-bold md:text-3xl">
             Settings
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground md:text-base">
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">
             Manage your account, preferences, and system configuration
           </p>
         </div>
@@ -458,37 +471,36 @@ const SettingsPageContent: React.FC = () => {
         <Tabs
           value={activeSection}
           onValueChange={(value) => {
-            setActiveSection(value);
             navigate(`/settings/${value}`, { replace: true });
           }}
           className="space-y-6"
         >
           {/* Glassmorphism Tabs with enhanced styling */}
-          <TabsList className="grid grid-cols-2 border border-border/50 bg-card/50 p-1 shadow-lg backdrop-blur-xl md:grid-cols-4">
+          <TabsList className="border-border/50 bg-card/50 grid grid-cols-2 border p-1 shadow-lg backdrop-blur-xl md:grid-cols-4">
             <TabsTrigger
               value="profile"
-              className="text-xs transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm md:text-sm"
+              className="hover:bg-accent/40 data-[state=active]:bg-accent/80 text-xs transition-all duration-300 data-[state=active]:backdrop-blur-sm md:text-sm"
             >
               <User className="h-4 w-4 md:mr-2" />
               <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
             <TabsTrigger
               value="notifications"
-              className="text-xs transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm md:text-sm"
+              className="hover:bg-accent/40 data-[state=active]:bg-accent/80 text-xs transition-all duration-300 data-[state=active]:backdrop-blur-sm md:text-sm"
             >
               <Bell className="h-4 w-4 md:mr-2" />
               <span className="hidden sm:inline">Notifications</span>
             </TabsTrigger>
             <TabsTrigger
               value="security"
-              className="text-xs transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm md:text-sm"
+              className="hover:bg-accent/40 data-[state=active]:bg-accent/80 text-xs transition-all duration-300 data-[state=active]:backdrop-blur-sm md:text-sm"
             >
               <Shield className="h-4 w-4 md:mr-2" />
               <span className="hidden sm:inline">Security</span>
             </TabsTrigger>
             <TabsTrigger
               value="system"
-              className="text-xs transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm md:text-sm"
+              className="hover:bg-accent/40 data-[state=active]:bg-accent/80 text-xs transition-all duration-300 data-[state=active]:backdrop-blur-sm md:text-sm"
             >
               <Settings className="h-4 w-4 md:mr-2" />
               <span className="hidden sm:inline">System</span>
@@ -501,7 +513,7 @@ const SettingsPageContent: React.FC = () => {
               <Card className="border-border bg-card">
                 <CardContent className="flex items-center justify-center py-8">
                   <div className="text-center">
-                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+                    <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2"></div>
                     <p className="text-muted-foreground">Loading profile...</p>
                   </div>
                 </CardContent>
@@ -525,11 +537,10 @@ const SettingsPageContent: React.FC = () => {
                       {/* Avatar with 3D Hover Effect */}
                       <div className="flex items-center space-x-4">
                         <InteractiveHoverCard>
-                          <Avatar className="h-20 w-20 ring-2 ring-primary/20 transition-all duration-300 hover:ring-primary/40">
-                            <AvatarImage src={profileForm.watch('avatar_url')} />
-                            <AvatarFallback className="bg-accent text-lg text-foreground">
-                              {profileForm
-                                .watch('name')
+                          <Avatar className="ring-primary/20 hover:ring-primary/40 h-20 w-20 ring-2 transition-all duration-300">
+                            <AvatarImage src={profileAvatarUrl} />
+                            <AvatarFallback className="bg-accent text-foreground text-lg">
+                              {profileName
                                 ?.split(' ')
                                 .map((n) => n[0])
                                 .join('') || 'U'}
@@ -547,7 +558,7 @@ const SettingsPageContent: React.FC = () => {
                           <Button
                             type="button"
                             variant="outline"
-                            className="border-border text-foreground transition-transform duration-200 hover:scale-105 hover:text-foreground"
+                            className="border-border text-foreground hover:text-foreground transition-transform duration-200 hover:scale-105"
                             onClick={() =>
                               document.getElementById('avatar-upload')?.click()
                             }
@@ -560,7 +571,7 @@ const SettingsPageContent: React.FC = () => {
                             )}
                             Change Photo
                           </Button>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             JPG, PNG up to 5MB
                           </p>
                         </div>
@@ -589,14 +600,16 @@ const SettingsPageContent: React.FC = () => {
                         />
 
                         <div>
-                          <Label className="text-foreground">Email Address</Label>
+                          <Label className="text-foreground">
+                            Email Address
+                          </Label>
                           <Input
                             type="email"
                             value={user?.email || ''}
                             disabled
-                            className="mt-2 cursor-not-allowed border-border bg-muted text-muted-foreground"
+                            className="border-border bg-muted text-muted-foreground mt-2 cursor-not-allowed"
                           />
-                          <p className="mt-1 text-xs text-muted-foreground">
+                          <p className="text-muted-foreground mt-1 text-xs">
                             Email cannot be changed
                           </p>
                         </div>
@@ -652,10 +665,18 @@ const SettingsPageContent: React.FC = () => {
                                   <SelectItem value="America/Los_Angeles">
                                     Pacific Time (PT)
                                   </SelectItem>
-                                  <SelectItem value="Europe/London">GMT</SelectItem>
-                                  <SelectItem value="Europe/Paris">CET</SelectItem>
-                                  <SelectItem value="Asia/Tokyo">JST</SelectItem>
-                                  <SelectItem value="Asia/Shanghai">CST</SelectItem>
+                                  <SelectItem value="Europe/London">
+                                    GMT
+                                  </SelectItem>
+                                  <SelectItem value="Europe/Paris">
+                                    CET
+                                  </SelectItem>
+                                  <SelectItem value="Asia/Tokyo">
+                                    JST
+                                  </SelectItem>
+                                  <SelectItem value="Asia/Shanghai">
+                                    CST
+                                  </SelectItem>
                                   <SelectItem value="Australia/Sydney">
                                     AEST
                                   </SelectItem>
@@ -703,7 +724,9 @@ const SettingsPageContent: React.FC = () => {
                         name="bio"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-foreground">Bio</FormLabel>
+                            <FormLabel className="text-foreground">
+                              Bio
+                            </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
@@ -714,7 +737,7 @@ const SettingsPageContent: React.FC = () => {
                               />
                             </FormControl>
                             <FormDescription>
-                              {(field.value?.length || 0)}/500 characters
+                              {field.value?.length || 0}/500 characters
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -722,7 +745,7 @@ const SettingsPageContent: React.FC = () => {
                       />
 
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-muted-foreground text-sm">
                           {profileForm.formState.isDirty && (
                             <span className="text-yellow-500">
                               You have unsaved changes
@@ -767,7 +790,9 @@ const SettingsPageContent: React.FC = () => {
               <CardContent>
                 <Form {...notificationForm}>
                   <form
-                    onSubmit={notificationForm.handleSubmit(handleSaveNotifications)}
+                    onSubmit={notificationForm.handleSubmit(
+                      handleSaveNotifications
+                    )}
                     className="space-y-6"
                   >
                     <div className="space-y-4">
@@ -818,7 +843,7 @@ const SettingsPageContent: React.FC = () => {
                           control={notificationForm.control}
                           name={key}
                           render={({ field }) => (
-                            <FormItem className="flex items-center justify-between rounded-lg border border-border/50 p-4">
+                            <FormItem className="border-border/50 flex items-center justify-between rounded-lg border p-4">
                               <div className="space-y-0.5">
                                 <FormLabel className="text-foreground">
                                   {label}
@@ -838,7 +863,7 @@ const SettingsPageContent: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-muted-foreground text-sm">
                         {notificationForm.formState.isDirty && (
                           <span className="text-yellow-500">
                             You have unsaved changes
@@ -847,7 +872,9 @@ const SettingsPageContent: React.FC = () => {
                       </div>
                       <Button
                         type="submit"
-                        disabled={isSaving || !notificationForm.formState.isDirty}
+                        disabled={
+                          isSaving || !notificationForm.formState.isDirty
+                        }
                         className="bg-blue-600 hover:bg-blue-700"
                       >
                         {updateSettingsMutation.isPending ? (
@@ -887,7 +914,7 @@ const SettingsPageContent: React.FC = () => {
                         control={securityForm.control}
                         name="two_factor_enabled"
                         render={({ field }) => (
-                          <FormItem className="flex items-center justify-between rounded-lg border border-border/50 p-4">
+                          <FormItem className="border-border/50 flex items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
                               <FormLabel className="text-foreground">
                                 Two-Factor Authentication
@@ -960,13 +987,15 @@ const SettingsPageContent: React.FC = () => {
                   </Form>
 
                   {/* Change Password - Separate Form */}
-                  <div className="border-t border-border pt-6">
+                  <div className="border-border border-t pt-6">
                     <Form {...passwordForm}>
                       <form
-                        onSubmit={passwordForm.handleSubmit(handlePasswordChange)}
+                        onSubmit={passwordForm.handleSubmit(
+                          handlePasswordChange
+                        )}
                         className="space-y-4"
                       >
-                        <h4 className="font-medium text-foreground">
+                        <h4 className="text-foreground font-medium">
                           Change Password
                         </h4>
 
@@ -975,7 +1004,7 @@ const SettingsPageContent: React.FC = () => {
                           name="newPassword"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm text-muted-foreground">
+                              <FormLabel className="text-muted-foreground text-sm">
                                 New Password
                               </FormLabel>
                               <FormControl>
@@ -983,7 +1012,7 @@ const SettingsPageContent: React.FC = () => {
                                   <Input
                                     {...field}
                                     type={showNewPassword ? 'text' : 'password'}
-                                    className="border-border bg-background pr-10 text-foreground"
+                                    className="border-border bg-background text-foreground pr-10"
                                     placeholder="Enter new password"
                                   />
                                   <button
@@ -991,7 +1020,7 @@ const SettingsPageContent: React.FC = () => {
                                     onClick={() =>
                                       setShowNewPassword(!showNewPassword)
                                     }
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
                                   >
                                     {showNewPassword ? (
                                       <EyeOff className="h-4 w-4" />
@@ -1002,8 +1031,8 @@ const SettingsPageContent: React.FC = () => {
                                 </div>
                               </FormControl>
                               <FormDescription className="text-xs">
-                                Min 8 characters with uppercase, lowercase, number,
-                                and special character
+                                Min 8 characters with uppercase, lowercase,
+                                number, and special character
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -1015,23 +1044,27 @@ const SettingsPageContent: React.FC = () => {
                           name="confirmPassword"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm text-muted-foreground">
+                              <FormLabel className="text-muted-foreground text-sm">
                                 Confirm Password
                               </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <Input
                                     {...field}
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    className="border-border bg-background pr-10 text-foreground"
+                                    type={
+                                      showConfirmPassword ? 'text' : 'password'
+                                    }
+                                    className="border-border bg-background text-foreground pr-10"
                                     placeholder="Confirm new password"
                                   />
                                   <button
                                     type="button"
                                     onClick={() =>
-                                      setShowConfirmPassword(!showConfirmPassword)
+                                      setShowConfirmPassword(
+                                        !showConfirmPassword
+                                      )
                                     }
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
                                   >
                                     {showConfirmPassword ? (
                                       <EyeOff className="h-4 w-4" />
@@ -1054,7 +1087,7 @@ const SettingsPageContent: React.FC = () => {
                             !passwordForm.formState.isDirty
                           }
                           variant="outline"
-                          className="w-full border-border"
+                          className="border-border w-full"
                         >
                           {changePasswordMutation.isPending ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1094,7 +1127,7 @@ const SettingsPageContent: React.FC = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {apiKeys.length === 0 ? (
-                      <div className="py-8 text-center text-muted-foreground">
+                      <div className="text-muted-foreground py-8 text-center">
                         <Key className="mx-auto mb-2 h-12 w-12 opacity-50" />
                         <p>No API keys yet</p>
                         <p className="text-sm">
@@ -1105,16 +1138,16 @@ const SettingsPageContent: React.FC = () => {
                       apiKeys.map((apiKey) => (
                         <div
                           key={apiKey.id}
-                          className="flex items-center justify-between rounded-lg border border-border bg-accent/50 p-3"
+                          className="border-border bg-accent/50 flex items-center justify-between rounded-lg border p-3"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate font-medium text-foreground">
+                            <p className="text-foreground truncate font-medium">
                               {apiKey.name}
                             </p>
-                            <p className="font-mono text-sm text-muted-foreground">
+                            <p className="text-muted-foreground font-mono text-sm">
                               {apiKey.key_prefix}...
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               Created:{' '}
                               {new Date(apiKey.created_at).toLocaleDateString()}
                               {apiKey.last_used_at &&
@@ -1219,7 +1252,7 @@ const SettingsPageContent: React.FC = () => {
                           control={systemForm.control}
                           name={key}
                           render={({ field }) => (
-                            <FormItem className="flex items-center justify-between rounded-lg border border-border/50 p-4">
+                            <FormItem className="border-border/50 flex items-center justify-between rounded-lg border p-4">
                               <div className="space-y-0.5">
                                 <FormLabel className="text-foreground">
                                   {label}
@@ -1368,129 +1401,132 @@ const SettingsPageContent: React.FC = () => {
                   </Card>
                 </div>
 
-            {/* Agent & Metrics Settings */}
-            <Card className="border-border bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Bot className="h-5 w-5 text-primary" />
-                  Agent & Metrics
-                </CardTitle>
-                <CardDescription>
-                  Manage background services and metrics tracking
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Background Service Status */}
-                <div className="rounded-lg border border-border/50 bg-accent/20 p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={cn(
-                          'h-2 w-2 rounded-full',
-                          metricsStore.isBackgroundServiceRunning
-                            ? 'animate-pulse bg-green-500'
-                            : 'bg-gray-500'
-                        )}
-                      />
-                      <span className="font-medium">Background Service</span>
+                {/* Agent & Metrics Settings */}
+                <Card className="border-border bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center gap-2">
+                      <Bot className="text-primary h-5 w-5" />
+                      Agent & Metrics
+                    </CardTitle>
+                    <CardDescription>
+                      Manage background services and metrics tracking
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Background Service Status */}
+                    <div className="border-border/50 bg-accent/20 rounded-lg border p-4">
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={cn(
+                              'h-2 w-2 rounded-full',
+                              metricsStore.isBackgroundServiceRunning
+                                ? 'animate-pulse bg-green-500'
+                                : 'bg-gray-500'
+                            )}
+                          />
+                          <span className="font-medium">
+                            Background Service
+                          </span>
+                        </div>
+                        <Badge
+                          variant={
+                            metricsStore.isBackgroundServiceRunning
+                              ? 'default'
+                              : 'outline'
+                          }
+                        >
+                          {metricsStore.isBackgroundServiceRunning
+                            ? 'Running'
+                            : 'Stopped'}
+                        </Badge>
+                      </div>
+                      <p className="text-muted-foreground text-xs">
+                        Enables agents to continue working when you navigate
+                        away
+                      </p>
                     </div>
-                    <Badge
-                      variant={
-                        metricsStore.isBackgroundServiceRunning
-                          ? 'default'
-                          : 'outline'
-                      }
-                    >
-                      {metricsStore.isBackgroundServiceRunning
-                        ? 'Running'
-                        : 'Stopped'}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Enables agents to continue working when you navigate away
-                  </p>
-                </div>
 
-                {/* Metrics Summary */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3">
-                    <p className="text-xs text-muted-foreground">
-                      Active Agents
-                    </p>
-                    <p className="text-2xl font-bold text-blue-400">
-                      {metricsStore.activeAgents}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-3">
-                    <p className="text-xs text-muted-foreground">
-                      Completed Tasks
-                    </p>
-                    <p className="text-2xl font-bold text-green-400">
-                      {metricsStore.completedTasks}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
-                    <p className="text-xs text-muted-foreground">
-                      Total Tokens
-                    </p>
-                    <p className="text-2xl font-bold text-purple-400">
-                      {metricsStore.totalTokensUsed.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-orange-500/20 bg-orange-500/10 p-3">
-                    <p className="text-xs text-muted-foreground">
-                      Success Rate
-                    </p>
-                    <p className="text-2xl font-bold text-orange-400">
-                      {metricsStore.getSuccessRate().toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
+                    {/* Metrics Summary */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3">
+                        <p className="text-muted-foreground text-xs">
+                          Active Agents
+                        </p>
+                        <p className="text-2xl font-bold text-blue-400">
+                          {metricsStore.activeAgents}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-3">
+                        <p className="text-muted-foreground text-xs">
+                          Completed Tasks
+                        </p>
+                        <p className="text-2xl font-bold text-green-400">
+                          {metricsStore.completedTasks}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
+                        <p className="text-muted-foreground text-xs">
+                          Total Tokens
+                        </p>
+                        <p className="text-2xl font-bold text-purple-400">
+                          {metricsStore.totalTokensUsed.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-orange-500/20 bg-orange-500/10 p-3">
+                        <p className="text-muted-foreground text-xs">
+                          Success Rate
+                        </p>
+                        <p className="text-2xl font-bold text-orange-400">
+                          {metricsStore.getSuccessRate().toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      metricsStore.reset();
-                      toast.success('Metrics reset successfully');
-                    }}
-                    className="flex-1"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Reset Metrics
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      if (metricsStore.isBackgroundServiceRunning) {
-                        backgroundChatService.stop();
-                        toast.info('Background service stopped');
-                      } else {
-                        backgroundChatService.start();
-                        toast.success('Background service started');
-                      }
-                    }}
-                    className="flex-1"
-                  >
-                    {metricsStore.isBackgroundServiceRunning ? (
-                      <>
-                        <AlertTriangle className="mr-2 h-4 w-4" />
-                        Stop Service
-                      </>
-                    ) : (
-                      <>
-                        <Play className="mr-2 h-4 w-4" />
-                        Start Service
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          metricsStore.reset();
+                          toast.success('Metrics reset successfully');
+                        }}
+                        className="flex-1"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Reset Metrics
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          if (metricsStore.isBackgroundServiceRunning) {
+                            backgroundChatService.stop();
+                            toast.info('Background service stopped');
+                          } else {
+                            backgroundChatService.start();
+                            toast.success('Background service started');
+                          }
+                        }}
+                        className="flex-1"
+                      >
+                        {metricsStore.isBackgroundServiceRunning ? (
+                          <>
+                            <AlertTriangle className="mr-2 h-4 w-4" />
+                            Stop Service
+                          </>
+                        ) : (
+                          <>
+                            <Play className="mr-2 h-4 w-4" />
+                            Start Service
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-muted-foreground text-sm">
                     {systemForm.formState.isDirty && (
                       <span className="text-yellow-500">
                         You have unsaved changes
@@ -1531,7 +1567,7 @@ const SettingsPageContent: React.FC = () => {
                       <AlertTriangle className="mr-2 inline h-4 w-4" />
                       Save this key now. You will not be able to see it again!
                     </p>
-                    <div className="break-all rounded border border-border bg-background/50 p-3 font-mono text-sm text-green-400">
+                    <div className="border-border bg-background/50 rounded border p-3 font-mono text-sm break-all text-green-400">
                       {generatedAPIKey}
                     </div>
                     <Button

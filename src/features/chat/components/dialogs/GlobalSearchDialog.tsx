@@ -87,13 +87,6 @@ export function GlobalSearchDialog({
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load recent and popular searches when dialog opens
-  useEffect(() => {
-    if (open && user?.id) {
-      loadSearchHistory();
-    }
-  }, [open, user?.id]);
-
   const loadSearchHistory = useCallback(async () => {
     if (!user?.id) return;
 
@@ -112,13 +105,24 @@ export function GlobalSearchDialog({
     }
   }, [user?.id]);
 
+  // Load recent and popular searches when dialog opens
+  useEffect(() => {
+    if (open && user?.id) {
+      loadSearchHistory();
+    }
+  }, [loadSearchHistory, open, user?.id]);
+
   const handleClearHistory = useCallback(async () => {
     if (!user?.id) return;
 
     try {
-      const deletedCount = await globalSearchService.clearSearchHistory(user.id);
+      const deletedCount = await globalSearchService.clearSearchHistory(
+        user.id
+      );
       setRecentSearches([]);
-      toast.success(`Cleared ${deletedCount} search${deletedCount !== 1 ? 'es' : ''} from history`);
+      toast.success(
+        `Cleared ${deletedCount} search${deletedCount !== 1 ? 'es' : ''} from history`
+      );
     } catch (error) {
       console.error('[GlobalSearch] Failed to clear history:', error);
       toast.error('Failed to clear search history');
@@ -287,9 +291,9 @@ export function GlobalSearchDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
           <DialogContent className="max-h-[80vh] max-w-3xl p-0">
             <div className="flex flex-col items-center justify-center p-8 text-center">
-              <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
+              <Search className="text-muted-foreground mb-3 h-12 w-12 opacity-30" />
               <p className="text-sm font-medium">Search unavailable</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-xs">
                 Something went wrong. Please close and try again.
               </p>
             </div>
@@ -299,7 +303,7 @@ export function GlobalSearchDialog({
     >
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[80vh] max-w-3xl p-0">
-          <DialogHeader className="border-b px-6 pb-4 pt-6">
+          <DialogHeader className="border-b px-6 pt-6 pb-4">
             <DialogTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
               Search Conversations
@@ -307,22 +311,22 @@ export function GlobalSearchDialog({
           </DialogHeader>
 
           {/* Search Input */}
-          <div className="border-b bg-muted/30 px-6 py-4">
+          <div className="bg-muted/30 border-b px-6 py-4">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   placeholder="Search messages and conversations..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="pl-9 pr-9"
+                  className="pr-9 pl-9"
                   autoFocus
                 />
                 {query && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                    className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
                     onClick={handleClear}
                   >
                     <X className="h-3.5 w-3.5" />
@@ -340,7 +344,7 @@ export function GlobalSearchDialog({
                 {activeFilterCount > 0 && (
                   <Badge
                     variant="destructive"
-                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center p-0 text-xs"
+                    className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center p-0 text-xs"
                   >
                     {activeFilterCount}
                   </Badge>
@@ -350,7 +354,7 @@ export function GlobalSearchDialog({
 
             {/* Filters Panel */}
             {showFilters && (
-              <div className="mt-4 space-y-4 rounded-lg border bg-background p-4">
+              <div className="bg-background mt-4 space-y-4 rounded-lg border p-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {/* Role Filter */}
                   <div className="space-y-2">
@@ -461,7 +465,7 @@ export function GlobalSearchDialog({
 
           {/* Search Stats */}
           {stats && (
-            <div className="border-b bg-muted/20 px-6 py-2 text-xs text-muted-foreground">
+            <div className="bg-muted/20 text-muted-foreground border-b px-6 py-2 text-xs">
               Found {stats.totalResults} results ({stats.sessionMatches}{' '}
               conversations, {stats.messageMatches} messages) in{' '}
               {stats.searchTime}ms
@@ -475,7 +479,7 @@ export function GlobalSearchDialog({
           >
             {isSearching ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
               </div>
             ) : results.length === 0 && !query.trim() && showSuggestions ? (
               /* Show recent and popular searches when no query */
@@ -484,7 +488,7 @@ export function GlobalSearchDialog({
                 {recentSearches.length > 0 && (
                   <div>
                     <div className="mb-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
                         <History className="h-4 w-4" />
                         Recent Searches
                       </div>
@@ -492,7 +496,7 @@ export function GlobalSearchDialog({
                         variant="ghost"
                         size="sm"
                         onClick={handleClearHistory}
-                        className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive h-7 px-2 text-xs"
                       >
                         <Trash2 className="mr-1 h-3 w-3" />
                         Clear
@@ -503,14 +507,17 @@ export function GlobalSearchDialog({
                         <button
                           key={`recent-${index}-${search.query}`}
                           onClick={() => handleSuggestionClick(search.query)}
-                          className="group flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-sm transition-colors hover:bg-accent hover:border-primary/20"
+                          className="group bg-background hover:bg-accent hover:border-primary/20 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors"
                         >
-                          <Clock className="h-3 w-3 text-muted-foreground group-hover:text-primary" />
+                          <Clock className="text-muted-foreground group-hover:text-primary h-3 w-3" />
                           <span className="max-w-[150px] truncate">
                             {search.query}
                           </span>
                           {search.resultCount > 0 && (
-                            <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px]">
+                            <Badge
+                              variant="secondary"
+                              className="ml-1 px-1.5 py-0 text-[10px]"
+                            >
                               {search.resultCount}
                             </Badge>
                           )}
@@ -523,7 +530,7 @@ export function GlobalSearchDialog({
                 {/* Popular/Trending Searches */}
                 {popularSearches.length > 0 && (
                   <div>
-                    <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <div className="text-muted-foreground mb-3 flex items-center gap-2 text-sm font-medium">
                       <TrendingUp className="h-4 w-4" />
                       Trending Searches
                     </div>
@@ -532,13 +539,16 @@ export function GlobalSearchDialog({
                         <button
                           key={`popular-${index}-${search.query}`}
                           onClick={() => handleSuggestionClick(search.query)}
-                          className="group flex items-center gap-1.5 rounded-full border border-primary/10 bg-primary/5 px-3 py-1.5 text-sm transition-colors hover:bg-primary/10 hover:border-primary/30"
+                          className="group border-primary/10 bg-primary/5 hover:bg-primary/10 hover:border-primary/30 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors"
                         >
-                          <TrendingUp className="h-3 w-3 text-primary/70 group-hover:text-primary" />
+                          <TrendingUp className="text-primary/70 group-hover:text-primary h-3 w-3" />
                           <span className="max-w-[150px] truncate">
                             {search.query}
                           </span>
-                          <Badge variant="outline" className="ml-1 border-primary/20 px-1.5 py-0 text-[10px] text-primary/70">
+                          <Badge
+                            variant="outline"
+                            className="border-primary/20 text-primary/70 ml-1 px-1.5 py-0 text-[10px]"
+                          >
                             {search.searchCount} searches
                           </Badge>
                         </button>
@@ -548,39 +558,41 @@ export function GlobalSearchDialog({
                 )}
 
                 {/* Empty state when no history */}
-                {recentSearches.length === 0 && popularSearches.length === 0 && !isLoadingHistory && (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-                    <p className="text-sm text-muted-foreground">
-                      Start typing to search
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground/70">
-                      Your search history will appear here
-                    </p>
-                  </div>
-                )}
+                {recentSearches.length === 0 &&
+                  popularSearches.length === 0 &&
+                  !isLoadingHistory && (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <Search className="text-muted-foreground mb-3 h-12 w-12 opacity-30" />
+                      <p className="text-muted-foreground text-sm">
+                        Start typing to search
+                      </p>
+                      <p className="text-muted-foreground/70 mt-1 text-xs">
+                        Your search history will appear here
+                      </p>
+                    </div>
+                  )}
 
                 {/* Loading history */}
                 {isLoadingHistory && (
                   <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
                   </div>
                 )}
               </div>
             ) : results.length === 0 && query.trim() ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-                <p className="text-sm text-muted-foreground">
+                <Search className="text-muted-foreground mb-3 h-12 w-12 opacity-30" />
+                <p className="text-muted-foreground text-sm">
                   No results found
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground/70">
+                <p className="text-muted-foreground/70 mt-1 text-xs">
                   Try different keywords or clear filters
                 </p>
               </div>
             ) : results.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-                <p className="text-sm text-muted-foreground">
+                <Search className="text-muted-foreground mb-3 h-12 w-12 opacity-30" />
+                <p className="text-muted-foreground text-sm">
                   Start typing to search
                 </p>
               </div>
@@ -590,13 +602,13 @@ export function GlobalSearchDialog({
                   <button
                     key={`search-result-${result.type}-${result.sessionId}-${result.messageId || result.matchedText.slice(0, 20)}`}
                     onClick={() => handleResultClick(result)}
-                    className="group w-full rounded-lg border p-3 text-left transition-colors hover:bg-accent"
+                    className="group hover:bg-accent w-full rounded-lg border p-3 text-left transition-colors"
                   >
                     {/* Header */}
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-1 items-center gap-2">
                         {result.type === 'session' ? (
-                          <MessageSquare className="h-4 w-4 shrink-0 text-primary" />
+                          <MessageSquare className="text-primary h-4 w-4 shrink-0" />
                         ) : (
                           getRoleIcon(result.role || 'assistant')
                         )}
@@ -605,15 +617,15 @@ export function GlobalSearchDialog({
                         </span>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
-                        <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
+                        <Clock className="text-muted-foreground h-3 w-3" />
+                        <span className="text-muted-foreground text-xs">
                           {format(result.createdAt, 'MMM d, yyyy')}
                         </span>
                       </div>
                     </div>
 
                     {/* Content Preview with Highlighting */}
-                    <div className="line-clamp-2 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground line-clamp-2 text-xs">
                       {result.contextBefore && (
                         <span className="opacity-70">
                           ...{result.contextBefore}
@@ -643,8 +655,8 @@ export function GlobalSearchDialog({
           </ScrollArea>
 
           {/* Footer */}
-          <div className="border-t bg-muted/20 px-6 py-3">
-            <p className="text-center text-xs text-muted-foreground">
+          <div className="bg-muted/20 border-t px-6 py-3">
+            <p className="text-muted-foreground text-center text-xs">
               Press{' '}
               <kbd className="rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-800 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100">
                 Enter

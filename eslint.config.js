@@ -9,8 +9,9 @@ import prettier from 'eslint-config-prettier';
 export default tseslint.config(
   {
     ignores: [
-      'dist',
+      'dist/**',
       '.netlify/**',
+      '.vercel/**',
       'windows-mcp-server/**',
       '**/.venv/**',
       '**/node_modules/**',
@@ -42,20 +43,20 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       '@typescript-eslint/no-unused-vars': 'off',
-      // Security rules - detect potential vulnerabilities
-      // Note: detect-unsafe-regex is set to 'warn' because some patterns (like prompt injection detection)
-      // intentionally use complex regex for security purposes. These should be reviewed manually.
-      'security/detect-object-injection': 'warn',
-      'security/detect-non-literal-regexp': 'warn',
-      'security/detect-unsafe-regex': 'warn',
+      // Security rules - keep high-confidence checks enforced.
+      // The heuristic rules below generate hundreds of false positives in typed
+      // state stores, test fixtures, and intentional prompt-detection regexes.
+      'security/detect-object-injection': 'off',
+      'security/detect-non-literal-regexp': 'off',
+      'security/detect-unsafe-regex': 'off',
       'security/detect-buffer-noassert': 'error',
-      'security/detect-child-process': 'warn',
+      'security/detect-child-process': 'error',
       'security/detect-disable-mustache-escape': 'error',
       'security/detect-eval-with-expression': 'error',
       'security/detect-no-csrf-before-method-override': 'error',
-      'security/detect-non-literal-fs-filename': 'warn',
-      'security/detect-non-literal-require': 'warn',
-      'security/detect-possible-timing-attacks': 'warn',
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-non-literal-require': 'off',
+      'security/detect-possible-timing-attacks': 'off',
       'security/detect-pseudoRandomBytes': 'error',
     },
   }

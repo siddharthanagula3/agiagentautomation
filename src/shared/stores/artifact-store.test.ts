@@ -8,6 +8,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useArtifactStore } from './artifact-store';
 import type { ArtifactData } from '@features/chat/components/ArtifactPreview';
 
+vi.mock('@shared/lib/supabase-client', () => {
+  const sharedArtifactsQuery = {
+    insert: vi.fn().mockResolvedValue({ error: null }),
+    select: vi.fn(() => sharedArtifactsQuery),
+    eq: vi.fn(() => sharedArtifactsQuery),
+    gt: vi.fn(() => sharedArtifactsQuery),
+    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+  };
+
+  return {
+    supabase: {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: 'test-user' } },
+          error: null,
+        }),
+      },
+      from: vi.fn(() => sharedArtifactsQuery),
+    },
+  };
+});
+
 // Mock artifact data factory
 const createMockArtifact = (
   overrides: Partial<ArtifactData> = {}
@@ -170,8 +192,12 @@ describe('Artifact Store', () => {
     });
 
     it('should set current version', () => {
-      const { addArtifact, addVersion, setCurrentVersion, getMessageArtifacts } =
-        useArtifactStore.getState();
+      const {
+        addArtifact,
+        addVersion,
+        setCurrentVersion,
+        getMessageArtifacts,
+      } = useArtifactStore.getState();
       const messageId = 'msg-123';
       const artifact = createMockArtifact();
 
@@ -198,8 +224,12 @@ describe('Artifact Store', () => {
     });
 
     it('should handle invalid version index', () => {
-      const { addArtifact, addVersion, setCurrentVersion, getMessageArtifacts } =
-        useArtifactStore.getState();
+      const {
+        addArtifact,
+        addVersion,
+        setCurrentVersion,
+        getMessageArtifacts,
+      } = useArtifactStore.getState();
       const messageId = 'msg-123';
       const artifact = createMockArtifact();
 
@@ -218,8 +248,12 @@ describe('Artifact Store', () => {
     });
 
     it('should handle negative version index', () => {
-      const { addArtifact, addVersion, setCurrentVersion, getMessageArtifacts } =
-        useArtifactStore.getState();
+      const {
+        addArtifact,
+        addVersion,
+        setCurrentVersion,
+        getMessageArtifacts,
+      } = useArtifactStore.getState();
       const messageId = 'msg-123';
       const artifact = createMockArtifact();
 
@@ -267,9 +301,9 @@ describe('Artifact Store', () => {
     it('should throw when sharing non-existent artifact', async () => {
       const { shareArtifact } = useArtifactStore.getState();
 
-      await expect(
-        shareArtifact('msg-123', 'non-existent')
-      ).rejects.toThrow('Message artifacts not found');
+      await expect(shareArtifact('msg-123', 'non-existent')).rejects.toThrow(
+        'Message artifacts not found'
+      );
     });
 
     it('should throw when artifact not found in message', async () => {
@@ -342,8 +376,12 @@ describe('Artifact Store', () => {
     });
 
     it('should clear all artifacts', async () => {
-      const { addArtifact, shareArtifact, setActiveArtifact, clearAllArtifacts } =
-        useArtifactStore.getState();
+      const {
+        addArtifact,
+        shareArtifact,
+        setActiveArtifact,
+        clearAllArtifacts,
+      } = useArtifactStore.getState();
 
       const artifact = createMockArtifact();
       addArtifact('msg-1', artifact);

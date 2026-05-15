@@ -117,7 +117,6 @@ export const useMemoizedValue = <T>(
     factoryRef.current = factory;
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => {
     const startTime = performance.now();
     const result = factoryRef.current();

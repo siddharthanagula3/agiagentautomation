@@ -118,9 +118,7 @@ function resolveRelativeImports(
   // Find all relative imports - match various import syntaxes
   // SECURITY NOTE: This regex is safe from ReDoS because all quantified groups use
   // character class exclusions ([^}]*, [^'"]+) which prevent backtracking
-  /* eslint-disable security/detect-unsafe-regex */
   const importRegex = /import\s+(?:(?:\{[^}]*\}|\*\s+as\s+\w+|\w+)(?:\s*,\s*(?:\{[^}]*\}|\*\s+as\s+\w+|\w+))*\s+from\s+)?['"](\.[^'"]+)['"]/g;
-  /* eslint-enable security/detect-unsafe-regex */
 
   // Collect all matches first to avoid regex state issues during replacement
   const matches: Array<{ fullMatch: string; importPath: string }> = [];

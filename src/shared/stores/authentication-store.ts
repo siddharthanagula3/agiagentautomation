@@ -9,6 +9,10 @@ import {
   RegisterData,
 } from '@core/auth/authentication-manager';
 import { logger } from '@shared/lib/logger';
+import {
+  useMissionStore,
+  stopMissionCleanupInterval,
+} from './mission-control-store';
 
 /**
  * Central cleanup function to reset all stores on logout
@@ -16,10 +20,9 @@ import { logger } from '@shared/lib/logger';
  */
 async function cleanupAllStores(): Promise<void> {
   try {
-    // Dynamically import stores to avoid circular dependencies
+    // Keep workforce dynamic because workforce-store reads auth-store state.
     const [
       { useWorkforceStore, cleanupWorkforceSubscription },
-      { useMissionStore, stopMissionCleanupInterval },
       { useNotificationStore },
       { useChatStore },
       { useMultiAgentChatStore },
@@ -30,7 +33,6 @@ async function cleanupAllStores(): Promise<void> {
       { useUserProfileStore },
     ] = await Promise.all([
       import('./workforce-store'),
-      import('./mission-control-store'),
       import('./notification-store'),
       import('./chat-store'),
       import('./multi-agent-chat-store'),
@@ -81,7 +83,9 @@ async function cleanupAllStores(): Promise<void> {
     } else if (typeof artifactState.reset === 'function') {
       artifactState.reset();
     } else {
-      logger.auth('Warning: Artifact store has no clearAllArtifacts or reset method');
+      logger.auth(
+        'Warning: Artifact store has no clearAllArtifacts or reset method'
+      );
     }
 
     // Layout store cleanup (prevents data leaks between users)

@@ -4,12 +4,83 @@
  * Based on official documentation and best practices
  */
 
-import matter from 'gray-matter';
 import { z } from 'zod';
-import type {
-  AIEmployee,
-} from '@core/types/ai-employee';
+import type { AIEmployee } from '@core/types/ai-employee';
 import { logger } from '@shared/lib/logger';
+
+interface ParsedEmployeeMarkdown {
+  data: Record<string, unknown>;
+  content: string;
+}
+
+function stripQuotes(value: string): string {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+    (trimmed.startsWith('"') && trimmed.endsWith('"'))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+
+  return trimmed;
+}
+
+function parseFrontmatterValue(value: string): unknown {
+  const trimmed = value.trim();
+
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    return trimmed.slice(1, -1).split(',').map(stripQuotes).filter(Boolean);
+  }
+
+  const numericValue = Number(trimmed);
+  if (trimmed !== '' && Number.isFinite(numericValue)) {
+    return numericValue;
+  }
+
+  if (trimmed === 'true') return true;
+  if (trimmed === 'false') return false;
+
+  return stripQuotes(trimmed);
+}
+
+function parseEmployeeMarkdown(content: string): ParsedEmployeeMarkdown {
+  const frontmatterMatch = content.match(
+    /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/
+  );
+
+  if (!frontmatterMatch) {
+    return { data: {}, content };
+  }
+
+  const [, frontmatter, body] = frontmatterMatch;
+  const data: Record<string, unknown> = {};
+  const lines = frontmatter.split(/\r?\n/);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const keyValueMatch = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (!keyValueMatch) continue;
+
+    const [, key, rawValue] = keyValueMatch;
+    let value = rawValue.trim();
+
+    if (!value && lines[i + 1]?.trim().startsWith('[')) {
+      const arrayLines: string[] = [];
+
+      while (i + 1 < lines.length) {
+        i++;
+        arrayLines.push(lines[i].trim());
+        if (lines[i].trim().endsWith(']')) break;
+      }
+
+      value = arrayLines.join(' ');
+    }
+
+    data[key] = parseFrontmatterValue(value);
+  }
+
+  return { data, content: body };
+}
 
 /**
  * Zod schema for AI Employee frontmatter validation
@@ -38,7 +109,9 @@ const EmployeeFrontmatterSchema = z.object({
 });
 
 /** Validated employee frontmatter type inferred from Zod schema */
-export type ValidatedEmployeeFrontmatter = z.infer<typeof EmployeeFrontmatterSchema>;
+export type ValidatedEmployeeFrontmatter = z.infer<
+  typeof EmployeeFrontmatterSchema
+>;
 
 /**
  * Validates employee frontmatter data against the schema
@@ -66,10 +139,21 @@ function validateEmployeeFrontmatter(
 }
 
 /** Supported LLM providers for system prompts */
-export type SystemPromptProvider = 'openai' | 'anthropic' | 'google' | 'perplexity' | 'grok' | 'deepseek' | 'qwen';
+export type SystemPromptProvider =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'perplexity'
+  | 'grok'
+  | 'deepseek'
+  | 'qwen';
 
 /** Categories of system prompts */
-export type SystemPromptCategory = 'general' | 'role-specific' | 'task-specific' | 'safety';
+export type SystemPromptCategory =
+  | 'general'
+  | 'role-specific'
+  | 'task-specific'
+  | 'safety';
 
 export interface SystemPrompt {
   id: string;
@@ -579,14 +663,15 @@ export class SystemPromptsService {
       if (typeof window !== 'undefined') {
         // Browser environment - use import.meta.glob for Vite
         const employeeFiles = import.meta.glob('/.agi/employees/*.md', {
-          as: 'raw',
+          query: '?raw',
+          import: 'default',
           eager: false,
         });
 
         for (const [path, loader] of Object.entries(employeeFiles)) {
           try {
             const content = await (loader as () => Promise<string>)();
-            const parsed = matter(content);
+            const parsed = parseEmployeeMarkdown(content);
 
             // Validate frontmatter with Zod schema
             const frontmatter = validateEmployeeFrontmatter(parsed.data, path);
@@ -616,7 +701,10 @@ export class SystemPromptsService {
             validCount++;
           } catch (err) {
             invalidCount++;
-            logger.error(`[SystemPromptsService] Failed to parse employee file ${path}:`, err);
+            logger.error(
+              `[SystemPromptsService] Failed to parse employee file ${path}:`,
+              err
+            );
           }
         }
 
@@ -715,7 +803,8 @@ export const promptManagement = {
   /**
    * Get a specific AI employee by name
    */
-  getEmployeeByName: (name: string) => systemPromptsService.getEmployeeByName(name),
+  getEmployeeByName: (name: string) =>
+    systemPromptsService.getEmployeeByName(name),
 
   /**
    * Invalidate the employee cache (forces reload on next access)

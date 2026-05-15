@@ -194,7 +194,25 @@ export default defineConfig(({ mode }) => {
             }
             // Split large feature modules
             if (id.includes('/features/chat/')) {
-              return 'chat';
+              if (id.includes('/features/chat/components/messages/')) {
+                return 'chat-messages';
+              }
+              if (id.includes('/features/chat/components/workflows/')) {
+                return 'chat-workflows';
+              }
+              if (id.includes('/features/chat/components/dialogs/')) {
+                return 'chat-dialogs';
+              }
+              if (id.includes('/features/chat/components/')) {
+                return 'chat-components';
+              }
+              if (id.includes('/features/chat/services/')) {
+                return 'chat-services';
+              }
+              if (id.includes('/features/chat/hooks/')) {
+                return 'chat-hooks';
+              }
+              return 'chat-feature';
             }
             if (id.includes('/features/vibe/')) {
               return 'vibe';

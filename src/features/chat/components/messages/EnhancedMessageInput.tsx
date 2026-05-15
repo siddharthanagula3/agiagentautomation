@@ -148,17 +148,24 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
     []
   );
 
+  const stopActiveRecording = useCallback(() => {
+    const mediaRecorder = mediaRecorderRef.current;
+
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+    }
+  }, []);
+
   // Cleanup all pending timeouts and media recorder on unmount
   useEffect(() => {
+    const pendingTimeouts = timeoutRefs.current;
+
     return () => {
-      timeoutRefs.current.forEach(clearTimeout);
-      timeoutRefs.current.clear();
-      // Stop any ongoing recording
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-      }
+      pendingTimeouts.forEach(clearTimeout);
+      pendingTimeouts.clear();
+      stopActiveRecording();
     };
-  }, []);
+  }, [stopActiveRecording]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -345,10 +352,10 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
       };
 
       // Include any existing text content with the voice message
-      onSend(
-        content || '[Voice Message]',
-        [...attachments.map((a) => a.file), audioAttachment.file]
-      );
+      onSend(content || '[Voice Message]', [
+        ...attachments.map((a) => a.file),
+        audioAttachment.file,
+      ]);
 
       // Clear state
       setContent('');
@@ -446,7 +453,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
     <div className={cn('flex flex-col gap-2', className)}>
       {/* Recording Error Display */}
       {recordingError && (
-        <div className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="border-destructive/50 bg-destructive/10 text-destructive flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{recordingError}</span>
           <Button
@@ -501,7 +508,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive gap-2"
               onClick={handleDiscardRecording}
             >
               <X className="h-4 w-4" />
@@ -530,7 +537,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
           {attachments.map((attachment) => (
             <div
               key={attachment.id}
-              className="group relative overflow-hidden rounded-lg border border-border bg-card"
+              className="group border-border bg-card relative overflow-hidden rounded-lg border"
             >
               {attachment.preview ? (
                 <img
@@ -540,22 +547,22 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
                 />
               ) : attachment.isAudio ? (
                 <div className="flex h-20 w-20 flex-col items-center justify-center gap-1 p-2">
-                  <Mic className="h-5 w-5 text-muted-foreground" />
-                  <span className="truncate text-xs text-muted-foreground">
+                  <Mic className="text-muted-foreground h-5 w-5" />
+                  <span className="text-muted-foreground truncate text-xs">
                     {attachment.file.name}
                   </span>
                 </div>
               ) : (
                 <div className="flex h-20 w-20 flex-col items-center justify-center gap-1 p-2">
-                  <Paperclip className="h-5 w-5 text-muted-foreground" />
-                  <span className="truncate text-xs text-muted-foreground">
+                  <Paperclip className="text-muted-foreground h-5 w-5" />
+                  <span className="text-muted-foreground truncate text-xs">
                     {attachment.file.name}
                   </span>
                 </div>
               )}
               <button
                 onClick={() => handleRemoveAttachment(attachment.id)}
-                className="absolute right-1 top-1 rounded-full bg-background/80 p-1 opacity-0 transition-opacity hover:bg-background group-hover:opacity-100"
+                className="bg-background/80 hover:bg-background absolute top-1 right-1 rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100"
                 aria-label="Remove attachment"
               >
                 <X className="h-3 w-3" />
@@ -567,9 +574,9 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
 
       {/* Markdown Preview */}
       {showPreview && content && (
-        <div className="rounded-lg border border-border bg-muted/50 p-3">
+        <div className="border-border bg-muted/50 rounded-lg border p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">
+            <span className="text-muted-foreground text-xs font-semibold">
               Preview
             </span>
           </div>
@@ -581,7 +588,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
 
       {/* Input Area - Hidden when actively recording */}
       {recordingState !== 'recording' && recordingState !== 'paused' && (
-        <div className="relative flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
+        <div className="border-border bg-card relative flex flex-col gap-2 rounded-lg border p-3">
           {/* Formatting Toolbar */}
           <div className="flex items-center gap-1">
             <Button
@@ -674,14 +681,14 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
               value={content}
               onChange={handleContentChange}
               placeholder={placeholder}
-              className="max-h-[200px] min-h-[60px] w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              className="placeholder:text-muted-foreground max-h-[200px] min-h-[60px] w-full resize-none bg-transparent text-sm outline-none"
               rows={1}
               disabled={recordingState === 'preview'}
             />
 
             {/* Mention Autocomplete */}
             {showMentions && filteredAgents.length > 0 && (
-              <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-card shadow-lg">
+              <div className="border-border bg-card absolute bottom-full left-0 mb-2 w-64 rounded-lg border shadow-lg">
                 <ScrollArea className="max-h-48">
                   {filteredAgents.map((agent, index) => (
                     <button
@@ -706,7 +713,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
                         <div className="truncate text-sm font-medium">
                           {agent.name}
                         </div>
-                        <div className="truncate text-xs text-muted-foreground">
+                        <div className="text-muted-foreground truncate text-xs">
                           {agent.role}
                         </div>
                       </div>
@@ -734,7 +741,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
                   disabled={permissionStatus === 'denied'}
                 >
                   {permissionStatus === 'denied' ? (
-                    <MicOff className="h-4 w-4 text-muted-foreground" />
+                    <MicOff className="text-muted-foreground h-4 w-4" />
                   ) : (
                     <Mic className="h-4 w-4" />
                   )}
@@ -742,7 +749,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
               )}
 
               {!isVoiceSupported && enableVoice && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   Voice recording not supported
                 </span>
               )}

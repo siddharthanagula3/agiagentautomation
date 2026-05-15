@@ -16,13 +16,34 @@ import React from 'react';
 import {
   Dialog,
   DialogTrigger,
-  DialogContent,
+  DialogContent as BaseDialogContent,
   DialogHeader,
   DialogFooter,
   DialogTitle,
   DialogDescription,
   DialogClose,
 } from './dialog';
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof BaseDialogContent>,
+  React.ComponentPropsWithoutRef<typeof BaseDialogContent>
+>(({ children, ...props }, ref) => {
+  const hasDescription = React.Children.toArray(children).some((child) => {
+    if (!React.isValidElement(child)) return false;
+    return child.type === DialogDescription;
+  });
+
+  const descriptionProps = hasDescription
+    ? {}
+    : { 'aria-describedby': undefined };
+
+  return (
+    <BaseDialogContent ref={ref} {...descriptionProps} {...props}>
+      {children}
+    </BaseDialogContent>
+  );
+});
+DialogContent.displayName = 'TestDialogContent';
 
 describe('Dialog Component', () => {
   beforeEach(() => {
@@ -266,7 +287,9 @@ describe('Dialog Component', () => {
       );
 
       expect(screen.getByPlaceholderText('Name')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Submit' })
+      ).toBeInTheDocument();
     });
   });
 

@@ -27,6 +27,9 @@ const TEST_USER = {
   email: process.env.E2E_TEST_EMAIL || 'test@example.com',
   password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
+const HAS_TEST_CREDENTIALS = Boolean(
+  process.env.E2E_TEST_EMAIL && process.env.E2E_TEST_PASSWORD
+);
 
 // ============================================================
 // HELPER FUNCTIONS
@@ -75,7 +78,14 @@ async function dismissCookieBanner(page: Page) {
 async function attemptLogin(page: Page): Promise<boolean> {
   console.log('🔐 Attempting login...');
 
-  await page.goto(`${BASE_URL}/login`);
+  if (!HAS_TEST_CREDENTIALS) {
+    console.log(
+      '⚠️ Skipping login: E2E_TEST_EMAIL and E2E_TEST_PASSWORD are not configured'
+    );
+    return false;
+  }
+
+  await page.goto(`${BASE_URL}/auth/login`);
   await waitForApp(page);
   await dismissCookieBanner(page);
 
@@ -151,7 +161,7 @@ test.describe('Public Pages', () => {
   test('Login page renders correctly', async ({ page }) => {
     console.log('\n🧪 Login Page');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
     await dismissCookieBanner(page);
     await screenshot(page, 'login-page');
@@ -171,7 +181,7 @@ test.describe('Public Pages', () => {
   test('Signup page renders correctly', async ({ page }) => {
     console.log('\n🧪 Signup Page');
 
-    await page.goto(`${BASE_URL}/signup`);
+    await page.goto(`${BASE_URL}/auth/register`);
     await waitForApp(page);
     await screenshot(page, 'signup-page');
 
@@ -235,7 +245,7 @@ test.describe('Authentication Flow', () => {
   test('Can access login page', async ({ page }) => {
     console.log('\n🧪 Login Access');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
 
     const emailInput = page.locator('input[type="email"]');
@@ -247,7 +257,7 @@ test.describe('Authentication Flow', () => {
   test('Form validation works', async ({ page }) => {
     console.log('\n🧪 Form Validation');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
     await dismissCookieBanner(page);
 
@@ -262,7 +272,7 @@ test.describe('Authentication Flow', () => {
     await page.waitForTimeout(1000);
 
     // Form should not navigate away (HTML5 validation)
-    expect(page.url()).toContain('/login');
+    expect(page.url()).toContain('/auth/login');
 
     console.log('✅ Form validation works');
   });
@@ -270,7 +280,7 @@ test.describe('Authentication Flow', () => {
   test('Password visibility toggle works', async ({ page }) => {
     console.log('\n🧪 Password Toggle');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
     await dismissCookieBanner(page);
 
@@ -465,7 +475,7 @@ test.describe('Responsive Design', () => {
     console.log('\n🧪 Mobile Login');
 
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
 
     await screenshot(page, 'mobile-login');
@@ -566,7 +576,7 @@ test.describe('Error Handling', () => {
       }
     });
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
     await page.waitForTimeout(2000);
 
@@ -600,7 +610,7 @@ test.describe('Performance', () => {
     console.log('\n🧪 Login Performance');
 
     const start = Date.now();
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
     const loadTime = Date.now() - start;
 
@@ -630,7 +640,7 @@ test.describe('Accessibility', () => {
   test('Form inputs have labels', async ({ page }) => {
     console.log('\n🧪 Form Labels');
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
 
     // Check email input has label
@@ -718,7 +728,7 @@ test.describe('Network', () => {
       }
     });
 
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/auth/login`);
     await waitForApp(page);
 
     console.log(`Failed requests: ${failedRequests.length}`);

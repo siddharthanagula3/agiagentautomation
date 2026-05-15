@@ -52,6 +52,50 @@ const categories = [
   { id: 'general', label: 'General', icon: Bot },
 ];
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const coerceNumberMetric = (
+  value: unknown,
+  min?: number,
+  max?: number
+): number | null => {
+  const numericValue =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+        ? Number(value)
+        : Number.NaN;
+
+  if (!Number.isFinite(numericValue)) return null;
+  if (min !== undefined && numericValue < min) return null;
+  if (max !== undefined && numericValue > max) return null;
+  return numericValue;
+};
+
+const firstNumberMetric = (
+  values: unknown[],
+  min?: number,
+  max?: number
+): number | null => {
+  for (const value of values) {
+    const metric = coerceNumberMetric(value, min, max);
+    if (metric !== null) return metric;
+  }
+
+  return null;
+};
+
+const firstStringMetric = (values: unknown[]): string | null => {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) {
+      return value;
+    }
+  }
+
+  return null;
+};
+
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   className,
 }) => {
@@ -138,6 +182,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           typeof cost === 'object' && cost.monthly ? cost.monthly : 99;
         const yearlyPrice =
           typeof cost === 'object' && cost.yearly ? cost.yearly : 999;
+        const performance = isRecord(dbEmp.performance)
+          ? dbEmp.performance
+          : {};
 
         return {
           id: dbEmp.employee_id || dbEmp.id,
@@ -148,7 +195,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             dbEmp.system_prompt?.slice(0, 150) || `Expert ${dbEmp.role}`,
           provider: 'claude' as const, // Default provider
           price: monthlyPrice,
-          originalPrice: monthlyPrice * 2,
+          originalPrice: undefined,
           yearlyPrice: yearlyPrice,
           avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${dbEmp.employee_id}&backgroundColor=EEF2FF%2CE0F2FE%2CF0F9FF&radius=50&size=128`,
           skills: dbEmp.capabilities || [],
@@ -157,10 +204,22 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           popular: dbEmp.level === 'senior',
           defaultTools: dbEmp.tools || [],
           isHired: purchasedEmployeeIds.has(dbEmp.employee_id || dbEmp.id),
-          rating: 4.5 + Math.random() * 0.5,
-          reviews: Math.floor(Math.random() * 100) + 10,
-          successRate: 85 + Math.floor(Math.random() * 15),
-          avgResponseTime: `${Math.floor(Math.random() * 30) + 5}s`,
+          rating: firstNumberMetric([performance.rating], 0, 5),
+          reviews: firstNumberMetric(
+            [performance.reviews, performance.reviewCount, performance.review_count],
+            0
+          ),
+          successRate: firstNumberMetric(
+            [performance.successRate, performance.success_rate],
+            0,
+            100
+          ),
+          avgResponseTime: firstStringMetric([
+            performance.avgResponseTime,
+            performance.avg_response_time,
+            performance.responseTime,
+            performance.response_time,
+          ]),
           examples: [
             `Help with ${dbEmp.role.toLowerCase()} tasks`,
             `Provide expert advice on ${dbEmp.category || 'general'} topics`,
@@ -172,7 +231,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       // Apply sorting
       switch (sortBy) {
         case 'rating':
-          transformedEmployees.sort((a, b) => b.rating - a.rating);
+          transformedEmployees.sort(
+            (a, b) => (b.rating ?? 0) - (a.rating ?? 0)
+          );
           break;
         case 'price-low':
           transformedEmployees.sort((a, b) => a.price - b.price);
@@ -186,8 +247,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         case 'popular':
         default:
           transformedEmployees.sort((a, b) => {
-            const aScore = (a.popular ? 1 : 0) + a.rating;
-            const bScore = (b.popular ? 1 : 0) + b.rating;
+            const aScore = (a.popular ? 1 : 0) + (a.rating ?? 0);
+            const bScore = (b.popular ? 1 : 0) + (b.rating ?? 0);
             return bScore - aScore;
           });
           break;
@@ -235,11 +296,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     let successCount = 0;
     let failureCount = 0;
 
-    for (let i = 0; i < unhiredEmployees.length; i++) {
+    for (const [i, employee] of unhiredEmployees.entries()) {
       // Check if component is still mounted
       if (!isMountedRef.current) break;
-
-      const employee = unhiredEmployees[i];
 
       try {
         // Check if already hired (double-check)

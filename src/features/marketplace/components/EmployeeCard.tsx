@@ -31,10 +31,10 @@ export interface AIEmployee extends Omit<
   avatar: string;
   popular: boolean;
   isHired: boolean;
-  rating: number;
-  reviews: number;
-  successRate: number;
-  avgResponseTime: string;
+  rating: number | null;
+  reviews: number | null;
+  successRate: number | null;
+  avgResponseTime: string | null;
   examples: string[];
 }
 
@@ -146,11 +146,15 @@ export const EmployeeCard = memo(function EmployeeCard({
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                     <span className="text-foreground">
-                      {employee.rating.toFixed(1)}
+                      {employee.rating !== null
+                        ? employee.rating.toFixed(1)
+                        : 'Unrated'}
                     </span>
-                    <span className="text-muted-foreground">
-                      ({employee.reviews})
-                    </span>
+                    {employee.reviews !== null && (
+                      <span className="text-muted-foreground">
+                        ({employee.reviews})
+                      </span>
+                    )}
                   </div>
                   <span className="font-semibold text-green-500">
                     ${employee.price}/mo
@@ -257,11 +261,15 @@ export const EmployeeCard = memo(function EmployeeCard({
             <div className="flex items-center space-x-1">
               <Star className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
               <span className="text-foreground">
-                {employee.rating.toFixed(1)}
+                {employee.rating !== null
+                  ? employee.rating.toFixed(1)
+                  : 'Unrated'}
               </span>
-              <span className="text-muted-foreground">
-                ({employee.reviews})
-              </span>
+              {employee.reviews !== null && (
+                <span className="text-muted-foreground">
+                  ({employee.reviews})
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-1">
               {employee.originalPrice &&
@@ -281,12 +289,16 @@ export const EmployeeCard = memo(function EmployeeCard({
             </div>
             <div className="flex items-center space-x-1">
               <CheckCircle className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-              <span className="text-foreground">{employee.successRate}%</span>
+              <span className="text-foreground">
+                {employee.successRate !== null
+                  ? `${employee.successRate}%`
+                  : 'No data'}
+              </span>
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="h-4 w-4 text-orange-500 dark:text-orange-400" />
               <span className="text-foreground">
-                {employee.avgResponseTime}
+                {employee.avgResponseTime ?? 'No data'}
               </span>
             </div>
           </div>

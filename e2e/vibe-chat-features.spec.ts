@@ -7,13 +7,21 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const BASE_URL = 'https://agiagentautomation.com';
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 // Test credentials - MUST be set via environment variables in CI/CD
 // Never commit actual credentials to the repository
 const TEST_USER = {
   email: process.env.E2E_TEST_EMAIL || 'test@example.com',
   password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
+const HAS_TEST_CREDENTIALS = Boolean(
+  process.env.E2E_TEST_EMAIL && process.env.E2E_TEST_PASSWORD
+);
+
+test.skip(
+  !HAS_TEST_CREDENTIALS,
+  'Deep chat/VIBE E2E tests require E2E_TEST_EMAIL and E2E_TEST_PASSWORD'
+);
 
 // Helper functions
 async function captureScreenshot(page: Page, name: string) {
@@ -29,7 +37,7 @@ async function waitForPageLoad(page: Page) {
 
 async function login(page: Page) {
   console.log('🔐 Logging in...');
-  await page.goto(`${BASE_URL}/login`);
+  await page.goto(`${BASE_URL}/auth/login`);
   await page.locator('input[type="email"]').fill(TEST_USER.email);
   await page.locator('input[type="password"]').fill(TEST_USER.password);
   await page.locator('button[type="submit"]').first().click();

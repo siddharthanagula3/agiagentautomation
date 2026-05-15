@@ -10,9 +10,6 @@ import {
 } from '@core/auth/authentication-manager';
 import { logger } from '@shared/lib/logger';
 
-// Import cleanup function for workforce subscription
-import { cleanupWorkforceSubscription } from './workforce-store';
-
 /**
  * Central cleanup function to reset all stores on logout
  * Prevents data leaks between user sessions
@@ -21,7 +18,7 @@ async function cleanupAllStores(): Promise<void> {
   try {
     // Dynamically import stores to avoid circular dependencies
     const [
-      { useWorkforceStore },
+      { useWorkforceStore, cleanupWorkforceSubscription },
       { useMissionStore, stopMissionCleanupInterval },
       { useNotificationStore },
       { useChatStore },

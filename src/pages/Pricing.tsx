@@ -149,7 +149,7 @@ const PricingPage: React.FC = () => {
 
     // If user is not logged in, redirect to register page
     if (!user) {
-      navigate('/register', { state: { selectedPlan: planName } });
+      navigate('/auth/register', { state: { selectedPlan: planName } });
       return;
     }
 

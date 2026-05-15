@@ -408,7 +408,7 @@ const VibeDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate('/login', { state: { from: '/vibe' } });
+      navigate('/auth/login', { state: { from: '/vibe' } });
       return;
     }
 

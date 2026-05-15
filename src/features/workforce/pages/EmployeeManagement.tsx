@@ -101,7 +101,7 @@ const EmployeeManagement: React.FC = () => {
             <CardDescription>Please log in to view workforce</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/login">
+            <Link to="/auth/login">
               <Button className="gradient-primary w-full text-white">
                 Go to Login
               </Button>

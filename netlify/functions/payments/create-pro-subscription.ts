@@ -121,7 +121,7 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
             product_data: {
               name: `${plan === 'pro' ? 'Pro' : 'Max'} Plan`,
               description: planDescriptions[plan as 'pro' | 'max'],
-              images: ['https://agiagentautomation.com/favicon.ico'],
+              images: ['https://agiworkforce.com/favicon.ico'],
             },
             recurring: {
               interval: interval as 'month' | 'year',
@@ -143,8 +143,8 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
           billingPeriod,
         },
       },
-      success_url: `${process.env.URL || 'https://agiagentautomation.com'}/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.URL || 'https://agiagentautomation.com'}/billing?canceled=true`,
+      success_url: `${process.env.URL || 'https://agiworkforce.com'}/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.URL || 'https://agiworkforce.com'}/billing?canceled=true`,
     }, {
       idempotencyKey,
     });

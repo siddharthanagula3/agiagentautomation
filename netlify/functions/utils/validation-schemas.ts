@@ -222,6 +222,16 @@ export const billingPortalSchema = z.object({
     .regex(/^cus_[a-zA-Z0-9]+$/, 'Invalid Stripe customer ID format'),
 });
 
+/**
+ * Update payment method request schema
+ * SECURITY: Validates Stripe payment method ID format
+ */
+export const updatePaymentMethodSchema = z.object({
+  paymentMethodId: z
+    .string()
+    .regex(/^pm_[a-zA-Z0-9]+$/, 'Invalid Stripe payment method ID format'),
+});
+
 // =============================================================================
 // AGENTS SESSION SCHEMA
 // =============================================================================
@@ -494,6 +504,7 @@ export type QwenRequest = z.infer<typeof qwenRequestSchema>;
 export type CreateSubscriptionRequest = z.infer<typeof createSubscriptionSchema>;
 export type BuyTokenPackRequest = z.infer<typeof buyTokenPackSchema>;
 export type BillingPortalRequest = z.infer<typeof billingPortalSchema>;
+export type UpdatePaymentMethodRequest = z.infer<typeof updatePaymentMethodSchema>;
 export type AgentsSessionRequest = z.infer<typeof agentsSessionSchema>;
 export type FetchPageRequest = z.infer<typeof fetchPageSchema>;
 export type VibeBuildRequest = z.infer<typeof vibeBuildSchema>;

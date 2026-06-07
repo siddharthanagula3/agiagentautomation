@@ -17,10 +17,10 @@ import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 // =============================================================================
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'AGI Agent <noreply@agiagentautomation.com>';
-const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@agiagentautomation.com';
-const APP_NAME = 'AGI Agent Automation';
-const APP_URL = process.env.VITE_APP_URL || 'https://agiagentautomation.com';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'AGI Workforce <noreply@agiworkforce.com>';
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@agiworkforce.com';
+const APP_NAME = 'AGI Workforce';
+const APP_URL = process.env.VITE_APP_URL || 'https://agiworkforce.com';
 
 // Security headers
 const SECURITY_HEADERS = {

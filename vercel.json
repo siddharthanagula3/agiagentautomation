@@ -1,47 +1,10 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "buildCommand": "npm run build:prod",
-  "outputDirectory": "dist",
-  "installCommand": "npm ci --legacy-peer-deps",
-  "rewrites": [
+  "redirects": [
     {
-      "source": "/.netlify/functions/(.*)",
-      "destination": "/api/$1"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
-    {
-      "source": "/((?!api/)(?!\\.netlify/).*)",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "destination": "https://agiworkforce.com/waitlist",
+      "permanent": true
     }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    }
-  ],
-  "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }

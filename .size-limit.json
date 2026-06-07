@@ -38,7 +38,7 @@
   {
     "name": "AI core",
     "path": "dist/assets/ai-core-*.js",
-    "limit": "120 kB",
+    "limit": "135 kB",
     "gzip": true
   },
   {

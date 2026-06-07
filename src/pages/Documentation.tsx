@@ -109,7 +109,7 @@ const DocumentationPage: React.FC = () => {
             </h1>
             <p className="mb-8 text-xl text-muted-foreground">
               Comprehensive guides, tutorials, and API documentation to help you
-              build with AGI Agent
+              build with AGI Workforce
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button

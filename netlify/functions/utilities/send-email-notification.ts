@@ -141,17 +141,17 @@ function generateEmailContent(
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #1a1a1a;">Support Ticket Received</h2>
             <p>Hi ${recipientName || 'there'},</p>
-            <p>Thank you for contacting AGI Agent support. We've received your request and will respond as soon as possible.</p>
+            <p>Thank you for contacting AGI Workforce support. We've received your request and will respond as soon as possible.</p>
             <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 0;"><strong>Ticket ID:</strong> #${ticketId.slice(0, 8)}</p>
             </div>
             <p>You can track your ticket status and add replies by visiting:</p>
             <p><a href="${ticketUrl}" style="color: #0066cc;">${ticketUrl}</a></p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-            <p style="color: #666; font-size: 14px;">The AGI Agent Support Team</p>
+            <p style="color: #666; font-size: 14px;">The AGI Workforce Support Team</p>
           </div>
         `,
-        text: `Support Ticket Received\n\nHi ${recipientName || 'there'},\n\nThank you for contacting AGI Agent support. We've received your request and will respond as soon as possible.\n\nTicket ID: #${ticketId.slice(0, 8)}\n\nTrack your ticket: ${ticketUrl}\n\nThe AGI Agent Support Team`,
+        text: `Support Ticket Received\n\nHi ${recipientName || 'there'},\n\nThank you for contacting AGI Workforce support. We've received your request and will respond as soon as possible.\n\nTicket ID: #${ticketId.slice(0, 8)}\n\nTrack your ticket: ${ticketUrl}\n\nThe AGI Workforce Support Team`,
       };
 
     case 'ticket_reply':
@@ -166,10 +166,10 @@ function generateEmailContent(
             <p>View the full conversation:</p>
             <p><a href="${ticketUrl}" style="color: #0066cc;">${ticketUrl}</a></p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-            <p style="color: #666; font-size: 14px;">The AGI Agent Support Team</p>
+            <p style="color: #666; font-size: 14px;">The AGI Workforce Support Team</p>
           </div>
         `,
-        text: `New Reply on Your Ticket\n\nHi ${recipientName || 'there'},\n\nOur support team has replied to your ticket.\n\n${message ? `Reply:\n${message}\n\n` : ''}View the full conversation: ${ticketUrl}\n\nThe AGI Agent Support Team`,
+        text: `New Reply on Your Ticket\n\nHi ${recipientName || 'there'},\n\nOur support team has replied to your ticket.\n\n${message ? `Reply:\n${message}\n\n` : ''}View the full conversation: ${ticketUrl}\n\nThe AGI Workforce Support Team`,
       };
 
     case 'ticket_status_change':
@@ -184,15 +184,15 @@ function generateEmailContent(
             <p>View your ticket:</p>
             <p><a href="${ticketUrl}" style="color: #0066cc;">${ticketUrl}</a></p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-            <p style="color: #666; font-size: 14px;">The AGI Agent Support Team</p>
+            <p style="color: #666; font-size: 14px;">The AGI Workforce Support Team</p>
           </div>
         `,
-        text: `Ticket Status Updated\n\nHi ${recipientName || 'there'},\n\nThe status of your support ticket has been updated.\n\n${message ? `New Status: ${message}\n\n` : ''}View your ticket: ${ticketUrl}\n\nThe AGI Agent Support Team`,
+        text: `Ticket Status Updated\n\nHi ${recipientName || 'there'},\n\nThe status of your support ticket has been updated.\n\n${message ? `New Status: ${message}\n\n` : ''}View your ticket: ${ticketUrl}\n\nThe AGI Workforce Support Team`,
       };
 
     default:
       return {
-        subject: `AGI Agent Support - #${ticketId.slice(0, 8)}`,
+        subject: `AGI Workforce Support - #${ticketId.slice(0, 8)}`,
         html: `<p>Notification for ticket #${ticketId.slice(0, 8)}</p>`,
         text: `Notification for ticket #${ticketId.slice(0, 8)}`,
       };

@@ -260,7 +260,7 @@ const AboutPage: React.FC = () => {
               Our Team
             </Badge>
             <h2 className="mb-4 text-4xl font-bold md:text-5xl">
-              Meet the Minds Behind AGI Agent
+              Meet the Minds Behind AGI Workforce
             </h2>
             <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
               A team of AI experts, engineers, and visionaries working to

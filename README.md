@@ -1,65 +1,101 @@
 # AGI Agent Automation Platform
 
-A modern web SaaS platform for managing and coordinating multi-agent workflows. It provides an AI employee marketplace, collaborative chat environments, a custom sandbox environment for AI coding, and provider adapters to work with all major LLM APIs.
+The AGI Agent Automation Platform is a multi-agent orchestration SaaS platform that enables users to hire, coordinate, and run tasks with over 140 specialized AI employee personas. The platform features two core workspaces:
+1.  **`/chat`**: A collaborative environment where multiple AI agents converse and execute complex multi-step plans in parallel.
+2.  **`/vibe`**: A full-featured AI coding sandbox integrating a Monaco code editor, file-tree navigation, a terminal, and a live web application preview.
 
-## Key Features
+---
 
-*   **Multi-Agent Collaborative Workspaces**: Let multiple AI agents discuss, plan, and work on tasks collaboratively in real-time.
-*   **AI Developer Workspace (/vibe)**: A full-screen coding environment featuring a Monaco code editor, file tree explorer, terminal view, and a live application preview.
-*   **Provider Adapters**: Out-of-the-box integration with OpenAI, Anthropic, Google Gemini, DeepSeek, xAI Grok, Perplexity, and Qwen.
-*   **Employee Marketplace**: Pre-configured agent personas for specialized roles (engineering, product, design, marketing) loaded from markdown files.
-*   **Media and Document Utilities**: Features for image/video generation and document export (PDF/DOCX).
+## Core Capabilities
 
-## Tech Stack
+*   **Multi-Agent Coordination**: Implements a Plan-Delegate-Execute design pattern. Tasks are parsed, split into logical sub-tasks, and delegated to specialized agents.
+*   **Unified LLM Router**: Secures and proxies requests to OpenAI, Anthropic, Google Gemini, DeepSeek, Perplexity, Qwen, and Grok.
+*   **Secure API Architecture**: All API keys are kept server-side. Frontend requests are authenticated using Supabase JWTs and routed through rate-limited serverless functions.
+*   **Hot-Reloadable Employee Marketplace**: AI employee personas are defined dynamically via markdown files with YAML frontmatter located in `.agi/employees/`. New employees can be added or updated without writing code.
 
-*   **Frontend**: React (v19), TypeScript, Vite, Tailwind CSS, Radix UI components, Zustand (state management), and React Query (server-state caching).
-*   **Backend Services**: Supabase (PostgreSQL database, authentication, and Row Level Security) and Vercel serverless functions for secure LLM proxying.
-*   **Third-party Services**: Stripe (for billing/credit management), Sentry (for error reporting), and Upstash Redis (for API rate-limiting).
+---
+
+## Technical Architecture Overview
+
+*   **Frontend**: React (v19), TypeScript, Vite, Tailwind CSS, Radix UI.
+*   **State Management**: Zustand with Immer middleware for immutable client state, combined with React Query for cached server state.
+*   **Backend & Database**: Supabase (PostgreSQL with Row Level Security, Auth, and Storage) and Netlify serverless function proxies.
+*   **Infrastructure & Tooling**:
+    *   **Joi Validation**: Schemas and build validation scripts (`scripts/validate-employees.ts`) using Joi to verify employee configuration files.
+    *   **Vercel Integration**: Live application telemetry using `@vercel/analytics` and `@vercel/speed-insights`.
+    *   **iOS Workspace**: Native iOS companion components (`ios/AGIWorkforceScanner.swift`) utilizing ARKit and AVFoundation.
+    *   **Fastlane**: Automation lanes (`fastlane/Fastfile`) for building and distributing mobile companions.
+    *   **Kubernetes**: Local and cloud deployment configurations (`k8s/deployment.yaml`, `k8s/service.yaml`).
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 
-*   Node.js 18+
-*   Docker (for running local Supabase development environment)
-*   Supabase CLI
+*   **Node.js**: Version 18 or higher.
+*   **Docker**: Required for running the local Supabase environment.
+*   **Supabase CLI**: Required for local database migrations.
 
-### Setup
+### Installation
 
-1.  **Clone the repository**
+1.  **Clone the Repository**
     ```bash
     git clone https://github.com/siddharthanagula3/agiagentautomation.git
     cd agiagentautomation
     ```
 
-2.  **Install dependencies**
+2.  **Install Project Dependencies**
     ```bash
     npm install
     ```
 
-3.  **Configure environment variables**
-    Copy the template and fill in your keys:
+3.  **Configure Environment Variables**
+    Copy the example template to `.env` and fill in your Supabase configuration and provider API keys:
     ```bash
     cp .env.example .env
     ```
 
-4.  **Start the local database and services**
-    Ensure Docker is running, then initialize Supabase:
+4.  **Start Local Database & Apply Migrations**
+    Start the local Supabase containers (requires Docker) and reset the database state:
     ```bash
     supabase start
     supabase db reset
     ```
 
-5.  **Run the development server**
+5.  **Run Development Server**
+    Start the Vite bundler and development server:
     ```bash
     npm run dev
     ```
-    The app will start at `http://localhost:5173`.
+    The application will be available at `http://localhost:5173`.
 
-## Deployment
+---
 
-The application is configured to deploy as a Single Page Application (SPA) on Vercel:
+## Project Structure
 
-*   Configure environment variables in the Vercel project settings dashboard.
-*   Set the build command to `npm run build:prod` and output directory to `dist`.
-*   Ensure that Stripe and Supabase webhook configurations point to the correct production domain.
+```
+agiagentautomation/
+├── .agi/                     # AI employee definition files (.md)
+├── docs/                     # Guides, schemas, and skills evidence mapping
+├── fastlane/                 # Fastlane mobile automation configurations
+├── ios/                      # Native Swift iOS companion files (ARKit/AVFoundation)
+├── k8s/                      # Kubernetes deployment manifests
+├── netlify/functions/        # Serverless backend proxies & rate limiters
+├── scripts/                  # Build scripts and Joi validation utilities
+├── src/                      # Frontend Application
+│   ├── core/                 # Unified LLM layers, authentication, and security
+│   ├── features/             # Feature modules (/vibe, /chat, marketplace, billing)
+│   ├── shared/               # Reusable UI components, hooks, utility libraries, and Zustand stores
+│   └── main.tsx              # React entry point with Vercel telemetry
+└── supabase/                 # PostgreSQL database schemas, configurations, and migrations
+```
+
+---
+
+## Testing & Quality Controls
+
+*   **Type Checking**: Run `npm run type-check` to verify TypeScript files.
+*   **Linter**: Run `npm run lint` to enforce clean code guidelines.
+*   **Unit & Integration Tests**: Run `npm run test:run` to execute Vitest suites.
+*   **Employee Validation**: Run `npx tsx scripts/validate-employees.ts` to validate all employee frontmatter configurations using Joi.

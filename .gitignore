@@ -141,3 +141,7 @@ docs/drafts/
 # Lighthouse CI
 .lighthouseci/
 .vercel
+
+# PDF Analysis reports
+Siddhartha_Nagula_Analysis*.pdf
+*Analysis*.pdf

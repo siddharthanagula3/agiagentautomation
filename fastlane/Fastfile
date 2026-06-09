@@ -1,0 +1,39 @@
+# Custom Fastlane configuration for AGI Workforce iOS integration
+# For detailed documentation see: https://docs.fastlane.tools
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Run Swift tests and analyze code structure"
+  lane :test do
+    scan(
+      scheme: "AGIWorkforce",
+      device: "iPhone 15",
+      clean: true
+    )
+  end
+
+  desc "Build and sign the iOS application for test distribution"
+  lane :beta do
+    setup_ci if is_ci
+    
+    # Increment project version numbers
+    increment_build_number(xcodeproj: "AGIWorkforce.xcodeproj")
+    
+    # Match provisioning profiles
+    match(type: "adhoc")
+    
+    # Build package using gym
+    build_app(
+      workspace: "AGIWorkforce.xcworkspace",
+      scheme: "AGIWorkforce",
+      output_directory: "./build",
+      output_name: "AGIWorkforce.ipa"
+    )
+    
+    # Upload to Apple TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

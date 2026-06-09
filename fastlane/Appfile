@@ -1,0 +1,8 @@
+# Appfile configurations mapping Apple developer account IDs and application bundle IDs.
+# For more info: https://docs.fastlane.tools/advanced/#appfile
+
+app_identifier("com.siddharthanagula.agiworkforce") # The bundle identifier of your app
+apple_id("siddharthanagula3@gmail.com") # Your Apple Developer Portal username
+
+itc_team_id("120485721") # App Store Connect Team ID
+team_id("XWMCVGDYER") # Apple Developer Portal Team ID

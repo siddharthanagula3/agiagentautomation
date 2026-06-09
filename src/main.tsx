@@ -12,6 +12,8 @@ import {
   validateAndLogEnvironment,
   logEnvironmentConfig,
 } from '@shared/utils/env-validation';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import './index.css';
 
 // Initialize Sentry error monitoring
@@ -177,6 +179,8 @@ export const Main = () => (
         >
           <QueryClientProvider client={queryClient}>
             <AppRouter />
+            <Analytics />
+            <SpeedInsights />
             <Toaster position="top-right" richColors />
             {import.meta.env.DEV && (
               <ReactQueryDevtools initialIsOpen={false} />

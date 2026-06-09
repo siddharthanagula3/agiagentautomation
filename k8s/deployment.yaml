@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agiworkforce-app
+  namespace: default
+  labels:
+    app: agiworkforce-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: agiworkforce-app
+  template:
+    metadata:
+      labels:
+        app: agiworkforce-app
+    spec:
+      containers:
+        - name: web-app
+          image: siddharthanagula/agiworkforce-web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: VITE_SUPABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: url
+            - name: VITE_SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: anon-key
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20

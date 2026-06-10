@@ -15,6 +15,7 @@
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { generateSecureId } from '@shared/utils/secure-id';
 
 // ============================================================================
 // TYPE DEFINITIONS (E2B-inspired)
@@ -517,7 +518,7 @@ export const useSandboxManager = create<SandboxManagerState>()(
     fileWatchers: new Map(),
 
     createSession: (template?: SandboxTemplate) => {
-      const sessionId = `sandbox-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      const sessionId = `sandbox-${Date.now()}-${generateSecureId(8)}`;
       const selectedTemplate = template || SANDBOX_TEMPLATES['react-ts'];
 
       // Convert template files to SandboxFile objects

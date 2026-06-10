@@ -7,6 +7,7 @@
  */
 
 import JSZip from 'jszip';
+import { SecurityManager } from '@shared/lib/security';
 
 // ============================================================================
 // Types
@@ -809,7 +810,9 @@ export default defineConfig({
         dirtyFiles: Array.from(this.dirtyFiles),
       };
 
-      localStorage.setItem(this.storageKey, JSON.stringify(state));
+      const security = new SecurityManager();
+      const encrypted = security.encrypt(JSON.stringify(state));
+      localStorage.setItem(this.storageKey, encrypted);
     } catch (error) {
       console.error('Failed to save to localStorage:', error);
       throw new FileSystemException(
@@ -824,7 +827,14 @@ export default defineConfig({
       const stored = localStorage.getItem(this.storageKey);
       if (!stored) return;
 
-      const state = JSON.parse(stored);
+      let decrypted = stored;
+      // Handle backward compatibility for unencrypted stores
+      if (!stored.trim().startsWith('{')) {
+        const security = new SecurityManager();
+        decrypted = security.decrypt(stored);
+      }
+
+      const state = JSON.parse(decrypted);
 
       // Restore files map
       this.files = new Map(

@@ -33,8 +33,9 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          config-file: ./.github/codeql/codeql-config.yml
           # Custom queries for additional security checks
-          queries: +security-extended,security-and-quality
+          queries: +security-extended
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v4

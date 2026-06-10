@@ -14,6 +14,7 @@
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { generateSecureId } from '@shared/utils/secure-id';
 
 // ============================================================================
 // TYPE DEFINITIONS (from VibeSDK patterns)
@@ -298,7 +299,7 @@ export const useVibeOrchestrator = create<VibeOrchestratorState>()(
     eventEmitter: new TypedEventEmitter<VibeEvent>(),
 
     initSession: (behaviorType: BehaviorType) => {
-      const sessionId = `vibe-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      const sessionId = `vibe-${Date.now()}-${generateSecureId(8)}`;
 
       set((state) => {
         state.session = {
@@ -567,7 +568,7 @@ export function createGenerationPhase(
   description: string
 ): GenerationPhase {
   return {
-    id: `phase-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    id: `phase-${Date.now()}-${generateSecureId(8)}`,
     name,
     description,
     status: 'pending',

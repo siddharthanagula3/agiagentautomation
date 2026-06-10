@@ -263,6 +263,11 @@ self.addEventListener('notificationclick', (event) => {
 
 // Message handling for communication with main thread
 self.addEventListener('message', (event) => {
+  // Security check: Verify origin of the message sender
+  if (event.origin && event.origin !== self.location.origin) {
+    return;
+  }
+
   console.log('Service Worker received message:', event.data);
 
   if (event.data && event.data.type === 'SKIP_WAITING') {

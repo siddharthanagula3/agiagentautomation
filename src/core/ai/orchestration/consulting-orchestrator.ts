@@ -1218,6 +1218,81 @@ export class ConsultingOrchestrator {
       const agent = this.agents[step.agentId];
       if (!agent) continue;
 
+      // Programmatic Step Input/Output Contract Enforcement & Dynamic Backfilling
+      const requiredInputs = step.requires || [];
+      const missingInputs = requiredInputs.filter(
+        (input) => previousOutputs[input] === undefined
+      );
+
+      if (missingInputs.length > 0) {
+        store.addMessage({
+          from: 'system',
+          type: 'system',
+          content: `⚠️ Missing required inputs for **${agent.name}**: ${missingInputs.join(', ')}. Programmatically triggering backfill...`,
+        });
+
+        for (const missingInput of missingInputs) {
+          const providerAgent = Object.values(this.agents).find(
+            (a) => a.produces.includes(missingInput) && a.id !== 'supervisor'
+          );
+
+          if (providerAgent) {
+            store.addMessage({
+              from: 'system',
+              type: 'system',
+              content: `🔄 Dynamic backfill: Invoking **${providerAgent.name}** to produce missing input **${missingInput}**...`,
+            });
+
+            const backfillStep: WorkflowStep = {
+              id: `backfill-${missingInput}`,
+              agentId: providerAgent.id,
+              name: `Backfill ${missingInput}`,
+              description: `Generate missing ${missingInput} context required by ${agent.name}`,
+              produces: [missingInput],
+              instructions: `Please generate the missing data for: "${missingInput}" based on user query: "${request.query}"`,
+            };
+
+            store.updateEmployeeStatus(
+              providerAgent.name,
+              'thinking',
+              null,
+              backfillStep.description
+            );
+
+            try {
+              const backfillResult = await this.executeAgentStep(
+                request,
+                providerAgent,
+                backfillStep,
+                previousOutputs
+              );
+
+              contributions.push(backfillResult);
+              previousOutputs = {
+                ...previousOutputs,
+                ...backfillResult.structuredOutput,
+              };
+              totalTokens += backfillResult.tokensUsed;
+
+              store.updateEmployeeStatus(providerAgent.name, 'idle');
+              store.addMessage({
+                from: providerAgent.name,
+                type: 'employee',
+                content: backfillResult.output,
+                metadata: {
+                  employeeName: providerAgent.name,
+                  role: providerAgent.role,
+                  stepId: backfillStep.id,
+                },
+              });
+            } catch (err) {
+              store.updateEmployeeStatus(providerAgent.name, 'error');
+              // Suppress backfill errors if non-critical, let main step proceed or fail gracefully
+            }
+          }
+        }
+      }
+
       store.addMessage({
         from: 'system',
         type: 'system',
@@ -1420,37 +1495,137 @@ Create a plan specifying:
 Respond in JSON format:
 {
   "plan": [
-    { "agentId": "...", "task": "...", "parallel": true/false }
+    { "agentId": "...", "task": "...", "parallel": false }
   ],
   "rationale": "..."
 }`;
 
     const planResponse = await this.callLLM(request, supervisor, planPrompt);
 
-    // Execute based on supervisor's plan
-    const contributions: AgentContribution[] = [];
+    let planTasks: { agentId: string; task: string; parallel: boolean }[] = [];
+    try {
+      const jsonMatch = planResponse.content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.plan && Array.isArray(parsed.plan)) {
+          planTasks = parsed.plan;
+        }
+      }
+    } catch {
+      // Fallback
+    }
 
-    // For simplicity, execute sequentially with supervisor coordination
-    for (const step of workflow.steps) {
-      const agent = this.agents[step.agentId];
+    if (planTasks.length === 0) {
+      planTasks = workflow.steps.map((s) => ({
+        agentId: s.agentId,
+        task: s.description,
+        parallel: s.parallel || false,
+      }));
+    }
+
+    const contributions: AgentContribution[] = [];
+    let previousOutputs: Record<string, unknown> = {};
+
+    for (const planTask of planTasks) {
+      const agent = this.agents[planTask.agentId];
       if (!agent) continue;
 
       store.updateEmployeeStatus(
         agent.name,
         'thinking',
         null,
-        step.description
+        planTask.task
       );
 
       try {
-        const result = await this.executeAgentStep(request, agent, step, {});
-        contributions.push(result);
-        store.updateEmployeeStatus(agent.name, 'idle');
+        const step: WorkflowStep = {
+          id: `hierarchical-${planTask.agentId}`,
+          agentId: planTask.agentId,
+          name: agent.name,
+          description: planTask.task,
+          produces: agent.produces,
+          instructions: planTask.task,
+        };
 
+        const result = await this.executeAgentStep(
+          request,
+          agent,
+          step,
+          previousOutputs
+        );
+
+        // Supervisor reviews the output
+        const reviewPrompt = `As the consultation supervisor, review the output generated by ${agent.name} (${agent.role}) for the task: "${planTask.task}".
+Output:
+${result.output}
+
+Does this output answer the task adequately? Rate it from 1 to 10 and suggest corrections if needed.
+Respond in JSON format:
+{
+  "rating": 8,
+  "approved": true,
+  "feedback": "Feedback details or empty if approved"
+}`;
+        const reviewResponse = await this.callLLM(
+          request,
+          supervisor,
+          reviewPrompt
+        );
+
+        let approved = true;
+        let feedback = '';
+
+        try {
+          const jsonMatch = reviewResponse.content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            approved =
+              parsed.approved !== undefined
+                ? parsed.approved
+                : parsed.rating >= 7;
+            feedback = parsed.feedback || '';
+          }
+        } catch {
+          // Fallback approval
+        }
+
+        if (!approved) {
+          store.addMessage({
+            from: 'system',
+            type: 'system',
+            content: `⚠️ Supervisor rejected output from ${agent.name}. Feedback: "${feedback}". Retrying step with feedback...`,
+          });
+
+          const retryStep = {
+            ...step,
+            instructions: `${step.instructions}\n\nNote from supervisor: "${feedback}"`,
+          };
+
+          const retryResult = await this.executeAgentStep(
+            request,
+            agent,
+            retryStep,
+            previousOutputs
+          );
+
+          contributions.push(retryResult);
+          previousOutputs = {
+            ...previousOutputs,
+            ...retryResult.structuredOutput,
+          };
+        } else {
+          contributions.push(result);
+          previousOutputs = {
+            ...previousOutputs,
+            ...result.structuredOutput,
+          };
+        }
+
+        store.updateEmployeeStatus(agent.name, 'idle');
         store.addMessage({
           from: agent.name,
           type: 'employee',
-          content: result.output,
+          content: contributions[contributions.length - 1].output,
           metadata: { employeeName: agent.name, role: agent.role },
         });
       } catch (error) {
@@ -1585,11 +1760,50 @@ Respond with JSON:
       // Use defaults
     }
 
+    // Programmatic verification scoring verification:
+    // Augment LLM scores with programmatic structural checks
+    const finalScores = raceResults.map((r, i) => {
+      let score = scores[i] || 7.0;
+
+      // Bonus for structural markdown clarity
+      const startsWithMarkdown =
+        r.output.trim().startsWith('#') || r.output.trim().includes('\n## ');
+      if (startsWithMarkdown) score += 0.5;
+
+      const hasBulletPoints = r.output.includes('- ') || r.output.includes('* ');
+      if (hasBulletPoints) score += 0.5;
+
+      // Keyword density check matching the agent's actual expertise fields
+      const agent = this.agents[r.agentId];
+      if (agent) {
+        let matchCount = 0;
+        const outputLower = r.output.toLowerCase();
+        for (const exp of agent.expertise) {
+          const word = exp.replace(/_/g, ' ');
+          if (outputLower.includes(word)) {
+            matchCount++;
+          }
+        }
+        score += Math.min(1.0, matchCount * 0.15);
+      }
+
+      return score;
+    });
+
+    // Determine the final winner programmatically based on the combined scores
+    let highestScore = -1;
+    for (let i = 0; i < finalScores.length; i++) {
+      if (finalScores[i] > highestScore) {
+        highestScore = finalScores[i];
+        winnerIndex = i;
+      }
+    }
+
     const raceResultsFinal: RaceResult[] = raceResults.map((r, i) => ({
       agentId: r.agentId,
       agentName: r.agentName,
       output: r.output,
-      score: scores[i] || 7.0,
+      score: finalScores[i],
       selected: i === winnerIndex,
       reasoning: i === winnerIndex ? reasoning : undefined,
     }));

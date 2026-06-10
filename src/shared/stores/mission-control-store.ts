@@ -17,6 +17,7 @@ export interface Task {
   toolRequired?: string;
   result?: string;
   error?: string;
+  dependencies?: string[];
   startedAt?: Date;
   completedAt?: Date;
 }

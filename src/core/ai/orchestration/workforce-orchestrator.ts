@@ -61,8 +61,10 @@ export interface WorkforceResponse {
 export type ToolName = 'Read' | 'Grep' | 'Glob' | 'Bash' | 'Edit' | 'Write' | 'general' | string;
 
 export interface PlanTask {
+  id: string;
   task: string;
   tool_required?: ToolName;
+  dependencies?: string[];
 }
 
 export interface MissionPlan {
@@ -306,14 +308,15 @@ export class WorkforceOrchestratorRefactored {
 
       // Convert to Task objects
       const tasks: Task[] = plan.plan.map((planTask, index) => ({
-        id: `task-${index + 1}`,
+        id: planTask.id || `task-${index + 1}`,
         description: planTask.task,
         status: 'pending' as const,
         assignedTo: null,
         toolRequired: planTask.tool_required,
+        dependencies: planTask.dependencies || [],
       }));
 
-      store.setMissionPlan(tasks);
+      store.setMissionPlan(tasks.map((t) => ({ ...t })));
       store.addMessage({
         from: 'system',
         type: 'plan',
@@ -341,6 +344,7 @@ export class WorkforceOrchestratorRefactored {
         const selectedEmployee = await this.selectOptimalEmployee(task, missionId);
 
         if (selectedEmployee) {
+          task.assignedTo = selectedEmployee.name;
           store.updateTaskStatus(task.id, 'in_progress', selectedEmployee.name);
           store.updateEmployeeStatus(
             selectedEmployee.name,
@@ -426,12 +430,13 @@ export class WorkforceOrchestratorRefactored {
     userId?: string
   ): Promise<MissionPlan> {
     const plannerPrompt = `You are a strategic AI planner. Given a user request, create a detailed step-by-step execution plan.
+    Tasks can depend on prior tasks (e.g. you cannot test code before it is written). Specify task IDs and dependencies.
 
 Return your response ONLY as valid JSON in this exact format:
 {
   "plan": [
-    {"task": "Task description", "tool_required": "tool_name"},
-    {"task": "Another task", "tool_required": "another_tool"}
+    {"id": "task-1", "task": "Task description", "tool_required": "tool_name", "dependencies": []},
+    {"id": "task-2", "task": "Another task", "tool_required": "another_tool", "dependencies": ["task-1"]}
   ],
   "reasoning": "Brief explanation of the plan"
 }
@@ -440,7 +445,7 @@ Available tools: Read, Grep, Glob, Bash, Edit, Write
 
 User request: ${userInput}
 
-Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
+Think step-by-step, assign correct tools, map dependencies carefully, and create a comprehensive plan. Respond with JSON only.`;
 
     try {
       const response = await retryWithBackoff(
@@ -547,9 +552,8 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
       return parsed;
     } catch (error) {
       logger.error('[Workforce Orchestrator] Error generating plan:', error);
-      // Fallback: create simple single-task plan
       return {
-        plan: [{ task: userInput, tool_required: 'general' }],
+        plan: [{ id: 'task-1', task: userInput, tool_required: 'general', dependencies: [] }],
         reasoning: 'Fallback plan due to parsing error',
       };
     }
@@ -693,196 +697,394 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
     missionId?: string
   ): Promise<void> {
     const store = useMissionStore.getState();
-
-    // CRITICAL FIX: Take a snapshot of the pause state at the beginning
-    // This prevents race conditions where pause state changes between checks
-    // Use a function to get current state, allowing tasks to respect pause during execution
     const checkIfPaused = () => useMissionStore.getState().isPaused;
 
-    // Check if mission is paused before starting execution
     if (checkIfPaused()) {
       return;
     }
 
-    // Execute tasks in parallel
-    const taskPromises: Promise<TaskExecutionResult>[] = tasks.map(async (task): Promise<TaskExecutionResult> => {
-      // Check pause state at start of each task
-      // This allows tasks that haven't started yet to be skipped if paused
+    // Clone tasks to prevent mutations from leaking back to the setMissionPlan assertions
+    let executionTasks = tasks.map((t) => ({ ...t }));
+    let activeTasksCount = 0;
+    const taskPromises = new Map<string, Promise<TaskExecutionResult>>();
+
+    while (true) {
       if (checkIfPaused()) {
-        return {
-          taskId: task.id,
-          status: 'skipped' as const,
-          reason: 'Mission paused',
-        };
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        continue;
       }
 
-      if (!task.assignedTo) {
-        store.updateTaskStatus(
-          task.id,
-          'failed',
-          undefined,
-          undefined,
-          'No employee assigned'
-        );
-        return {
-          taskId: task.id,
-          status: 'failed' as const,
-          reason: 'No employee assigned',
-        };
+      // Check if all tasks are complete or failed
+      const allDone = executionTasks.every(
+        (t) => t.status === 'completed' || t.status === 'failed'
+      );
+      if (allDone) {
+        break;
       }
 
-      try {
-        store.updateEmployeeStatus(
-          task.assignedTo,
-          'using_tool',
-          task.toolRequired || 'general',
-          task.description
-        );
-        store.addEmployeeLog(
-          task.assignedTo,
-          `Starting task: ${task.description}`
-        );
-        store.updateEmployeeProgress(task.assignedTo, 25);
+      // Find tasks that are 'pending' and whose dependencies are met (completed successfully)
+      const executableTasks = executionTasks.filter((task) => {
+        if (task.status !== 'pending') return false;
 
-        // Get employee details
-        const employee = this.employees.find((e) => e.name === task.assignedTo);
-
-        if (!employee) {
-          throw new AppError(
-            `Employee ${task.assignedTo} not found`,
-            ErrorCodes.EMPLOYEE_NOT_FOUND,
-            404,
-            false,
-            `The assigned AI employee "${task.assignedTo}" could not be found.`
-          );
-        }
-
-        // Execute using employee's system prompt
-        const result = await this.executeWithEmployee(
-          employee,
-          task,
-          originalInput,
-          sessionId,
-          userId
-        );
-
-        store.updateEmployeeProgress(task.assignedTo, 100);
-        store.updateTaskStatus(task.id, 'completed', task.assignedTo, result);
-        store.updateEmployeeStatus(task.assignedTo, 'idle');
-        store.addEmployeeLog(
-          task.assignedTo,
-          `✓ Completed: ${task.description}`
-        );
-
-        store.addMessage({
-          from: task.assignedTo,
-          type: 'employee',
-          content: result,
-          metadata: { taskId: task.id, employeeName: task.assignedTo },
+        const deps = task.dependencies || [];
+        return deps.every((depId) => {
+          const depTask = executionTasks.find((t) => t.id === depId);
+          return depTask && depTask.status === 'completed';
         });
+      });
 
-        // RACE CONDITION FIX: Release employee when task completes successfully
-        // This allows the employee to be assigned to other tasks if needed
-        if (missionId && task.assignedTo) {
-          this.releaseEmployeeFromMission(missionId, task.assignedTo);
-        }
+      // If we have executable tasks, delegate and run them
+      if (executableTasks.length > 0) {
+        for (const task of executableTasks) {
+          // If task doesn't have an employee assigned yet, select one
+          if (!task.assignedTo) {
+            const employee = await this.selectOptimalEmployee(task, missionId);
+            if (employee) {
+              task.assignedTo = employee.name;
+              store.updateTaskStatus(task.id, 'in_progress', employee.name);
+              store.updateEmployeeStatus(
+                employee.name,
+                'thinking',
+                null,
+                task.description
+              );
 
-        return { taskId: task.id, status: 'fulfilled' as const, result };
-      } catch (error) {
-        const errorMsg =
-          error instanceof Error ? error.message : 'Unknown error';
-        store.updateTaskStatus(
-          task.id,
-          'failed',
-          task.assignedTo,
-          undefined,
-          errorMsg
-        );
-        store.updateEmployeeStatus(task.assignedTo, 'error');
-        store.addEmployeeLog(task.assignedTo, `✗ Failed: ${errorMsg}`);
-
-        store.addMessage({
-          from: task.assignedTo,
-          type: 'error',
-          content: `Task failed: ${errorMsg}`,
-          metadata: { taskId: task.id, employeeName: task.assignedTo },
-        });
-
-        // RACE CONDITION FIX: Release employee when task fails
-        // This ensures employees are not stuck in "assigned" state after errors
-        if (missionId && task.assignedTo) {
-          this.releaseEmployeeFromMission(missionId, task.assignedTo);
-        }
-
-        return {
-          taskId: task.id,
-          status: 'rejected' as const,
-          error: errorMsg,
-        };
-      }
-    });
-
-    const results = await Promise.allSettled(taskPromises);
-
-    // Process results - handle partial failures
-    const processedResults: TaskExecutionResult[] = results.map((r): TaskExecutionResult =>
-      r.status === 'fulfilled'
-        ? r.value
-        : {
-            taskId: 'unknown',
-            status: 'rejected',
-            error: 'Promise rejected',
+              store.addMessage({
+                from: 'system',
+                type: 'task_update',
+                content: `✓ Assigned "${task.description}" to ${employee.name}`,
+                metadata: { taskId: task.id, employeeName: employee.name },
+              });
+            } else {
+              store.updateTaskStatus(
+                task.id,
+                'failed',
+                undefined,
+                undefined,
+                'No employee assigned'
+              );
+              task.status = 'failed';
+              task.error = 'No employee assigned';
+              continue;
+            }
           }
-    );
 
-    const failedTasks = processedResults.filter(
-      (r) => r.status === 'rejected' || r.status === 'failed'
-    );
-    const succeededTasks = processedResults.filter(
-      (r) => r.status === 'fulfilled'
-    );
-    const skippedTasks = processedResults.filter((r) => r.status === 'skipped');
+          // Run task promise
+          const promise = (async (): Promise<TaskExecutionResult> => {
+            const employee = this.employees.find(
+              (e) => e.name === task.assignedTo
+            );
+            if (!employee) {
+              throw new Error(`Employee ${task.assignedTo} not found`);
+            }
 
-    // Report partial success/failure
-    if (failedTasks.length > 0 && succeededTasks.length > 0) {
-      store.addMessage({
-        from: 'system',
-        type: 'warning',
-        content: `⚠️ Partial completion: ${succeededTasks.length} task(s) succeeded, ${failedTasks.length} task(s) failed`,
-      });
+            // Fetch dependency results to pass as input context
+            const depResults = (task.dependencies || [])
+              .map((depId) => executionTasks.find((t) => t.id === depId))
+              .filter(
+                (t): t is Task =>
+                  t !== undefined && t.status === 'completed'
+              )
+              .map((t) => ({ task: t.description, result: t.result || '' }));
+
+            store.updateEmployeeStatus(
+              task.assignedTo!,
+              'using_tool',
+              task.toolRequired || 'general',
+              task.description
+            );
+            store.addEmployeeLog(
+              task.assignedTo!,
+              `Starting task: ${task.description}`
+            );
+            store.updateEmployeeProgress(task.assignedTo!, 25);
+
+            const result = await this.executeWithEmployee(
+              employee,
+              task,
+              originalInput,
+              sessionId,
+              userId,
+              depResults
+            );
+
+            return { taskId: task.id, status: 'fulfilled' as const, result };
+          })();
+
+          task.status = 'in_progress';
+          activeTasksCount++;
+
+          const wrappedPromise = promise.then(
+            (val) => {
+              store.updateEmployeeProgress(task.assignedTo!, 100);
+              store.updateTaskStatus(
+                task.id,
+                'completed',
+                task.assignedTo!,
+                val.result
+              );
+              store.updateEmployeeStatus(task.assignedTo!, 'idle');
+              store.addEmployeeLog(
+                task.assignedTo!,
+                `✓ Completed: ${task.description}`
+              );
+              store.addMessage({
+                from: task.assignedTo!,
+                type: 'employee',
+                content: val.result!,
+                metadata: { taskId: task.id, employeeName: task.assignedTo! },
+              });
+
+              if (missionId && task.assignedTo) {
+                this.releaseEmployeeFromMission(missionId, task.assignedTo);
+              }
+
+              task.status = 'completed';
+              task.result = val.result;
+              activeTasksCount--;
+              taskPromises.delete(task.id);
+              return val;
+            },
+            async (err) => {
+              const errorMsg =
+                err instanceof Error ? err.message : 'Unknown error';
+              store.updateTaskStatus(
+                task.id,
+                'failed',
+                task.assignedTo!,
+                undefined,
+                errorMsg
+              );
+              store.updateEmployeeStatus(task.assignedTo!, 'error');
+              store.addEmployeeLog(
+                task.assignedTo!,
+                `✗ Failed: ${errorMsg}`
+              );
+              store.addMessage({
+                from: task.assignedTo!,
+                type: 'error',
+                content: `Task failed: ${errorMsg}`,
+                metadata: { taskId: task.id, employeeName: task.assignedTo! },
+              });
+
+              if (missionId && task.assignedTo) {
+                this.releaseEmployeeFromMission(missionId, task.assignedTo);
+              }
+
+              task.status = 'failed';
+              task.error = errorMsg;
+              activeTasksCount--;
+              taskPromises.delete(task.id);
+
+              // Avoid calling dynamic replanning for systematic infrastructure or rate limit failures
+              const isInfrastructureError =
+                errorMsg.includes('rate limit') ||
+                errorMsg.includes('timeout') ||
+                errorMsg.includes('network') ||
+                errorMsg.includes('API') ||
+                errorMsg.includes('status code');
+
+              if (!isInfrastructureError) {
+                // Trigger replanning
+                const replannedTasks = await this.triggerReplanning(
+                  task,
+                  executionTasks,
+                  errorMsg,
+                  originalInput,
+                  sessionId,
+                  userId
+                );
+
+                if (replannedTasks) {
+                  executionTasks = replannedTasks;
+                  store.setMissionPlan(executionTasks);
+                  store.addMessage({
+                    from: 'system',
+                    type: 'plan',
+                    content: `🔄 Plan dynamically revised after task failure. New plan has ${executionTasks.length} tasks.`,
+                  });
+                }
+              }
+
+              return { taskId: task.id, status: 'failed' as const, error: errorMsg };
+            }
+          );
+
+          taskPromises.set(task.id, wrappedPromise);
+        }
+      } else {
+        // If there are no executable tasks but some are still running, wait for one to finish
+        if (activeTasksCount > 0) {
+          await Promise.race(taskPromises.values());
+        } else {
+          // Deadlock or finished. Check if we have unresolvable pending tasks
+          const pendingTasks = executionTasks.filter(
+            (t) => t.status === 'pending'
+          );
+          if (pendingTasks.length > 0) {
+            for (const pt of pendingTasks) {
+              pt.status = 'failed';
+              pt.error = 'Dependency failed or cyclic dependency detected';
+              store.updateTaskStatus(
+                pt.id,
+                'failed',
+                undefined,
+                undefined,
+                pt.error
+              );
+            }
+          }
+          break;
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
+  }
 
-    if (skippedTasks.length > 0) {
-      store.addMessage({
-        from: 'system',
-        type: 'system',
-        content: `⏸️ ${skippedTasks.length} task(s) skipped due to mission pause`,
+  /**
+   * Dynamic Replanning: Re-plan remaining tasks upon failure
+   */
+  private async triggerReplanning(
+    failedTask: Task,
+    allTasks: Task[],
+    errorMsg: string,
+    originalInput: string,
+    sessionId?: string,
+    userId?: string
+  ): Promise<Task[] | null> {
+    logger.info(
+      `[Workforce Orchestrator] Triggering dynamic replanning for failed task: ${failedTask.id}`
+    );
+
+    const replanPrompt = `You are a strategic AI replanner. An ongoing mission has encountered a task failure. Your goal is to inspect the state, analyze the error, and generate a recovery sub-plan to either bypass the failed task, introduce correction tasks, or use fallback actions.
+
+User's Original Goal: ${originalInput}
+
+Current Task Execution State:
+${allTasks
+  .map(
+    (t) =>
+      `- Task ${t.id} ("${t.description}") [Status: ${t.status}]${t.result ? `\n  Output: ${t.result.slice(0, 150)}...` : ''}${t.error ? `\n  Error: ${t.error}` : ''}`
+  )
+  .join('\n')}
+
+Failed Task: ${failedTask.id} ("${failedTask.description}")
+Error Encountered: ${errorMsg}
+
+Please generate a revised plan of PENDING or NEW tasks to recover from this failure. You can:
+1. Re-route the task to a different tool/agent.
+2. Add new corrective tasks to fix the issue, making the subsequent tasks depend on these corrective tasks.
+3. Skip or substitute tasks if a bypass is possible.
+
+Return your response ONLY as valid JSON in this exact format. Make sure you map dependencies to existing or new task IDs correctly:
+{
+  "plan": [
+    {"id": "new-task-1", "task": "Correction task description", "tool_required": "tool_name", "dependencies": ["some-existing-task-id"]},
+    {"id": "existing-dependent-task", "task": "Existing task description but updated with new dependency if needed", "tool_required": "tool_name", "dependencies": ["new-task-1"]}
+  ],
+  "reasoning": "Explain why this recovery plan works"
+}
+
+Available tools: Read, Grep, Glob, Bash, Edit, Write`;
+
+    try {
+      const response = await retryWithBackoff(
+        () =>
+          unifiedLLMService.sendMessage({
+            provider: 'anthropic',
+            messages: [{ role: 'user', content: replanPrompt }],
+            model: 'claude-3-5-sonnet-20241022',
+            temperature: 0.3,
+            userId,
+            sessionId,
+          }),
+        { maxRetries: 2 }
+      );
+
+      let jsonText = response.content.trim();
+      if (jsonText.startsWith('```json')) {
+        jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
+      } else if (jsonText.startsWith('```')) {
+        jsonText = jsonText.replace(/```\n?/g, '').replace(/```\n?$/g, '');
+      }
+
+      const parseResult = safeJsonParse<{ plan: PlanTask[]; reasoning: string }>(
+        jsonText
+      );
+      if (!parseResult.success || !parseResult.data.plan) {
+        return null;
+      }
+
+      // Merge new tasks with existing completed/in_progress tasks
+      const completedAndInprogress = allTasks.filter(
+        (t) => t.status === 'completed' || t.status === 'in_progress'
+      );
+
+      const newTasks: Task[] = parseResult.data.plan.map((pt, idx) => {
+        const existing = allTasks.find((t) => t.id === pt.id);
+        return {
+          id: pt.id || `replan-${failedTask.id}-${idx}`,
+          description: pt.task,
+          status:
+            existing && existing.status === 'completed'
+              ? 'completed'
+              : 'pending',
+          assignedTo:
+            existing && existing.status === 'completed'
+              ? existing.assignedTo
+              : null,
+          toolRequired: pt.tool_required,
+          dependencies: pt.dependencies || [],
+          result: existing?.result,
+          error: existing?.error,
+        };
       });
-    }
 
+      const combinedTasks: Task[] = [...completedAndInprogress];
+      for (const nt of newTasks) {
+        if (!combinedTasks.some((t) => t.id === nt.id)) {
+          combinedTasks.push(nt);
+        }
+      }
+
+      return combinedTasks;
+    } catch (e) {
+      logger.error('[Workforce Orchestrator] Replanning failed:', e);
+      return null;
+    }
   }
 
   /**
    * Execute a task using a specific AI employee
    * SECURITY: Uses sandwich defense and validates output
+   * Programmatic validation retry loop checks formatting & schemas
    */
   private async executeWithEmployee(
     employee: AIEmployee,
     task: Task,
     originalContext: string,
     sessionId?: string,
-    userId?: string
+    userId?: string,
+    dependencyResults?: { task: string; result: string }[]
   ): Promise<string> {
-    const prompt = `Original request: ${originalContext}
+    const store = useMissionStore.getState();
+    let prompt = `Original request: ${originalContext}\n\n`;
 
-Your specific task: ${task.description}
+    if (dependencyResults && dependencyResults.length > 0) {
+      prompt += `Results from previous dependent tasks:\n`;
+      for (const dep of dependencyResults) {
+        prompt += `--- Result of task: "${dep.task}" ---\n${dep.result}\n\n`;
+      }
+    }
+
+    prompt += `Your specific task: ${task.description}
 
 ${task.toolRequired ? `Tool to use: ${task.toolRequired}` : ''}
 
 Please complete this task according to your role and capabilities.`;
 
     try {
-      // Use withTimeout from shared utilities for consistent timeout handling
       const TASK_TIMEOUT = 120000; // 2 minutes
 
       // SECURITY: Build secure messages with sandwich defense
@@ -916,20 +1118,92 @@ Please complete this task according to your role and capabilities.`;
         `Task execution timeout after ${TASK_TIMEOUT / 1000} seconds`
       );
 
-      // SECURITY: Validate employee output for data leakage
-      const outputValidation = validateEmployeeOutput(
-        response.content,
-        employee.name
-      );
-      if (!outputValidation.isValid) {
-        logger.warn(
-          `[Workforce Orchestrator] Output validation issues for ${employee.name}:`,
-          outputValidation.issues
-        );
-        // Use sanitized output if there were issues
-        if (outputValidation.sanitizedOutput) {
-          response.content = outputValidation.sanitizedOutput;
+      let retries = 0;
+      const maxRetries = 3;
+      let finalContent = response.content;
+      let isValid = true;
+      let validationError = '';
+
+      while (retries < maxRetries) {
+        isValid = true;
+        validationError = '';
+
+        // 1. JSON parsing check if task specifies JSON output
+        const needsJson =
+          task.description.toLowerCase().includes('json') ||
+          (task.toolRequired &&
+            task.toolRequired.toLowerCase().includes('json'));
+
+        if (needsJson) {
+          let jsonText = finalContent.trim();
+          if (jsonText.includes('```json')) {
+            const match = jsonText.match(/```json\n?([\s\S]*?)\n?```/);
+            jsonText = match ? match[1] : jsonText;
+          } else if (jsonText.includes('```')) {
+            const match = jsonText.match(/```\n?([\s\S]*?)\n?```/);
+            jsonText = match ? match[1] : jsonText;
+          }
+          try {
+            JSON.parse(jsonText.trim());
+          } catch (e) {
+            isValid = false;
+            validationError =
+              e instanceof Error ? e.message : 'Invalid JSON format';
+          }
         }
+
+        // 2. Output validation (from existing security sanitizer)
+        const outputValidation = validateEmployeeOutput(
+          finalContent,
+          employee.name
+        );
+        if (!outputValidation.isValid) {
+          isValid = false;
+          validationError = `Security/Safety check failed: ${outputValidation.issues.join(', ')}`;
+        }
+
+        if (isValid) {
+          break;
+        }
+
+        retries++;
+        logger.warn(
+          `[Workforce Orchestrator] Validation failed for ${employee.name} (attempt ${retries}/${maxRetries}): ${validationError}`
+        );
+        store.addEmployeeLog(
+          employee.name,
+          `⚠️ Output validation failed (attempt ${retries}): ${validationError}. Requesting correction...`,
+          'warning'
+        );
+
+        const correctionPrompt = `Your previous output failed validation with the following error:
+${validationError}
+
+Please correct your output. Make sure you strictly adhere to the requested format (e.g., valid JSON if requested).`;
+
+        const retryMessages = [
+          ...secureMessages,
+          { role: 'assistant' as const, content: finalContent },
+          { role: 'user' as const, content: correctionPrompt },
+        ];
+
+        const retryResponse = await retryWithBackoff(
+          () =>
+            unifiedLLMService.sendMessage({
+              provider: 'anthropic',
+              messages: retryMessages,
+              model:
+                employee.model === 'inherit'
+                  ? 'claude-3-5-sonnet-20241022'
+                  : employee.model,
+              temperature: 0.7,
+              userId,
+              sessionId,
+            }),
+          { maxRetries: 3 }
+        );
+
+        finalContent = retryResponse.content;
       }
 
       // Track token usage
@@ -946,7 +1220,6 @@ Please complete this task according to your role and capabilities.`;
           `Task execution: ${task.description.slice(0, 100)}`
         );
 
-        // Update vibe session if sessionId provided
         if (sessionId) {
           const cost = tokenLogger.calculateCost(
             response.model,
@@ -962,7 +1235,7 @@ Please complete this task according to your role and capabilities.`;
         }
       }
 
-      return response.content;
+      return finalContent;
     } catch (error) {
       const userMessage = getErrorMessage(error);
       throw new AppError(

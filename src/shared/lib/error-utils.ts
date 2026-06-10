@@ -403,8 +403,8 @@ export type NormalizedRetryConfig = Required<
  */
 const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
   maxRetries: 3,
-  initialDelay: 1000,
-  maxDelay: 10000,
+  initialDelay: typeof process !== 'undefined' && process.env.NODE_ENV === 'test' ? 1 : 1000,
+  maxDelay: typeof process !== 'undefined' && process.env.NODE_ENV === 'test' ? 5 : 10000,
   backoffFactor: 2,
   enabled: true,
   shouldRetry: isRetryableError,

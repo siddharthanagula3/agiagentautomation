@@ -1,5 +1,5 @@
 /**
- * VibeEmptyState - Stunning empty state inspired by Bolt.new, Lovable.dev, Replit
+ * VibeEmptyState - Stunning empty state inspired by Bolt.new, Replit
  *
  * Features:
  * - Big centered headline with gradient text

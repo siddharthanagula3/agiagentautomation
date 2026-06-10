@@ -1,6 +1,6 @@
 /**
  * VibeDashboard - Redesigned AI Development Agent Interface
- * Inspired by: Lovable.dev, Bolt.new, Replit.com, Emergent.sh
+ * Inspired by: Bolt.new, Replit.com, Emergent.sh
  *
  * Layout:
  * - Left (30%): Chat interface only

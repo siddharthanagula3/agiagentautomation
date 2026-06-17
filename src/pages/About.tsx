@@ -55,7 +55,7 @@ const AboutPage: React.FC = () => {
   const founder = {
     name: 'Siddhartha Nagula',
     role: 'Founder & CEO',
-    bio: 'Building the future of work — on a mission to make enterprise-grade AI accessible and affordable for every business. Designed and engineered the entire AGI Workforce platform from the ground up, including the AI marketplace, multi-LLM orchestration, Supabase-powered infrastructure, and natural language workflow engine.',
+    bio: 'Building the future of work — on a mission to make enterprise-grade AI accessible and affordable for every business. Designed and engineered the entire AGI platform from the ground up, including the AI marketplace, multi-LLM orchestration, Supabase-powered infrastructure, and natural language workflow engine.',
     avatar: '👨‍💼',
   };
 
@@ -78,12 +78,12 @@ const AboutPage: React.FC = () => {
         schema={{
           '@context': 'https://schema.org',
           '@type': 'AboutPage',
-          name: 'About AGI Workforce',
+          name: 'About AGI',
           description:
             'Replace expensive human employees with affordable AI employees - save 99.8% on payroll costs',
           mainEntity: {
             '@type': 'Organization',
-            name: 'AGI Workforce',
+            name: 'AGI',
             description:
               'Complete AI Workforce Platform - AI Employees at 1/100th the cost',
             foundingDate: '2026',
@@ -249,7 +249,7 @@ const AboutPage: React.FC = () => {
               Built by One Visionary
             </h2>
             <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
-              AGI Workforce was designed, engineered, and launched entirely
+              AGI was designed, engineered, and launched entirely
               by a single founder — from concept to production.
             </p>
           </motion.div>

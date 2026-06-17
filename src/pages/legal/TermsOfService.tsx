@@ -19,14 +19,14 @@ const TermsOfServicePage: React.FC = () => {
     {
       icon: CheckCircle2,
       title: 'Acceptance of Terms',
-      content: `By accessing and using AGI Workforce, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+      content: `By accessing and using AGI, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
 
 These terms apply to all users, including visitors, registered users, and paid subscribers. We reserve the right to modify these terms at any time, and will notify users of significant changes.`,
     },
     {
       icon: FileText,
       title: 'Services Description',
-      content: `AGI Workforce provides:
+      content: `AGI provides:
 
 • AI employee creation and management platform
 • Workflow automation tools
@@ -104,8 +104,8 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
   return (
     <div className="bg-background min-h-screen">
       <SEOHead
-        title="Terms of Service | AGI Workforce"
-        description="Terms of Service for AGI Workforce platform. Read our terms and conditions for using our AI employee and automation services."
+        title="Terms of Service | AGI"
+        description="Terms of Service for AGI platform. Read our terms and conditions for using our AI employee and automation services."
         keywords={[
           'terms of service',
           'terms and conditions',

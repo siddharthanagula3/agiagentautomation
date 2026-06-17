@@ -81,7 +81,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
   const o1Documents: O1VisaDocument[] = [
     {
       id: '1',
-      title: 'AGI Workforce Platform Launch',
+      title: 'AGI Platform Launch',
       category: 'achievements',
       description:
         'Successfully launched a revolutionary AI workforce automation platform',
@@ -156,7 +156,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
     },
     {
       id: '2',
-      title: 'AGI Workforce Trademark',
+      title: 'AGI Trademark',
       type: 'trademark',
       status: 'filed',
       priority: 'high',

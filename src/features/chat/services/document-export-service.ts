@@ -165,7 +165,7 @@ export async function downloadAsDOCX(
         children: sections,
       },
     ],
-    creator: options?.author || 'AGI Workforce',
+    creator: options?.author || 'AGI',
     title: options?.title || 'Document',
     description: 'Generated document from chat',
   });

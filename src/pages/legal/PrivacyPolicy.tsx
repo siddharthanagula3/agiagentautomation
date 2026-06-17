@@ -97,8 +97,8 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiagentautom
   return (
     <div className="bg-background min-h-screen">
       <SEOHead
-        title="Privacy Policy | AGI Workforce"
-        description="Privacy Policy for AGI Workforce platform. Learn how we collect, use, and protect your personal information and data."
+        title="Privacy Policy | AGI"
+        description="Privacy Policy for AGI platform. Learn how we collect, use, and protect your personal information and data."
         keywords={[
           'privacy policy',
           'data protection',
@@ -149,7 +149,7 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiagentautom
             className="prose prose-lg dark:prose-invert max-w-none"
           >
             <p className="text-muted-foreground text-lg leading-relaxed">
-              This Privacy Policy explains how AGI Workforce ("we", "us", "our")
+              This Privacy Policy explains how AGI ("we", "us", "our")
               collects, uses, discloses, and protects your personal information
               when you use our AI automation platform and services. By using our
               services, you agree to the collection and use of information in

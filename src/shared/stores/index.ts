@@ -1,5 +1,5 @@
 /**
- * Central store exports for AGI Workforce
+ * Central store exports for AGI
  * State management using Zustand for client state and React Query for server state
  */
 

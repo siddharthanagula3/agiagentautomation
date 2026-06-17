@@ -213,7 +213,7 @@ const ContactSalesPage: React.FC = () => {
   return (
     <div className="bg-background min-h-screen">
       <SEOHead
-        title="Contact Sales | Get Custom AI Employee Solutions | AGI Agent Automation"
+        title="Contact Sales | Get Custom AI Employee Solutions | AGI Workforce"
         description="Contact our sales team for custom AI employee solutions. Get personalized pricing, enterprise features, and dedicated support. Schedule a demo today."
         keywords={[
           'contact sales ai employees',
@@ -229,12 +229,12 @@ const ContactSalesPage: React.FC = () => {
         schema={{
           '@context': 'https://schema.org',
           '@type': 'ContactPage',
-          name: 'Contact Sales - AGI Agent Automation',
+          name: 'Contact Sales - AGI Workforce',
           description:
             'Contact our sales team for custom AI employee solutions',
           mainEntity: {
             '@type': 'Organization',
-            name: 'AGI Agent Automation',
+            name: 'AGI Workforce',
             contactPoint: {
               '@type': 'ContactPoint',
               contactType: 'Sales',
@@ -263,7 +263,7 @@ const ContactSalesPage: React.FC = () => {
               Let's Talk About Your AI Automation Needs
             </h1>
             <p className="text-muted-foreground text-xl">
-              Speak with our sales team to learn how AGI Agent Automation can transform
+              Speak with our sales team to learn how AGI Workforce can transform
               your business
             </p>
           </motion.div>
@@ -529,7 +529,7 @@ const ContactSalesPage: React.FC = () => {
                         Schedule a personalized demo
                       </p>
                       <p className="text-muted-foreground text-xs">
-                        See AGI Agent Automation in action
+                        See AGI Workforce in action
                       </p>
                     </div>
                   </div>

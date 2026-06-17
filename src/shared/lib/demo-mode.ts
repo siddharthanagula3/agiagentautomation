@@ -21,6 +21,6 @@ export const DEMO_USER = {
     full_name: 'Demo User',
     role: 'admin',
     plan: 'enterprise',
-    company: 'AGI Agent Automation Demo',
+    company: 'AGI Workforce Demo',
   },
 };

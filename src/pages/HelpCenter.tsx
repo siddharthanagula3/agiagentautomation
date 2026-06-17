@@ -178,8 +178,8 @@ const HelpPage: React.FC = () => {
   return (
     <div className="bg-background min-h-screen">
       <SEOHead
-        title="Help & Support | AGI Agent Automation"
-        description="Get help with AGI Agent Automation platform. Find answers to common questions, tutorials, and contact our support team for assistance."
+        title="Help & Support | AGI Workforce"
+        description="Get help with AGI Workforce platform. Find answers to common questions, tutorials, and contact our support team for assistance."
         keywords={[
           'help center',
           'support',
@@ -195,7 +195,7 @@ const HelpPage: React.FC = () => {
           '@context': 'https://schema.org',
           '@type': 'WebPage',
           name: 'Help & Support',
-          description: 'Get help with AGI Agent Automation platform',
+          description: 'Get help with AGI Workforce platform',
           mainEntity: {
             '@type': 'FAQPage',
             mainEntity: [

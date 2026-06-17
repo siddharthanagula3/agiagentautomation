@@ -41,7 +41,7 @@ class SEOService {
   constructor() {
     this.baseUrl = import.meta.env.VITE_APP_URL || 'https://agiagentautomation.vercel.app';
     this.defaultSEO = {
-      title: 'AGI Agent Automation - Your AI Workforce, On Demand',
+      title: 'AGI Workforce - Your AI Workforce, On Demand',
       description:
         'Build and manage your AI workforce. Chat with specialized AI agents, automate tasks, and scale your business.',
       keywords: [
@@ -100,7 +100,7 @@ class SEOService {
     this.updateMetaTag('og:type', fullSEO.ogType, 'property');
     this.updateMetaTag('og:url', this.getCanonicalUrl(currentPath), 'property');
     this.updateMetaTag('og:image', fullSEO.ogImage, 'property');
-    this.updateMetaTag('og:site_name', 'AGI Agent Automation', 'property');
+    this.updateMetaTag('og:site_name', 'AGI Workforce', 'property');
 
     // Update Twitter Card tags
     this.updateMetaTag('twitter:card', fullSEO.twitterCard);
@@ -177,11 +177,11 @@ class SEOService {
           headline: data.headline,
           author: {
             '@type': 'Person',
-            name: data.author || 'AGI Agent Automation Team',
+            name: data.author || 'AGI Workforce Team',
           },
           publisher: {
             '@type': 'Organization',
-            name: 'AGI Agent Automation',
+            name: 'AGI Workforce',
             logo: {
               '@type': 'ImageObject',
               url: `${this.baseUrl}/logo.png`,
@@ -197,7 +197,7 @@ class SEOService {
           ...baseStructuredData,
           brand: {
             '@type': 'Brand',
-            name: 'AGI Agent Automation',
+            name: 'AGI Workforce',
           },
           offers: {
             '@type': 'Offer',
@@ -233,7 +233,7 @@ class SEOService {
     const pages: PageSEOData[] = [
       {
         path: '/',
-        title: 'AGI Agent Automation - AI Workforce Platform',
+        title: 'AGI Workforce - AI Workforce Platform',
         description:
           'Transform your business with AI employees. Hire, manage, and scale your AI workforce.',
         keywords: ['AI', 'automation', 'workforce', 'artificial intelligence'],
@@ -242,7 +242,7 @@ class SEOService {
       },
       {
         path: '/pricing',
-        title: 'Pricing - AGI Agent Automation',
+        title: 'Pricing - AGI Workforce',
         description:
           'Choose the perfect plan for your AI workforce needs. Flexible pricing for businesses of all sizes.',
         keywords: ['pricing', 'AI workforce', 'subscription', 'plans'],
@@ -251,7 +251,7 @@ class SEOService {
       },
       {
         path: '/marketplace',
-        title: 'AI Employee Marketplace - AGI Agent Automation',
+        title: 'AI Employee Marketplace - AGI Workforce',
         description:
           'Browse and hire AI employees for your business. Find the perfect AI assistant for your needs.',
         keywords: ['AI employees', 'marketplace', 'hire AI', 'AI assistants'],
@@ -260,7 +260,7 @@ class SEOService {
       },
       {
         path: '/about',
-        title: 'About Us - AGI Agent Automation',
+        title: 'About Us - AGI Workforce',
         description:
           'Learn about our mission to democratize AI workforce automation and empower businesses.',
         keywords: ['about', 'company', 'mission', 'AI workforce'],
@@ -269,7 +269,7 @@ class SEOService {
       },
       {
         path: '/blog',
-        title: 'Blog - AGI Agent Automation',
+        title: 'Blog - AGI Workforce',
         description:
           'Latest insights, tutorials, and news about AI workforce automation and business transformation.',
         keywords: ['blog', 'AI insights', 'tutorials', 'automation'],
@@ -278,7 +278,7 @@ class SEOService {
       },
       {
         path: '/contact-sales',
-        title: 'Contact Sales - AGI Agent Automation',
+        title: 'Contact Sales - AGI Workforce',
         description:
           'Get in touch with our sales team to discuss your AI workforce automation needs.',
         keywords: ['contact', 'sales', 'AI consultation', 'support'],
@@ -390,7 +390,7 @@ class SEOService {
   private setupStructuredData(): void {
     // Add organization structured data
     const organizationData = this.generateStructuredData('Organization', {
-      name: 'AGI Agent Automation',
+      name: 'AGI Workforce',
       description: 'AI workforce automation platform',
     });
     this.updateStructuredData(organizationData);

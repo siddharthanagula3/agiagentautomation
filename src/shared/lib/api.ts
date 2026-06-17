@@ -1,5 +1,5 @@
 /**
- * API integration layer for AGI Agent Automation
+ * API integration layer for AGI Workforce
  * Centralized API client with authentication, error handling, and type safety
  */
 

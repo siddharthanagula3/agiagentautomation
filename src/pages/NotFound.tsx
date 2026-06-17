@@ -27,7 +27,7 @@ const NotFoundPage = () => {
   return (
     <>
       <SEOHead
-        title="404 - Page Not Found | AGI Workforce"
+        title="404 - Page Not Found | AGI Agent Automation"
         description="The page you're looking for doesn't exist. Find what you need with our site search or navigate to our popular pages."
         noindex
       />

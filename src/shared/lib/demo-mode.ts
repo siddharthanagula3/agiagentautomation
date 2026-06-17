@@ -12,7 +12,7 @@ export const DEMO_MODE =
 
 export const DEMO_USER = {
   id: 'demo-user-001',
-  email: 'demo@agiworkforce.ai',
+  email: 'demo@agiagentautomation.com',
   name: 'Demo User',
   avatar: undefined as string | undefined,
   role: 'admin' as const,
@@ -21,6 +21,6 @@ export const DEMO_USER = {
     full_name: 'Demo User',
     role: 'admin',
     plan: 'enterprise',
-    company: 'AGI Workforce Demo',
+    company: 'AGI Agent Automation Demo',
   },
 };

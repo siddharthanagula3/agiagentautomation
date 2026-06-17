@@ -63,7 +63,7 @@ const PublicFooter: React.FC = () => {
                 <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">AGI Workforce</span>
+                <span className="text-xl font-bold">AGI Agent Automation</span>
                 <span className="text-muted-foreground text-xs">
                   AI Workforce Platform
                 </span>
@@ -154,7 +154,7 @@ const PublicFooter: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-border flex flex-col items-center justify-between gap-4 border-t pt-6 sm:pt-8 md:flex-row">
           <p className="text-muted-foreground text-center text-sm md:text-left">
-            © {currentYear} AGI Workforce. All rights reserved. Built with AI
+            © {currentYear} AGI Agent Automation. All rights reserved. Built with AI
             for the AI age.
           </p>
           <div className="text-muted-foreground flex items-center gap-6 text-sm">

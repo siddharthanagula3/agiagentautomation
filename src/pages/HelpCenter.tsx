@@ -178,8 +178,8 @@ const HelpPage: React.FC = () => {
   return (
     <div className="bg-background min-h-screen">
       <SEOHead
-        title="Help & Support | AGI Workforce"
-        description="Get help with AGI Workforce platform. Find answers to common questions, tutorials, and contact our support team for assistance."
+        title="Help & Support | AGI Agent Automation"
+        description="Get help with AGI Agent Automation platform. Find answers to common questions, tutorials, and contact our support team for assistance."
         keywords={[
           'help center',
           'support',
@@ -195,7 +195,7 @@ const HelpPage: React.FC = () => {
           '@context': 'https://schema.org',
           '@type': 'WebPage',
           name: 'Help & Support',
-          description: 'Get help with AGI Workforce platform',
+          description: 'Get help with AGI Agent Automation platform',
           mainEntity: {
             '@type': 'FAQPage',
             mainEntity: [
@@ -343,12 +343,12 @@ const HelpPage: React.FC = () => {
             <ContactCard
               icon={Mail}
               title="Email Support"
-              description="support@agiworkforce.com"
+              description="support@agiagentautomation.com"
               cta="Send Email"
               color="from-purple-500 to-pink-500"
               index={1}
               onClick={() =>
-                (window.location.href = 'mailto:support@agiworkforce.com')
+                (window.location.href = 'mailto:support@agiagentautomation.com')
               }
             />
             <ContactCard
@@ -384,7 +384,7 @@ const HelpPage: React.FC = () => {
                 size="lg"
                 className="border-border/40"
                 onClick={() =>
-                  window.open('https://community.agiworkforce.com', '_blank')
+                  window.open('https://agiagentautomation.vercel.app/community', '_blank')
                 }
               >
                 <Users className="mr-2" size={18} />

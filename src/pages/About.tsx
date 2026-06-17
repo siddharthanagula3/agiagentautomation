@@ -52,32 +52,12 @@ const AboutPage: React.FC = () => {
     },
   ];
 
-  const team = [
-    {
-      name: 'Siddhartha Nagula',
-      role: 'Founder & CEO',
-      bio: 'On a mission to end the $100K employee era. Former AI researcher with 10+ years making AI accessible and affordable for businesses of all sizes.',
-      avatar: '👨‍💼',
-    },
-    {
-      name: 'Alex Chen',
-      role: 'CTO',
-      bio: 'Built the Supabase-powered infrastructure enabling 50,000+ AI employees to work 24/7 at enterprise scale with bank-level security.',
-      avatar: '👨‍💻',
-    },
-    {
-      name: 'Sarah Johnson',
-      role: 'Head of Product',
-      bio: 'Designed the natural language chat interface that makes hiring AI employees as easy as sending a text message—no coding required.',
-      avatar: '👩‍🎨',
-    },
-    {
-      name: 'Michael Rodriguez',
-      role: 'Head of Engineering',
-      bio: 'Architected the multi-LLM routing system that delivers GPT-4, Claude, and Gemini intelligence at market rates with full cost transparency.',
-      avatar: '👨‍🔧',
-    },
-  ];
+  const founder = {
+    name: 'Siddhartha Nagula',
+    role: 'Founder & CEO',
+    bio: 'Building the future of work — on a mission to make enterprise-grade AI accessible and affordable for every business. Designed and engineered the entire AGI Agent Automation platform from the ground up, including the AI marketplace, multi-LLM orchestration, Supabase-powered infrastructure, and natural language workflow engine.',
+    avatar: '👨‍💼',
+  };
 
   return (
     <div className="bg-background min-h-screen">
@@ -98,16 +78,22 @@ const AboutPage: React.FC = () => {
         schema={{
           '@context': 'https://schema.org',
           '@type': 'AboutPage',
-          name: 'About AGI Workforce',
+          name: 'About AGI Agent Automation',
           description:
             'Replace expensive human employees with affordable AI employees - save 99.8% on payroll costs',
           mainEntity: {
             '@type': 'Organization',
-            name: 'AGI Workforce',
+            name: 'AGI Agent Automation',
             description:
-              'Complete Workforce Replacement Platform - AI Employees at 1/100th the cost',
+              'Complete AI Workforce Platform - AI Employees at 1/100th the cost',
             foundingDate: '2026',
-            numberOfEmployees: '50+',
+            numberOfEmployees: '1',
+            founder: {
+              '@type': 'Person',
+              name: 'Siddhartha Nagula',
+              jobTitle: 'Founder & CEO',
+            },
+            url: 'https://agiagentautomation.vercel.app',
             location: {
               '@type': 'Place',
               name: 'United States',
@@ -246,7 +232,7 @@ const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Founder Section */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
@@ -257,35 +243,31 @@ const AboutPage: React.FC = () => {
           >
             <Badge className="glass mb-4 px-4 py-2">
               <Users className="mr-2 h-4 w-4" />
-              Our Team
+              The Builder
             </Badge>
             <h2 className="mb-4 text-4xl font-bold md:text-5xl">
-              Meet the Minds Behind AGI Workforce
+              Built by One Visionary
             </h2>
             <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
-              A team of AI experts, engineers, and visionaries working to
-              transform the future of work
+              AGI Agent Automation was designed, engineered, and launched entirely
+              by a single founder — from concept to production.
             </p>
           </motion.div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {team.map((member, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="glass group border-border/50 hover:border-primary/50 rounded-2xl border p-6 transition-all"
-              >
-                <div className="mb-4 text-6xl transition-transform group-hover:scale-110">
-                  {member.avatar}
-                </div>
-                <h3 className="mb-1 text-xl font-bold">{member.name}</h3>
-                <p className="text-primary mb-3 text-sm">{member.role}</p>
-                <p className="text-muted-foreground text-sm">{member.bio}</p>
-              </motion.div>
-            ))}
+          <div className="flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="glass group border-border/50 hover:border-primary/50 rounded-2xl border p-10 transition-all max-w-xl w-full text-center"
+            >
+              <div className="mb-6 text-7xl transition-transform group-hover:scale-110">
+                {founder.avatar}
+              </div>
+              <h3 className="mb-2 text-2xl font-bold">{founder.name}</h3>
+              <p className="text-primary mb-4 font-semibold">{founder.role}</p>
+              <p className="text-muted-foreground leading-relaxed">{founder.bio}</p>
+            </motion.div>
           </div>
         </div>
       </section>

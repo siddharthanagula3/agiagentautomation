@@ -23,7 +23,7 @@ interface SEOHeadProps {
 }
 
 const SEOHead: React.FC<SEOHeadProps> = ({
-  title = 'AGI Workforce - AI Workforce Platform',
+  title = 'AGI Agent Automation - AI Workforce Platform',
   description = 'Transform your business with AI employees. Hire, manage, and scale your AI workforce with our comprehensive automation platform.',
   keywords = [
     'AI',
@@ -37,7 +37,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   ogImage = '/og-image.png',
   ogType = 'website',
   twitterCard = 'summary_large_image',
-  twitterSite = '@agiworkforce',
+  twitterSite = '@agiagentauto',
   twitterCreator,
   structuredData,
   robots,
@@ -49,7 +49,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   noindex = false,
   nofollow = false,
 }) => {
-  const baseUrl = import.meta.env.VITE_APP_URL || 'https://agiworkforce.com';
+  const baseUrl = import.meta.env.VITE_APP_URL || 'https://agiagentautomation.vercel.app';
   const currentUrl = canonicalUrl || `${baseUrl}${window.location.pathname}`;
 
   // Build robots meta content
@@ -84,7 +84,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
         property="og:image"
         content={ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`}
       />
-      <meta property="og:site_name" content="AGI Workforce" />
+      <meta property="og:site_name" content="AGI Agent Automation" />
       <meta property="og:locale" content="en_US" />
 
       {/* Article specific Open Graph tags */}
@@ -124,7 +124,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="msapplication-TileColor" content="#3b82f6" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      <meta name="apple-mobile-web-app-title" content="AGI Workforce" />
+      <meta name="apple-mobile-web-app-title" content="AGI Agent Automation" />
 
       {/* Structured Data */}
       {structuredData && (

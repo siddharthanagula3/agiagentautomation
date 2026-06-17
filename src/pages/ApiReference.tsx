@@ -40,7 +40,7 @@ const ApiReferencePage: React.FC = () => {
       path: '/api/chat/completion',
       description: 'Send a chat message and get AI response',
       auth: 'Bearer Token',
-      example: `curl -X POST https://api.agiworkforce.com/api/chat/completion \\
+      example: `curl -X POST https://agiagentautomation.vercel.app/api/chat/completion \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -54,7 +54,7 @@ const ApiReferencePage: React.FC = () => {
       path: '/api/sessions',
       description: 'Get all chat sessions for the authenticated user',
       auth: 'Bearer Token',
-      example: `curl -X GET https://api.agiworkforce.com/api/sessions \\
+      example: `curl -X GET https://agiagentautomation.vercel.app/api/sessions \\
   -H "Authorization: Bearer YOUR_API_KEY"`,
     },
     {
@@ -62,7 +62,7 @@ const ApiReferencePage: React.FC = () => {
       path: '/api/sessions/:id/messages',
       description: 'Get all messages for a specific session',
       auth: 'Bearer Token',
-      example: `curl -X GET https://api.agiworkforce.com/api/sessions/session-id/messages \\
+      example: `curl -X GET https://agiagentautomation.vercel.app/api/sessions/session-id/messages \\
   -H "Authorization: Bearer YOUR_API_KEY"`,
     },
     {
@@ -70,7 +70,7 @@ const ApiReferencePage: React.FC = () => {
       path: '/api/employees/hire',
       description: 'Hire an AI employee',
       auth: 'Bearer Token',
-      example: `curl -X POST https://api.agiworkforce.com/api/employees/hire \\
+      example: `curl -X POST https://agiagentautomation.vercel.app/api/employees/hire \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -104,8 +104,8 @@ const ApiReferencePage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title="API Reference | AGI Workforce"
-        description="Complete API documentation for integrating AGI Workforce into your applications."
+        title="API Reference | AGI Agent Automation"
+        description="Complete API documentation for integrating AGI Agent Automation into your applications."
         keywords={[
           'API',
           'documentation',
@@ -132,7 +132,7 @@ const ApiReferencePage: React.FC = () => {
                 API Reference
               </h1>
               <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
-                Integrate AGI Workforce into your applications with our
+                Integrate AGI Agent Automation into your applications with our
                 comprehensive REST API. Build powerful AI-powered features with
                 ease.
               </p>
@@ -316,7 +316,7 @@ const ApiReferencePage: React.FC = () => {
                       </h3>
                       <div className="relative">
                         <pre className="bg-muted overflow-x-auto rounded-lg p-4 text-sm">
-                          <code>{`const response = await fetch('https://api.agiworkforce.com/api/chat/completion', {
+                          <code>{`const response = await fetch('https://agiagentautomation.vercel.app/api/chat/completion', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -337,7 +337,7 @@ console.log(data);`}</code>
                           className="absolute top-2 right-2"
                           onClick={() =>
                             copyToClipboard(
-                              `const response = await fetch('https://api.agiworkforce.com/api/chat/completion', {
+                              `const response = await fetch('https://agiagentautomation.vercel.app/api/chat/completion', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -371,7 +371,7 @@ console.log(data);`,
                           <code>{`import requests
 
 response = requests.post(
-    'https://api.agiworkforce.com/api/chat/completion',
+    'https://agiagentautomation.vercel.app/api/chat/completion',
     headers={
         'Authorization': 'Bearer YOUR_API_KEY',
         'Content-Type': 'application/json',
@@ -394,7 +394,7 @@ print(data)`}</code>
                               `import requests
 
 response = requests.post(
-    'https://api.agiworkforce.com/api/chat/completion',
+    'https://agiagentautomation.vercel.app/api/chat/completion',
     headers={
         'Authorization': 'Bearer YOUR_API_KEY',
         'Content-Type': 'application/json',

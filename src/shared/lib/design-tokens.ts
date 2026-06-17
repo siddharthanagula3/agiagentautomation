@@ -1,5 +1,5 @@
 /**
- * Design Tokens for AGI Workforce
+ * Design Tokens for AGI Agent Automation
  * Production-grade design system tokens for consistent theming
  */
 

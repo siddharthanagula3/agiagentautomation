@@ -46,7 +46,6 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { cn } from '@shared/lib/utils';
-import { ExpandableChatDemo } from '@shared/ui/expandable-chat-demo';
 import { Particles } from '@shared/ui/particles';
 import { Spotlight, MouseSpotlight } from '@shared/ui/spotlight';
 import { BentoGrid, BentoCard } from '@shared/ui/bento-grid';
@@ -196,7 +195,7 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden">
       <SEOHead
-        title="AGI Workforce | #1 AI Employees Platform USA | Hire 165+ AI Agents"
+        title="AGI Agent Automation | #1 AI Employees Platform USA | Hire 165+ AI Agents"
         description="Hire Free AI Employees. Free plan: 1M tokens/month (250K per provider). Pro plan: 10M tokens/month (2.5M per provider). 165+ specialized AI agents. Best AI workforce platform. 24/7 operation. Start free today!"
         keywords={[
           'ai employees',
@@ -212,7 +211,7 @@ const LandingPage: React.FC = () => {
           'asi',
           'hiring ai employees',
         ]}
-        ogImage="https://agiworkforce.com/og-landing.jpg"
+        ogImage="https://agiagentautomation.vercel.app/og-landing.jpg"
       />
 
       {/* Hero Section */}
@@ -386,7 +385,6 @@ const LandingPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
-      <ExpandableChatDemo />
 
       {/* AI Employees Marketplace Preview */}
       <section
@@ -729,7 +727,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Social Proof / Trust Section */}
       <section className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
         <div className="from-primary/5 to-accent/5 absolute inset-0 bg-gradient-to-br via-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -741,49 +739,61 @@ const LandingPage: React.FC = () => {
           >
             <Badge className="glass mb-4 px-4 py-2">
               <Star className="mr-2 h-4 w-4" />
-              Testimonials
+              Why Businesses Choose Us
             </Badge>
             <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
-              Loved by 10,000+ Companies
+              The Smartest Way to Scale
             </h2>
             <p className="text-muted-foreground text-xl">
-              See how businesses are transforming with AI employees
+              Real advantages that make AGI Agent Automation the platform of choice
             </p>
           </motion.div>
 
           <div className="grid w-full max-w-full gap-4 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                name: 'Sarah Chen',
-                role: 'CTO, TechFlow',
-                company: 'TechFlow',
-                avatar: '👩‍💼',
-                content:
-                  'AGI Workforce reduced our development time by 70%. Our AI employees handle complex coding tasks while our team focuses on strategy. Game-changing platform.',
-                rating: 5,
-                metric: '70% faster development',
+                icon: <DollarSign className="h-8 w-8" />,
+                gradient: 'from-green-500 to-emerald-500',
+                headline: '99%+ Cost Reduction',
+                detail:
+                  'A senior developer costs $100K+/year. Our AI employees cost you only what you use — starting at $0/month. Free plan includes 1M tokens/month across all providers.',
               },
               {
-                name: 'Marcus Rodriguez',
-                role: 'CEO, GrowthCo',
-                company: 'GrowthCo',
-                avatar: '👨‍💼',
-                content:
-                  'We hired 15 AI employees for marketing and sales. Our conversion rates increased by 150% in just 3 months. The ROI is incredible.',
-                rating: 5,
-                metric: '150% conversion increase',
+                icon: <Zap className="h-8 w-8" />,
+                gradient: 'from-blue-500 to-cyan-500',
+                headline: 'Deploy in 60 Seconds',
+                detail:
+                  'No interviews, no onboarding, no contracts. Select an AI employee from our 165+ marketplace and start delegating in natural language immediately.',
               },
               {
-                name: 'Emily Watson',
-                role: 'Operations Director, ScaleUp',
-                company: 'ScaleUp',
-                avatar: '👩‍🔬',
-                content:
-                  "Our AI employees handle customer support 24/7 with 98% satisfaction rates. We've saved $200K annually while improving service quality.",
-                rating: 5,
-                metric: '$200K annual savings',
+                icon: <Shield className="h-8 w-8" />,
+                gradient: 'from-purple-500 to-pink-500',
+                headline: 'Enterprise-Grade Security',
+                detail:
+                  'Powered by Supabase with SOC 2 compliance, end-to-end encryption, and complete data isolation. Your data is never used to train models.',
               },
-            ].map((testimonial, idx) => (
+              {
+                icon: <Clock className="h-8 w-8" />,
+                gradient: 'from-orange-500 to-red-500',
+                headline: '24/7 Operation',
+                detail:
+                  'AI employees never sleep, take breaks, or call in sick. They handle workloads around the clock across all time zones simultaneously.',
+              },
+              {
+                icon: <Brain className="h-8 w-8" />,
+                gradient: 'from-indigo-500 to-violet-500',
+                headline: 'Multi-LLM Intelligence',
+                detail:
+                  'Access GPT-4, Claude, Gemini, and Perplexity — each optimized for different tasks. Our router picks the best model for every job automatically.',
+              },
+              {
+                icon: <TrendingUp className="h-8 w-8" />,
+                gradient: 'from-yellow-500 to-amber-500',
+                headline: 'Instant Scalability',
+                detail:
+                  'Go from 1 to 100+ AI employees instantly without hiring pipelines, HR overhead, or infrastructure scaling concerns. Scale down just as easily.',
+              },
+            ].map((item, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 30 }}
@@ -792,36 +802,13 @@ const LandingPage: React.FC = () => {
                 transition={{ delay: idx * 0.1 }}
                 className="glass group border-border/50 hover:border-primary/50 rounded-2xl border p-8 transition-all duration-300"
               >
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full text-2xl">
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">{testimonial.name}</h4>
-                    <p className="text-muted-foreground text-sm">
-                      {testimonial.role}
-                    </p>
-                  </div>
+                <div
+                  className={`mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r ${item.gradient} text-white`}
+                >
+                  {item.icon}
                 </div>
-
-                <div className="mb-4 flex">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-
-                <blockquote className="text-muted-foreground mb-6">
-                  "{testimonial.content}"
-                </blockquote>
-
-                <div className="bg-primary/10 rounded-lg px-4 py-2 text-center">
-                  <span className="text-primary text-sm font-semibold">
-                    {testimonial.metric}
-                  </span>
-                </div>
+                <h3 className="mb-3 text-xl font-bold">{item.headline}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{item.detail}</p>
               </motion.div>
             ))}
           </div>

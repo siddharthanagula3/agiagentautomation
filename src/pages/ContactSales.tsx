@@ -263,8 +263,8 @@ const ContactSalesPage: React.FC = () => {
               Let's Talk About Your AI Automation Needs
             </h1>
             <p className="text-muted-foreground text-xl">
-              Speak with our sales team to learn how AGI can transform
-              your business
+              Speak with our sales team to learn how AGI can transform your
+              business
             </p>
           </motion.div>
         </div>

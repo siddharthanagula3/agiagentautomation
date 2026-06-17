@@ -132,9 +132,8 @@ const ApiReferencePage: React.FC = () => {
                 API Reference
               </h1>
               <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
-                Integrate AGI into your applications with our
-                comprehensive REST API. Build powerful AI-powered features with
-                ease.
+                Integrate AGI into your applications with our comprehensive REST
+                API. Build powerful AI-powered features with ease.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <a

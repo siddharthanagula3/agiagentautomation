@@ -249,8 +249,8 @@ const AboutPage: React.FC = () => {
               Built by One Visionary
             </h2>
             <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
-              AGI was designed, engineered, and launched entirely
-              by a single founder — from concept to production.
+              AGI was designed, engineered, and launched entirely by a single
+              founder — from concept to production.
             </p>
           </motion.div>
 
@@ -259,14 +259,16 @@ const AboutPage: React.FC = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="glass group border-border/50 hover:border-primary/50 rounded-2xl border p-10 transition-all max-w-xl w-full text-center"
+              className="glass group border-border/50 hover:border-primary/50 w-full max-w-xl rounded-2xl border p-10 text-center transition-all"
             >
               <div className="mb-6 text-7xl transition-transform group-hover:scale-110">
                 {founder.avatar}
               </div>
               <h3 className="mb-2 text-2xl font-bold">{founder.name}</h3>
               <p className="text-primary mb-4 font-semibold">{founder.role}</p>
-              <p className="text-muted-foreground leading-relaxed">{founder.bio}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {founder.bio}
+              </p>
             </motion.div>
           </div>
         </div>

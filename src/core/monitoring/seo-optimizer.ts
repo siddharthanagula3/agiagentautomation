@@ -39,7 +39,8 @@ class SEOService {
   private defaultSEO: SEOData;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_APP_URL || 'https://agiagentautomation.vercel.app';
+    this.baseUrl =
+      import.meta.env.VITE_APP_URL || 'https://agiagentautomation.vercel.app';
     this.defaultSEO = {
       title: 'AGI - Your AI Workforce, On Demand',
       description:

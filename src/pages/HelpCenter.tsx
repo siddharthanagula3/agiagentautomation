@@ -384,7 +384,10 @@ const HelpPage: React.FC = () => {
                 size="lg"
                 className="border-border/40"
                 onClick={() =>
-                  window.open('https://agiagentautomation.vercel.app/community', '_blank')
+                  window.open(
+                    'https://agiagentautomation.vercel.app/community',
+                    '_blank'
+                  )
                 }
               >
                 <Users className="mr-2" size={18} />

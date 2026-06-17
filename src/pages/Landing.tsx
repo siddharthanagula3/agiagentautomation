@@ -808,7 +808,9 @@ const LandingPage: React.FC = () => {
                   {item.icon}
                 </div>
                 <h3 className="mb-3 text-xl font-bold">{item.headline}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{item.detail}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {item.detail}
+                </p>
               </motion.div>
             ))}
           </div>

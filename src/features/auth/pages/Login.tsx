@@ -214,9 +214,7 @@ const LoginPage: React.FC = () => {
               </motion.div>
             </motion.div>
             <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-            <CardDescription>
-              Sign in to your AGI account
-            </CardDescription>
+            <CardDescription>Sign in to your AGI account</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">

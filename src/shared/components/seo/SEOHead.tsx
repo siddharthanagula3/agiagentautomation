@@ -49,7 +49,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   noindex = false,
   nofollow = false,
 }) => {
-  const baseUrl = import.meta.env.VITE_APP_URL || 'https://agiagentautomation.vercel.app';
+  const baseUrl =
+    import.meta.env.VITE_APP_URL || 'https://agiagentautomation.vercel.app';
   const currentUrl = canonicalUrl || `${baseUrl}${window.location.pathname}`;
 
   // Build robots meta content

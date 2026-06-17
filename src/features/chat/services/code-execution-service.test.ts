@@ -182,14 +182,20 @@ describe('CodeExecutionService', () => {
     });
 
     it('should execute simple string operations', async () => {
-      const result = await service.execute('"hello".toUpperCase()', 'javascript');
+      const result = await service.execute(
+        '"hello".toUpperCase()',
+        'javascript'
+      );
 
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('HELLO');
     });
 
     it('should execute array operations', async () => {
-      const result = await service.execute('[1, 2, 3].map(x => x * 2)', 'javascript');
+      const result = await service.execute(
+        '[1, 2, 3].map(x => x * 2)',
+        'javascript'
+      );
 
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('2');

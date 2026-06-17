@@ -66,7 +66,8 @@ export interface VoiceRecordingActions {
   requestPermission: () => Promise<boolean>;
 }
 
-export type UseVoiceRecordingReturn = VoiceRecordingState & VoiceRecordingActions;
+export type UseVoiceRecordingReturn = VoiceRecordingState &
+  VoiceRecordingActions;
 
 // Audio configuration
 const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
@@ -117,7 +118,8 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
   const [audioLevels, setAudioLevels] = useState<number[]>([]);
-  const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>('unknown');
+  const [permissionStatus, setPermissionStatus] =
+    useState<PermissionStatus>('unknown');
   const [error, setError] = useState<string | null>(null);
   const [isSupported] = useState(() => checkBrowserSupport());
 
@@ -127,7 +129,9 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedDurationRef = useRef<number>(0);
@@ -259,7 +263,9 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
 
     // Continue animation loop using ref to avoid self-reference during callback creation
     if (updateAudioLevelsRef.current) {
-      animationFrameRef.current = requestAnimationFrame(updateAudioLevelsRef.current);
+      animationFrameRef.current = requestAnimationFrame(
+        updateAudioLevelsRef.current
+      );
     }
   }, [isRecording, isPaused]);
 
@@ -286,16 +292,25 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       return true;
     } catch (err) {
       if (err instanceof DOMException) {
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        if (
+          err.name === 'NotAllowedError' ||
+          err.name === 'PermissionDeniedError'
+        ) {
           setPermissionStatus('denied');
-          setError('Microphone permission was denied. Please allow access in your browser settings.');
+          setError(
+            'Microphone permission was denied. Please allow access in your browser settings.'
+          );
         } else if (err.name === 'NotFoundError') {
-          setError('No microphone found. Please connect a microphone and try again.');
+          setError(
+            'No microphone found. Please connect a microphone and try again.'
+          );
         } else {
           setError(`Failed to access microphone: ${err.message}`);
         }
       } else {
-        setError('An unexpected error occurred while requesting microphone access');
+        setError(
+          'An unexpected error occurred while requesting microphone access'
+        );
       }
       return false;
     }
@@ -396,7 +411,9 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       // Start duration timer
       durationIntervalRef.current = setInterval(() => {
         if (!isPaused) {
-          const elapsed = (Date.now() - startTimeRef.current - pausedDurationRef.current) / 1000;
+          const elapsed =
+            (Date.now() - startTimeRef.current - pausedDurationRef.current) /
+            1000;
           setDuration(Math.floor(elapsed));
         }
       }, 100);
@@ -405,11 +422,18 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
     } catch (err) {
       if (err instanceof DOMException) {
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        if (
+          err.name === 'NotAllowedError' ||
+          err.name === 'PermissionDeniedError'
+        ) {
           setPermissionStatus('denied');
-          setError('Microphone permission was denied. Please allow access in your browser settings.');
+          setError(
+            'Microphone permission was denied. Please allow access in your browser settings.'
+          );
         } else if (err.name === 'NotFoundError') {
-          setError('No microphone found. Please connect a microphone and try again.');
+          setError(
+            'No microphone found. Please connect a microphone and try again.'
+          );
         } else {
           setError(`Failed to start recording: ${err.message}`);
         }
@@ -418,7 +442,14 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       }
       cleanup();
     }
-  }, [isSupported, isRecording, isPaused, audioUrl, cleanup, updateAudioLevels]);
+  }, [
+    isSupported,
+    isRecording,
+    isPaused,
+    audioUrl,
+    cleanup,
+    updateAudioLevels,
+  ]);
 
   // Stop recording
   const stopRecording = useCallback(async (): Promise<Blob | null> => {
@@ -462,7 +493,8 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       setIsPaused(true);
 
       // Track pause time for accurate duration
-      pausedDurationRef.current = Date.now() - startTimeRef.current - duration * 1000;
+      pausedDurationRef.current =
+        Date.now() - startTimeRef.current - duration * 1000;
 
       // Stop audio level updates
       if (animationFrameRef.current) {

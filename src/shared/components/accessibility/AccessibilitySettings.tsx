@@ -73,7 +73,7 @@ export const AccessibilitySettings: React.FC = () => {
                   .value as AccessibilitySettingsType['fontSize'],
               })
             }
-            className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
           >
             <option value="small">Small</option>
             <option value="medium">Medium</option>
@@ -139,7 +139,7 @@ export const AccessibilitySettings: React.FC = () => {
       <div className="border-t border-gray-200 pt-4">
         <button
           onClick={resetSettings}
-          className="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
         >
           Reset to Defaults
         </button>

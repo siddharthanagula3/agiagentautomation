@@ -118,7 +118,7 @@ export const CollaborativeMessageDisplay: React.FC<
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+            <div className="text-muted-foreground mt-2 flex items-center justify-between text-xs">
               <span>{message.timestamp.toLocaleTimeString()}</span>
               <Button
                 variant="ghost"
@@ -202,7 +202,7 @@ export const CollaborativeMessageDisplay: React.FC<
                 >
                   {message.toolArgs && (
                     <div>
-                      <div className="mb-1 text-xs font-medium text-muted-foreground">
+                      <div className="text-muted-foreground mb-1 text-xs font-medium">
                         Arguments:
                       </div>
                       <pre className="overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-900">
@@ -212,7 +212,7 @@ export const CollaborativeMessageDisplay: React.FC<
                   )}
                   {message.toolResult && (
                     <div>
-                      <div className="mb-1 text-xs font-medium text-muted-foreground">
+                      <div className="text-muted-foreground mb-1 text-xs font-medium">
                         Result:
                       </div>
                       <pre className="max-h-40 overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-900">
@@ -226,7 +226,7 @@ export const CollaborativeMessageDisplay: React.FC<
               )}
             </AnimatePresence>
 
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="text-muted-foreground mt-2 text-xs">
               {message.timestamp.toLocaleTimeString()}
             </div>
           </CardContent>
@@ -326,17 +326,17 @@ export const CollaborativeMessageDisplay: React.FC<
 
           {message.metadata?.reasoning && (
             <details className="mt-3">
-              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+              <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-xs">
                 <MessageSquare className="mr-1 inline h-3 w-3" />
                 View reasoning
               </summary>
-              <div className="mt-2 rounded bg-slate-50 p-2 text-xs text-muted-foreground dark:bg-slate-900/50">
+              <div className="text-muted-foreground mt-2 rounded bg-slate-50 p-2 text-xs dark:bg-slate-900/50">
                 {message.metadata.reasoning}
               </div>
             </details>
           )}
 
-          <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-2 flex items-center justify-between text-xs">
             <span>{message.timestamp.toLocaleTimeString()}</span>
             {message.metadata?.tokensUsed && (
               <span className="text-xs">

@@ -81,14 +81,14 @@ const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps>(
         <Label htmlFor={inputId} id={labelId}>
           {label}
           {required && (
-            <span className="ml-1 text-destructive" aria-label="required">
+            <span className="text-destructive ml-1" aria-label="required">
               *
             </span>
           )}
         </Label>
 
         {description && (
-          <p id={descriptionId} className="text-sm text-muted-foreground">
+          <p id={descriptionId} className="text-muted-foreground text-sm">
             {description}
           </p>
         )}
@@ -109,7 +109,7 @@ const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps>(
         {error && (
           <p
             id={errorId}
-            className="text-sm text-destructive"
+            className="text-destructive text-sm"
             role="alert"
             aria-live="polite"
           >

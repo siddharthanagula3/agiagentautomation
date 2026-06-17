@@ -43,4 +43,8 @@ export {
 } from './use-settings-queries';
 
 // Re-export service types
-export type { UserProfile, UserSettings, APIKey } from '../services/user-preferences';
+export type {
+  UserProfile,
+  UserSettings,
+  APIKey,
+} from '../services/user-preferences';

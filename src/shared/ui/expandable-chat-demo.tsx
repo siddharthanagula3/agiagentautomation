@@ -84,7 +84,7 @@ export function ExpandableChatDemo() {
       >
         <ExpandableChatHeader className="flex-col justify-center text-center">
           <h1 className="text-xl font-semibold">Chat with AI ✨</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Ask me anything about the components
           </p>
         </ExpandableChatHeader>
@@ -129,13 +129,13 @@ export function ExpandableChatDemo() {
         <ExpandableChatFooter>
           <form
             onSubmit={handleSubmit}
-            className="relative rounded-lg border bg-background p-1 focus-within:ring-1 focus-within:ring-ring"
+            className="bg-background focus-within:ring-ring relative rounded-lg border p-1 focus-within:ring-1"
           >
             <ChatInput
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="min-h-12 resize-none rounded-lg border-0 bg-background p-3 shadow-none focus-visible:ring-0"
+              className="bg-background min-h-12 resize-none rounded-lg border-0 p-3 shadow-none focus-visible:ring-0"
             />
             <div className="flex items-center justify-between p-3 pt-0">
               <div className="flex">

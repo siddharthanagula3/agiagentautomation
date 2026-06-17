@@ -39,6 +39,9 @@ CREATE POLICY "purchased_employees_delete_own" ON public.purchased_employees
 -- Add unique constraint to prevent duplicate hires
 -- This will prevent the same user from hiring the same employee twice
 ALTER TABLE public.purchased_employees 
+DROP CONSTRAINT IF EXISTS purchased_employees_unique;
+
+ALTER TABLE public.purchased_employees 
 ADD CONSTRAINT purchased_employees_unique UNIQUE (user_id, employee_id);
 
 -- Create indexes for performance

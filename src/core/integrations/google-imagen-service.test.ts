@@ -170,7 +170,9 @@ describe('Google Imagen Service', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            predictions: [{ bytesBase64Encoded: 'data', mimeType: 'image/png' }],
+            predictions: [
+              { bytesBase64Encoded: 'data', mimeType: 'image/png' },
+            ],
           }),
       });
 
@@ -209,7 +211,9 @@ describe('Google Imagen Service', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            predictions: [{ bytesBase64Encoded: 'data', mimeType: 'image/png' }],
+            predictions: [
+              { bytesBase64Encoded: 'data', mimeType: 'image/png' },
+            ],
           }),
       });
 
@@ -225,7 +229,9 @@ describe('Google Imagen Service', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            predictions: [{ bytesBase64Encoded: 'data', mimeType: 'image/png' }],
+            predictions: [
+              { bytesBase64Encoded: 'data', mimeType: 'image/png' },
+            ],
           }),
       });
 
@@ -239,7 +245,7 @@ describe('Google Imagen Service', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/media-proxies/google-imagen-proxy',
+        '/api/media-proxies/google-imagen-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -281,7 +287,9 @@ describe('Google Imagen Service', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            predictions: [{ bytesBase64Encoded: 'data', mimeType: 'image/png' }],
+            predictions: [
+              { bytesBase64Encoded: 'data', mimeType: 'image/png' },
+            ],
             metadata: {
               safetyRatings: [
                 { category: 'HARM_CATEGORY_VIOLENCE', probability: 'LOW' },
@@ -418,7 +426,9 @@ describe('Google Imagen Service', () => {
       const models = googleImagenService.getAvailableModels();
 
       expect(models.length).toBe(3);
-      expect(models.find((m) => m.id === 'imagen-4.0-generate-001')).toBeDefined();
+      expect(
+        models.find((m) => m.id === 'imagen-4.0-generate-001')
+      ).toBeDefined();
       expect(
         models.find((m) => m.id === 'imagen-4.0-ultra-generate-001')
       ).toBeDefined();
@@ -500,7 +510,9 @@ describe('Google Imagen Service', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            predictions: [{ bytesBase64Encoded: 'data', mimeType: 'image/png' }],
+            predictions: [
+              { bytesBase64Encoded: 'data', mimeType: 'image/png' },
+            ],
           }),
       });
 
@@ -518,7 +530,9 @@ describe('Google Imagen Service', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            predictions: [{ bytesBase64Encoded: 'data', mimeType: 'image/png' }],
+            predictions: [
+              { bytesBase64Encoded: 'data', mimeType: 'image/png' },
+            ],
           }),
       });
 
@@ -536,7 +550,9 @@ describe('Google Imagen Service', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            predictions: [{ bytesBase64Encoded: 'data', mimeType: 'image/png' }],
+            predictions: [
+              { bytesBase64Encoded: 'data', mimeType: 'image/png' },
+            ],
           }),
       });
 

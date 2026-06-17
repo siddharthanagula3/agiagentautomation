@@ -549,7 +549,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
                     }
                     onClick={() => setSelectedCategory(category.id)}
                     className={cn(
-                      'flex h-auto min-h-[44px] items-center space-x-2 whitespace-nowrap px-3 py-2 sm:px-4',
+                      'flex h-auto min-h-[44px] items-center space-x-2 px-3 py-2 whitespace-nowrap sm:px-4',
                       selectedCategory === category.id
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
                         : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
@@ -579,7 +579,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
             <div className="flex flex-col gap-4 sm:flex-row">
               {/* Search */}
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-slate-400" />
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-slate-400" />
                 <Input
                   placeholder="Search by name, role, or skills..."
                   value={searchQuery}
@@ -829,12 +829,12 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                 </Avatar>
                 <div
                   className={cn(
-                    'absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-slate-800',
+                    'absolute -right-1 -bottom-1 h-5 w-5 rounded-full border-2 border-slate-800',
                     getStatusColor(employee.status)
                   )}
                 />
                 {employee.verified && (
-                  <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+                  <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
                     <CheckCircle className="h-3 w-3 text-white" />
                   </div>
                 )}
@@ -1034,12 +1034,12 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
               </Avatar>
               <div
                 className={cn(
-                  'absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-slate-800',
+                  'absolute -right-1 -bottom-1 h-4 w-4 rounded-full border-2 border-slate-800',
                   getStatusColor(employee.status)
                 )}
               />
               {employee.verified && (
-                <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
+                <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
                   <CheckCircle className="h-2.5 w-2.5 text-white" />
                 </div>
               )}
@@ -1059,7 +1059,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
               e.stopPropagation();
               onToggleFavorite();
             }}
-            className="text-slate-400 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
+            className="text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-400"
           >
             <Heart
               className={cn(
@@ -1245,12 +1245,12 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
             </Avatar>
             <div
               className={cn(
-                'absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-slate-800',
+                'absolute -right-1 -bottom-1 h-6 w-6 rounded-full border-2 border-slate-800',
                 getStatusColor(employee.status)
               )}
             />
             {employee.verified && (
-              <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500">
+              <div className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500">
                 <CheckCircle className="h-4 w-4 text-white" />
               </div>
             )}

@@ -21,7 +21,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
 
   const handleOverlayKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+      if (
+        event.key === 'Escape' ||
+        event.key === 'Enter' ||
+        event.key === ' '
+      ) {
         event.preventDefault();
         closeMobileMenu();
       }
@@ -81,14 +85,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <div className="space-y-4 text-center">
           <div
-            className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
+            className="border-primary mx-auto h-12 w-12 animate-spin rounded-full border-4 border-t-transparent"
             role="status"
             aria-label="Loading"
           ></div>
-          <p className="font-medium text-foreground">Loading AGI Platform...</p>
+          <p className="text-foreground font-medium">Loading AGI Platform...</p>
         </div>
       </div>
     );
@@ -97,7 +101,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
   return (
     <div
       className={cn(
-        'min-h-screen bg-background',
+        'bg-background min-h-screen',
         'transition-all duration-300 ease-in-out',
         className
       )}
@@ -105,7 +109,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-overlay bg-black/50 backdrop-blur-sm lg:hidden"
+          className="z-overlay fixed inset-0 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={closeMobileMenu}
           onKeyDown={handleOverlayKeyDown}
           role="button"
@@ -126,7 +130,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
         <aside
           className={cn(
             'hidden lg:fixed lg:inset-y-0 lg:top-16 lg:flex lg:flex-col',
-            'border-r border-border bg-card/50 backdrop-blur-xl',
+            'border-border bg-card/50 border-r backdrop-blur-xl',
             'z-30 transition-all duration-300 ease-in-out',
             sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'
           )}
@@ -137,7 +141,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
           </div>
 
           {/* Sidebar Toggle Button */}
-          <div className="border-t border-border p-4">
+          <div className="border-border border-t p-4">
             <Button
               variant="ghost"
               size="sm"
@@ -163,8 +167,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
         {/* Mobile Sidebar */}
         <aside
           className={cn(
-            'fixed inset-y-0 left-0 z-modal w-64 lg:hidden',
-            'border-r border-border bg-card backdrop-blur-xl',
+            'z-modal fixed inset-y-0 left-0 w-64 lg:hidden',
+            'border-border bg-card border-r backdrop-blur-xl',
             'transform transition-transform duration-300 ease-in-out',
             'flex flex-col shadow-2xl',
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
@@ -173,7 +177,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
           aria-hidden={!mobileMenuOpen}
           inert={!mobileMenuOpen ? '' : undefined}
         >
-          <div className="flex flex-shrink-0 items-center justify-between border-b border-border p-4">
+          <div className="border-border flex flex-shrink-0 items-center justify-between border-b p-4">
             <h2 className="text-lg font-semibold">AGI Platform</h2>
             <Button
               variant="ghost"
@@ -208,7 +212,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
       </div>
 
       {/* Floating Action Button (Mobile) */}
-      <div className="pb-safe fixed bottom-6 right-6 z-40 lg:hidden">
+      <div className="pb-safe fixed right-6 bottom-6 z-40 lg:hidden">
         <Button
           onClick={() => setMobileMenuOpen(true)}
           className="gradient-primary h-14 w-14 rounded-full text-white shadow-lg"

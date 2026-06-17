@@ -11,12 +11,14 @@ interface VibeLayoutProps {
  */
 export function VibeLayout({ children }: VibeLayoutProps) {
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background">
+    <div className="bg-background flex h-screen w-screen flex-col overflow-hidden">
       {/* Top Navigation - NO MAIN SIDEBAR */}
       <VibeTopNav />
 
       {/* Main Content - Full Width */}
-      <main id="main-content" className="flex-1 overflow-hidden">{children}</main>
+      <main id="main-content" className="flex-1 overflow-hidden">
+        {children}
+      </main>
     </div>
   );
 }

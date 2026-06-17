@@ -182,7 +182,7 @@ describe('Web Search Handler', () => {
       await searchWithPerplexity('test query');
 
       expect(mockFetchWithTimeout).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/perplexity-proxy',
+        '/api/llm-proxies/perplexity-proxy',
         expect.objectContaining({
           timeoutMs: 30000,
           fetchOptions: expect.objectContaining({
@@ -470,7 +470,7 @@ describe('Web Search Handler', () => {
       await webSearch('test', 10, 'google');
 
       expect(mockFetchWithTimeout).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/google-proxy',
+        '/api/llm-proxies/google-proxy',
         expect.anything()
       );
     });
@@ -514,15 +514,12 @@ describe('Web Search Handler', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            RelatedTopics: [
-              { Text: 'Topic', FirstURL: 'https://example.com' },
-            ],
+            RelatedTopics: [{ Text: 'Topic', FirstURL: 'https://example.com' }],
           }),
       });
 
-      const { unifiedLLMService } = await import(
-        '@core/ai/llm/unified-language-model'
-      );
+      const { unifiedLLMService } =
+        await import('@core/ai/llm/unified-language-model');
       const mockLLM = unifiedLLMService as unknown as {
         sendMessage: ReturnType<typeof vi.fn>;
       };
@@ -533,7 +530,9 @@ describe('Web Search Handler', () => {
 
       const result = await searchAndSummarize('test', 'claude');
 
-      expect(result.answer).toBe('AI-generated summary based on search results');
+      expect(result.answer).toBe(
+        'AI-generated summary based on search results'
+      );
       expect(mockLLM.sendMessage).toHaveBeenCalled();
     });
 
@@ -542,15 +541,12 @@ describe('Web Search Handler', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            RelatedTopics: [
-              { Text: 'Topic', FirstURL: 'https://example.com' },
-            ],
+            RelatedTopics: [{ Text: 'Topic', FirstURL: 'https://example.com' }],
           }),
       });
 
-      const { unifiedLLMService } = await import(
-        '@core/ai/llm/unified-language-model'
-      );
+      const { unifiedLLMService } =
+        await import('@core/ai/llm/unified-language-model');
       const mockLLM = unifiedLLMService as unknown as {
         sendMessage: ReturnType<typeof vi.fn>;
       };
@@ -573,9 +569,7 @@ describe('Web Search Handler', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Perplexity answer' } }],
-            citations: [
-              { url: 'https://example.com', title: 'Test' },
-            ],
+            citations: [{ url: 'https://example.com', title: 'Test' }],
           }),
       });
 

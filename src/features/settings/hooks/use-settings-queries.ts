@@ -623,8 +623,13 @@ export function useOrganizationSettings(
       const { data, error } = await query.maybeSingle();
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
-          logger.warn('[useOrganizationSettings] Organizations table does not exist');
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
+          logger.warn(
+            '[useOrganizationSettings] Organizations table does not exist'
+          );
           return null;
         }
         throw error;
@@ -770,15 +775,24 @@ export function useTeamMembers(
         .order('joined_at', { ascending: false });
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
-          logger.warn('[useTeamMembers] Organization members table does not exist');
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
+          logger.warn(
+            '[useTeamMembers] Organization members table does not exist'
+          );
           return [];
         }
         throw error;
       }
 
       return (data || []).map((member) => {
-        const user = member.users as { email: string; display_name: string; avatar_url: string | null } | null;
+        const user = member.users as {
+          email: string;
+          display_name: string;
+          avatar_url: string | null;
+        } | null;
         return {
           id: member.id,
           userId: member.user_id,
@@ -876,26 +890,28 @@ export function useRemoveTeamMember(): UseMutationResult<
 > {
   const queryClient: QueryClient = useQueryClient();
 
-  return useMutation<void, Error, { memberId: string; organizationId: string }>({
-    mutationFn: async ({ memberId }) => {
-      const { error } = await supabase
-        .from('organization_members')
-        .delete()
-        .eq('id', memberId);
+  return useMutation<void, Error, { memberId: string; organizationId: string }>(
+    {
+      mutationFn: async ({ memberId }) => {
+        const { error } = await supabase
+          .from('organization_members')
+          .delete()
+          .eq('id', memberId);
 
-      if (error) throw error;
-    },
-    onSuccess: (_, { organizationId }) => {
-      queryClient.invalidateQueries({
-        queryKey: ['settings', 'team', organizationId],
-      });
-      toast.success('Team member removed');
-    },
-    onError: (error: Error) => {
-      logger.error('Failed to remove team member:', error);
-      toast.error('Failed to remove team member');
-    },
-  });
+        if (error) throw error;
+      },
+      onSuccess: (_, { organizationId }) => {
+        queryClient.invalidateQueries({
+          queryKey: ['settings', 'team', organizationId],
+        });
+        toast.success('Team member removed');
+      },
+      onError: (error: Error) => {
+        logger.error('Failed to remove team member:', error);
+        toast.error('Failed to remove team member');
+      },
+    }
+  );
 }
 
 /**
@@ -989,7 +1005,10 @@ export function useUserActivity(
         .limit(limit);
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
           logger.warn('[useUserActivity] User activity table does not exist');
           return [];
         }
@@ -1073,7 +1092,15 @@ export function useAuditLogs(
     queryKey: [
       'audit',
       'logs',
-      { userId, action, resourceType, startDate: startDate?.toISOString(), endDate: endDate?.toISOString(), limit, offset },
+      {
+        userId,
+        action,
+        resourceType,
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
+        limit,
+        offset,
+      },
     ],
     queryFn: async (): Promise<AuditLogEntry[]> => {
       let query = supabase
@@ -1105,7 +1132,10 @@ export function useAuditLogs(
       const { data, error } = await query;
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
           logger.warn('[useAuditLogs] Audit logs table does not exist');
           return [];
         }
@@ -1146,7 +1176,10 @@ export function useAuditLogActions(): UseQueryResult<string[], Error> {
         .limit(1000);
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
           return [];
         }
         throw error;

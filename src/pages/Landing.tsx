@@ -225,17 +225,17 @@ const LandingPage: React.FC = () => {
           <motion.div
             animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute left-4 top-20 h-32 w-32 rounded-full bg-primary/10 blur-3xl sm:left-20 sm:h-72 sm:w-72"
+            className="bg-primary/10 absolute top-20 left-4 h-32 w-32 rounded-full blur-3xl sm:left-20 sm:h-72 sm:w-72"
           />
           <motion.div
             animate={{ y: [0, 20, 0], x: [0, -10, 0] }}
             transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-20 right-4 h-40 w-40 rounded-full bg-accent/10 blur-3xl sm:right-20 sm:h-96 sm:w-96"
+            className="bg-accent/10 absolute right-4 bottom-20 h-40 w-40 rounded-full blur-3xl sm:right-20 sm:h-96 sm:w-96"
           />
           <motion.div
             animate={{ y: [0, -15, 0], x: [0, -15, 0] }}
             transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute right-1/3 top-1/2 h-24 w-24 rounded-full bg-secondary/10 blur-3xl sm:h-64 sm:w-64"
+            className="bg-secondary/10 absolute top-1/2 right-1/3 h-24 w-24 rounded-full blur-3xl sm:h-64 sm:w-64"
           />
         </div>
 
@@ -251,7 +251,7 @@ const LandingPage: React.FC = () => {
               Your Complete AI Workforce - Available Now
             </Badge>
 
-            <h1 className="mb-8 text-3xl font-bold leading-tight sm:text-5xl md:text-6xl lg:text-8xl">
+            <h1 className="mb-8 text-3xl leading-tight font-bold sm:text-5xl md:text-6xl lg:text-8xl">
               <motion.span
                 className="mb-2 block"
                 initial={{ opacity: 0, y: 20 }}
@@ -270,14 +270,14 @@ const LandingPage: React.FC = () => {
               </motion.span>
             </h1>
 
-            <p className="mx-auto mb-8 max-w-4xl text-xl leading-relaxed text-muted-foreground md:text-2xl">
+            <p className="text-muted-foreground mx-auto mb-8 max-w-4xl text-xl leading-relaxed md:text-2xl">
               Replace $100K+/year human employees with
-              <span className="font-bold text-primary">
+              <span className="text-primary font-bold">
                 {' '}
                 Hire Free AI Employees - Pay Only for Tokens
               </span>
               .
-              <span className="font-semibold text-foreground">
+              <span className="text-foreground font-semibold">
                 {' '}
                 Save 99%+ on costs
               </span>
@@ -327,14 +327,14 @@ const LandingPage: React.FC = () => {
                 <InteractiveHoverCard>
                   <div className="text-center">
                     <motion.div
-                      className="mb-2 text-4xl font-bold text-primary"
+                      className="text-primary mb-2 text-4xl font-bold"
                       initial={{ opacity: 0, scale: 0.5 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: 0.3 }}
                     >
                       {stats.tasks.toLocaleString()}+
                     </motion.div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       Tasks Completed Daily
                     </div>
                   </div>
@@ -348,14 +348,14 @@ const LandingPage: React.FC = () => {
                 <InteractiveHoverCard>
                   <div className="text-center">
                     <motion.div
-                      className="mb-2 text-4xl font-bold text-accent"
+                      className="text-accent mb-2 text-4xl font-bold"
                       initial={{ opacity: 0, scale: 0.5 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: 0.4 }}
                     >
                       {stats.time.toFixed(0)}%
                     </motion.div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       Time Saved
                     </div>
                   </div>
@@ -369,14 +369,14 @@ const LandingPage: React.FC = () => {
                 <InteractiveHoverCard>
                   <div className="text-center">
                     <motion.div
-                      className="mb-2 text-4xl font-bold text-secondary"
+                      className="text-secondary mb-2 text-4xl font-bold"
                       initial={{ opacity: 0, scale: 0.5 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: 0.5 }}
                     >
                       {stats.cost.toFixed(0)}%
                     </motion.div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       Cost Reduction
                     </div>
                   </div>
@@ -408,7 +408,7 @@ const LandingPage: React.FC = () => {
             <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               <AnimatedGradientText>Hire Your AI Team</AnimatedGradientText>
             </h2>
-            <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
               Browse our marketplace of specialized AI employees. Each one
               brings expert-level skills and works 24/7 without breaks,
               vacations, or overhead costs.
@@ -427,7 +427,7 @@ const LandingPage: React.FC = () => {
                 <Card
                   className={cn(
                     'glass-strong card-hover group relative h-full w-full max-w-full overflow-hidden border-2 transition-all duration-300',
-                    'hover:shadow-2xl hover:shadow-primary/20',
+                    'hover:shadow-primary/20 hover:shadow-2xl',
                     activeEmployee === idx
                       ? 'border-primary/50'
                       : 'border-border/50'
@@ -444,7 +444,7 @@ const LandingPage: React.FC = () => {
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex min-w-0 flex-1 items-center space-x-3">
                         <motion.div
-                          className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl ring-2 ring-border"
+                          className="ring-border h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl ring-2"
                           whileHover={{ scale: 1.1 }}
                           animate={
                             activeEmployee === idx
@@ -466,7 +466,7 @@ const LandingPage: React.FC = () => {
                           <h3 className="mb-1 truncate text-lg font-semibold">
                             {employee.role}
                           </h3>
-                          <p className="truncate text-xs text-muted-foreground">
+                          <p className="text-muted-foreground truncate text-xs">
                             {employee.specialty}
                           </p>
                         </div>
@@ -483,7 +483,7 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     {/* Description */}
-                    <p className="mb-4 line-clamp-2 flex-grow text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mb-4 line-clamp-2 flex-grow text-sm">
                       {employee.description}
                     </p>
 
@@ -508,18 +508,18 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     {/* Fit Level */}
-                    <div className="mb-4 flex items-center gap-2 border-b border-border pb-4">
+                    <div className="border-border mb-4 flex items-center gap-2 border-b pb-4">
                       {employee.fitLevel === 'excellent' ? (
                         <>
-                          <Zap className="h-4 w-4 text-primary" />
-                          <span className="text-xs font-medium text-primary">
+                          <Zap className="text-primary h-4 w-4" />
+                          <span className="text-primary text-xs font-medium">
                             Excellent Fit
                           </span>
                         </>
                       ) : (
                         <>
-                          <TrendingUp className="h-4 w-4 text-accent" />
-                          <span className="text-xs font-medium text-accent">
+                          <TrendingUp className="text-accent h-4 w-4" />
+                          <span className="text-accent text-xs font-medium">
                             Great Fit
                           </span>
                         </>
@@ -536,7 +536,7 @@ const LandingPage: React.FC = () => {
                           <div className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-2xl font-bold text-transparent">
                             $0
                           </div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-muted-foreground text-sm">
                             per month
                           </div>
                         </div>
@@ -549,7 +549,7 @@ const LandingPage: React.FC = () => {
                               Limited time offer
                             </Badge>
                           </div>
-                          <div className="text-xs italic text-muted-foreground">
+                          <div className="text-muted-foreground text-xs italic">
                             🎉 Introductory offer
                           </div>
                         </div>
@@ -591,10 +591,10 @@ const LandingPage: React.FC = () => {
       {/* Features Section */}
       <section
         ref={featuresRef}
-        className="relative w-full max-w-full overflow-hidden bg-muted/30 py-12 sm:py-20"
+        className="bg-muted/30 relative w-full max-w-full overflow-hidden py-12 sm:py-20"
       >
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+          <div className="from-primary/5 to-accent/5 absolute inset-0 bg-gradient-to-br via-transparent" />
         </div>
         <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -609,7 +609,7 @@ const LandingPage: React.FC = () => {
             <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               Everything You Need to Scale
             </h2>
-            <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
               Enterprise-grade features that make AI workforce management
               simple, secure, and scalable.
             </p>
@@ -624,7 +624,7 @@ const LandingPage: React.FC = () => {
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 className="w-full max-w-full"
               >
-                <Card className="group h-full border-2 border-border/50 p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
+                <Card className="group border-border/50 hover:border-primary/50 hover:shadow-primary/10 h-full border-2 p-6 transition-all hover:shadow-xl">
                   <motion.div
                     className={cn(
                       'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white',
@@ -635,7 +635,7 @@ const LandingPage: React.FC = () => {
                   >
                     {feature.icon}
                   </motion.div>
-                  <h3 className="mb-2 text-xl font-bold transition-colors group-hover:text-primary">
+                  <h3 className="group-hover:text-primary mb-2 text-xl font-bold transition-colors">
                     {feature.title}
                   </h3>
                   <p className="text-muted-foreground">{feature.description}</p>
@@ -664,7 +664,7 @@ const LandingPage: React.FC = () => {
               <h2 className="mb-6 text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl">
                 Watch Your AI Team Work
               </h2>
-              <p className="mb-8 text-xl text-muted-foreground">
+              <p className="text-muted-foreground mb-8 text-xl">
                 See how easy it is to delegate tasks, monitor progress, and
                 achieve results with your AI workforce.
               </p>
@@ -703,7 +703,7 @@ const LandingPage: React.FC = () => {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="aspect-video overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-accent/10 shadow-2xl shadow-primary/20 backdrop-blur-xl">
+              <div className="border-primary/20 from-primary/10 to-accent/10 shadow-primary/20 aspect-video overflow-hidden rounded-2xl border-2 bg-gradient-to-br shadow-2xl backdrop-blur-xl">
                 <div className="flex h-full items-center justify-center">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
@@ -717,12 +717,12 @@ const LandingPage: React.FC = () => {
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -right-4 -top-4 h-24 w-24 rounded-2xl bg-gradient-to-br from-primary to-accent opacity-80 shadow-xl"
+                className="from-primary to-accent absolute -top-4 -right-4 h-24 w-24 rounded-2xl bg-gradient-to-br opacity-80 shadow-xl"
               />
               <motion.div
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 4, repeat: Infinity }}
-                className="absolute -bottom-4 -left-4 h-32 w-32 rounded-2xl bg-gradient-to-br from-accent to-secondary opacity-80 shadow-xl"
+                className="from-accent to-secondary absolute -bottom-4 -left-4 h-32 w-32 rounded-2xl bg-gradient-to-br opacity-80 shadow-xl"
               />
             </motion.div>
           </div>
@@ -731,7 +731,7 @@ const LandingPage: React.FC = () => {
 
       {/* Testimonials Section */}
       <section className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="from-primary/5 to-accent/5 absolute inset-0 bg-gradient-to-br via-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -746,7 +746,7 @@ const LandingPage: React.FC = () => {
             <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               Loved by 10,000+ Companies
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-xl">
               See how businesses are transforming with AI employees
             </p>
           </motion.div>
@@ -790,15 +790,15 @@ const LandingPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="glass group rounded-2xl border border-border/50 p-8 transition-all duration-300 hover:border-primary/50"
+                className="glass group border-border/50 hover:border-primary/50 rounded-2xl border p-8 transition-all duration-300"
               >
                 <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full text-2xl">
                     {testimonial.avatar}
                   </div>
                   <div>
                     <h4 className="font-semibold">{testimonial.name}</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {testimonial.role}
                     </p>
                   </div>
@@ -813,12 +813,12 @@ const LandingPage: React.FC = () => {
                   ))}
                 </div>
 
-                <blockquote className="mb-6 text-muted-foreground">
+                <blockquote className="text-muted-foreground mb-6">
                   "{testimonial.content}"
                 </blockquote>
 
-                <div className="rounded-lg bg-primary/10 px-4 py-2 text-center">
-                  <span className="text-sm font-semibold text-primary">
+                <div className="bg-primary/10 rounded-lg px-4 py-2 text-center">
+                  <span className="text-primary text-sm font-semibold">
                     {testimonial.metric}
                   </span>
                 </div>
@@ -844,7 +844,7 @@ const LandingPage: React.FC = () => {
             <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               How Teams Use AI Employees
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-xl">
               Real workflows from successful implementations
             </p>
           </motion.div>
@@ -918,7 +918,7 @@ const LandingPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="glass group rounded-2xl border border-border/50 p-8 transition-all duration-300 hover:border-primary/50"
+                className="glass group border-border/50 hover:border-primary/50 rounded-2xl border p-8 transition-all duration-300"
               >
                 <div
                   className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r ${useCase.gradient} text-white`}
@@ -927,25 +927,25 @@ const LandingPage: React.FC = () => {
                 </div>
 
                 <h3 className="mb-3 text-2xl font-bold">{useCase.title}</h3>
-                <p className="mb-6 text-muted-foreground">
+                <p className="text-muted-foreground mb-6">
                   {useCase.description}
                 </p>
 
                 <div className="mb-6 space-y-3">
                   {useCase.steps.map((step, stepIdx) => (
                     <div key={stepIdx} className="flex items-start gap-3">
-                      <div className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      <div className="bg-primary/10 text-primary mt-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
                         {stepIdx + 1}
                       </div>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-muted-foreground text-sm">
                         {step}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-3 text-center">
-                  <span className="text-sm font-semibold text-primary">
+                <div className="from-primary/10 to-accent/10 rounded-lg bg-gradient-to-r px-4 py-3 text-center">
+                  <span className="text-primary text-sm font-semibold">
                     {useCase.result}
                   </span>
                 </div>
@@ -971,7 +971,7 @@ const LandingPage: React.FC = () => {
             <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               Common Questions
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-xl">
               Everything you need to know about AI employees
             </p>
           </motion.div>
@@ -987,12 +987,12 @@ const LandingPage: React.FC = () => {
                 <AccordionItem
                   key={idx}
                   value={`item-${idx}`}
-                  className="glass rounded-xl border border-border/50 px-6"
+                  className="glass border-border/50 rounded-xl border px-6"
                 >
                   <AccordionTrigger className="py-4 text-left hover:no-underline">
                     <span className="font-semibold">{faq.question}</span>
                   </AccordionTrigger>
-                  <AccordionContent className="pb-4 text-muted-foreground">
+                  <AccordionContent className="text-muted-foreground pb-4">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -1029,7 +1029,7 @@ const LandingPage: React.FC = () => {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="bg-white px-10 py-7 text-lg font-semibold text-primary shadow-2xl hover:bg-white/90"
+                  className="text-primary bg-white px-10 py-7 text-lg font-semibold shadow-2xl hover:bg-white/90"
                   onClick={handleGetStarted}
                 >
                   {user ? 'Go to Dashboard' : 'Get Started Free'}

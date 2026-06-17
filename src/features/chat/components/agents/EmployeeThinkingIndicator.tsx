@@ -56,7 +56,7 @@ export const EmployeeThinkingIndicator: React.FC<
           </Avatar>
           {/* Animated pulse indicator */}
           <div
-            className="absolute -right-0.5 -top-0.5 h-3 w-3 animate-pulse rounded-full"
+            className="absolute -top-0.5 -right-0.5 h-3 w-3 animate-pulse rounded-full"
             style={{ backgroundColor: employeeColor }}
           >
             <div
@@ -87,13 +87,13 @@ export const EmployeeThinkingIndicator: React.FC<
         </div>
 
         {/* Thinking content */}
-        <div className="inline-block rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 shadow-sm">
+        <div className="border-border bg-card inline-block rounded-2xl rounded-bl-sm border px-4 py-3 shadow-sm">
           <div className="flex items-center gap-2">
             <Brain
               className="h-4 w-4 animate-pulse"
               style={{ color: employeeColor }}
             />
-            <span className="text-sm text-muted-foreground">{message}</span>
+            <span className="text-muted-foreground text-sm">{message}</span>
             {/* Animated dots */}
             <div className="flex gap-1">
               <div

@@ -84,7 +84,7 @@ export function WorkingProcessSection({
         <CollapsibleTrigger asChild>
           <button className="group flex w-full items-center justify-between text-left">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
+              <Sparkles className="text-primary h-4 w-4" />
               <span className="text-sm font-medium">Working Process</span>
               {totalCount > 0 && (
                 <Badge variant="secondary" className="text-xs">
@@ -94,7 +94,7 @@ export function WorkingProcessSection({
             </div>
             <ChevronDown
               className={cn(
-                'h-4 w-4 text-muted-foreground transition-transform',
+                'text-muted-foreground h-4 w-4 transition-transform',
                 isOpen && 'rotate-180'
               )}
             />
@@ -144,14 +144,14 @@ export function WorkingProcessSection({
 
                   {/* Result */}
                   {step.result && step.status === 'completed' && (
-                    <div className="mt-1.5 rounded bg-muted/50 p-2 font-mono text-xs text-muted-foreground">
+                    <div className="bg-muted/50 text-muted-foreground mt-1.5 rounded p-2 font-mono text-xs">
                       {step.result}
                     </div>
                   )}
 
                   {/* Timestamp */}
                   {step.timestamp && (
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       {step.timestamp.toLocaleTimeString()}
                     </p>
                   )}

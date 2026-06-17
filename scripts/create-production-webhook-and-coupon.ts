@@ -37,7 +37,7 @@ function log(message: string, color: keyof typeof colors = 'reset') {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
-const PRODUCTION_URL = 'https://agiagentautomation.com';
+const PRODUCTION_URL = 'https://agiagentautomation.vercel.app';
 const WEBHOOK_URL = `${PRODUCTION_URL}/.netlify/functions/payments/stripe-webhook`;
 const REQUIRED_EVENTS = [
   'checkout.session.completed',

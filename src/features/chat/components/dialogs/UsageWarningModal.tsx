@@ -79,7 +79,7 @@ export function UsageWarningModal({
           </div>
 
           <AlertDialogDescription className="space-y-4 pt-4 text-left">
-            <div className="rounded-lg border border-border bg-muted/50 p-4">
+            <div className="border-border bg-muted/50 rounded-lg border p-4">
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="font-medium">Current Usage</span>
                 <span
@@ -90,7 +90,7 @@ export function UsageWarningModal({
               </div>
 
               {/* Progress Bar */}
-              <div className="mb-2 h-2 overflow-hidden rounded-full bg-muted">
+              <div className="bg-muted mb-2 h-2 overflow-hidden rounded-full">
                 <div
                   className={`h-full transition-all duration-500 ${
                     isCritical
@@ -101,7 +101,7 @@ export function UsageWarningModal({
                 />
               </div>
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex items-center justify-between text-xs">
                 <span>
                   {currentUsage.toLocaleString()} /{' '}
                   {totalLimit.toLocaleString()} tokens
@@ -118,7 +118,7 @@ export function UsageWarningModal({
                 <p className="mb-2 font-semibold text-red-600 dark:text-red-400">
                   🚨 Service May Be Interrupted Soon
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   You're at 95% usage. Buy more tokens now to avoid
                   interruption. Your AI employees need tokens to continue
                   working.
@@ -129,18 +129,18 @@ export function UsageWarningModal({
                 <p className="mb-2 font-semibold text-yellow-600 dark:text-yellow-400">
                   ⚡ Running Low on Tokens
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   You've used 85% of your monthly tokens. Consider buying more
                   to ensure uninterrupted service.
                 </p>
               </div>
             )}
 
-            <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4">
-              <p className="text-sm font-semibold text-foreground">
+            <div className="border-primary/20 bg-primary/5 space-y-2 rounded-lg border p-4">
+              <p className="text-foreground text-sm font-semibold">
                 💡 Why Buy More Tokens?
               </p>
-              <ul className="space-y-1 text-sm text-muted-foreground">
+              <ul className="text-muted-foreground space-y-1 text-sm">
                 <li className="flex items-start gap-2">
                   <span className="text-primary">•</span>
                   <span>
@@ -172,7 +172,7 @@ export function UsageWarningModal({
             className={`gap-2 ${
               isCritical
                 ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
-                : 'bg-gradient-to-r from-primary to-accent'
+                : 'from-primary to-accent bg-gradient-to-r'
             }`}
           >
             <CreditCard className="h-4 w-4" />

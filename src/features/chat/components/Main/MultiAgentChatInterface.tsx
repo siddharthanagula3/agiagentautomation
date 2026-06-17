@@ -216,7 +216,7 @@ export function MultiAgentChatInterface({
         <div className="flex h-full items-center justify-center p-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Multi-agent chat error</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="text-muted-foreground mt-2">
               Something went wrong with the multi-agent interface. Please
               refresh the page.
             </p>
@@ -229,13 +229,13 @@ export function MultiAgentChatInterface({
     >
       <div
         className={cn(
-          'flex h-full w-full flex-col bg-background',
-          isFullscreen && 'fixed inset-0 z-modal',
+          'bg-background flex h-full w-full flex-col',
+          isFullscreen && 'z-modal fixed inset-0',
           className
         )}
       >
         {/* Top Bar */}
-        <div className="flex h-14 items-center justify-between border-b border-border bg-card px-4">
+        <div className="border-border bg-card flex h-14 items-center justify-between border-b px-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -249,12 +249,12 @@ export function MultiAgentChatInterface({
                 <ChevronRight className="h-4 w-4" />
               )}
             </Button>
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
+            <MessageSquare className="text-muted-foreground h-5 w-5" />
             <div>
               <h2 className="text-sm font-semibold">
                 Multi-Agent Collaboration
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {agents.length} agent{agents.length !== 1 ? 's' : ''} active
               </p>
             </div>
@@ -266,7 +266,7 @@ export function MultiAgentChatInterface({
               {agents.slice(0, 5).map((agent) => (
                 <div
                   key={agent.id}
-                  className="relative h-8 w-8 rounded-full border-2 border-background"
+                  className="border-background relative h-8 w-8 rounded-full border-2"
                   style={{ backgroundColor: agent.color }}
                   title={agent.name}
                 >
@@ -274,12 +274,12 @@ export function MultiAgentChatInterface({
                     {agent.name.substring(0, 2).toUpperCase()}
                   </div>
                   {agent.status === 'typing' && (
-                    <div className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
+                    <div className="border-background absolute -right-1 -bottom-1 h-3 w-3 rounded-full border-2 bg-green-500" />
                   )}
                 </div>
               ))}
               {agents.length > 5 && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-semibold">
+                <div className="border-background bg-muted flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-semibold">
                   +{agents.length - 5}
                 </div>
               )}
@@ -306,7 +306,7 @@ export function MultiAgentChatInterface({
         <div className="flex flex-1 overflow-hidden">
           {/* Left Panel - Agent List (Optional) */}
           {leftPanelOpen && (
-            <div className="w-64 border-r border-border bg-card">
+            <div className="border-border bg-card w-64 border-r">
               <div className="p-4">
                 <h3 className="mb-4 text-sm font-semibold">Active Agents</h3>
                 <ScrollArea className="h-[calc(100vh-12rem)]">
@@ -334,7 +334,7 @@ export function MultiAgentChatInterface({
                           <div className="truncate text-sm font-medium">
                             {agent.name}
                           </div>
-                          <div className="truncate text-xs text-muted-foreground">
+                          <div className="text-muted-foreground truncate text-xs">
                             {agent.role}
                           </div>
                         </div>
@@ -372,7 +372,7 @@ export function MultiAgentChatInterface({
             </div>
 
             {/* Message Input */}
-            <div className="border-t border-border bg-card p-4">
+            <div className="border-border bg-card border-t p-4">
               <EnhancedMessageInput
                 agents={agents}
                 onSend={handleSendMessage}
@@ -383,15 +383,15 @@ export function MultiAgentChatInterface({
 
           {/* Right Panel - Tasks/Participants/Settings */}
           {rightPanelOpen && (
-            <div className="w-80 border-l border-border bg-card">
+            <div className="border-border bg-card w-80 border-l">
               {/* Panel Tabs */}
-              <div className="flex border-b border-border">
+              <div className="border-border flex border-b">
                 <button
                   onClick={() => setRightPanelTab('tasks')}
                   className={cn(
                     'flex-1 px-4 py-3 text-sm font-medium transition-colors',
                     rightPanelTab === 'tasks'
-                      ? 'border-b-2 border-primary text-primary'
+                      ? 'border-primary text-primary border-b-2'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -402,7 +402,7 @@ export function MultiAgentChatInterface({
                   className={cn(
                     'flex-1 px-4 py-3 text-sm font-medium transition-colors',
                     rightPanelTab === 'participants'
-                      ? 'border-b-2 border-primary text-primary'
+                      ? 'border-primary text-primary border-b-2'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -414,7 +414,7 @@ export function MultiAgentChatInterface({
                   className={cn(
                     'flex-1 px-4 py-3 text-sm font-medium transition-colors',
                     rightPanelTab === 'settings'
-                      ? 'border-b-2 border-primary text-primary'
+                      ? 'border-primary text-primary border-b-2'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -441,7 +441,7 @@ export function MultiAgentChatInterface({
                   {rightPanelTab === 'settings' && (
                     <div className="space-y-4">
                       <h3 className="text-sm font-semibold">Chat Settings</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Settings panel - to be implemented
                       </p>
                     </div>

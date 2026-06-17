@@ -28,7 +28,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="border-t bg-card p-3 sm:p-4">
+    <div className="bg-card border-t p-3 sm:p-4">
       <div className="flex gap-2">
         <Input
           value={value}

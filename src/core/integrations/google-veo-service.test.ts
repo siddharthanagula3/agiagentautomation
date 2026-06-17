@@ -265,7 +265,9 @@ describe('Google Veo Service', () => {
 
       const result = await googleVeoService.generateVideo(mockRequest);
 
-      expect(result.video?.url).toBe('https://storage.googleapis.com/video.mp4');
+      expect(result.video?.url).toBe(
+        'https://storage.googleapis.com/video.mp4'
+      );
     });
 
     it('should handle polling error', async () => {
@@ -567,7 +569,7 @@ describe('Google Veo Service', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/media-proxies/google-veo-proxy',
+        '/api/media-proxies/google-veo-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -607,9 +609,7 @@ describe('Google Veo Service', () => {
 
       await googleVeoService.generateVideo({
         prompt: 'Test',
-        referenceImages: [
-          { imageData: 'base64data', mimeType: 'image/png' },
-        ],
+        referenceImages: [{ imageData: 'base64data', mimeType: 'image/png' }],
         firstFrame: { imageData: 'firstFrameData', mimeType: 'image/jpeg' },
       });
 

@@ -4,11 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  GoogleProvider,
-  GoogleError,
-  GoogleMessage,
-} from './google-gemini';
+import { GoogleProvider, GoogleError, GoogleMessage } from './google-gemini';
 
 // Mock external dependencies
 vi.mock('@shared/lib/supabase-client', () => ({
@@ -385,7 +381,7 @@ describe('GoogleProvider', () => {
       await provider.sendMessage(mockMessages);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/google-proxy',
+        '/api/llm-proxies/google-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -403,9 +399,7 @@ describe('GoogleProvider', () => {
   });
 
   describe('streamMessage', () => {
-    const mockMessages: GoogleMessage[] = [
-      { role: 'user', content: 'Hello' },
-    ];
+    const mockMessages: GoogleMessage[] = [{ role: 'user', content: 'Hello' }];
 
     it('should throw DIRECT_API_DISABLED error (direct API disabled)', async () => {
       const stream = provider.streamMessage(mockMessages);
@@ -469,9 +463,7 @@ describe('GoogleProvider', () => {
   });
 
   describe('Error Handling Edge Cases', () => {
-    const mockMessages: GoogleMessage[] = [
-      { role: 'user', content: 'Test' },
-    ];
+    const mockMessages: GoogleMessage[] = [{ role: 'user', content: 'Test' }];
 
     it('should handle network error', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));

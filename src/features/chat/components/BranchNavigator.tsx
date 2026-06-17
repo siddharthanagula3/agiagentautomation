@@ -11,11 +11,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@shared/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 import {
   Dialog,
   DialogContent,
@@ -69,7 +65,8 @@ export function BranchNavigator({
   const [branchHistory, setBranchHistory] = useState<BranchHistoryEntry[]>([]);
   const [isBranch, setIsBranch] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [editingBranch, setEditingBranch] = useState<ConversationBranchWithDetails | null>(null);
+  const [editingBranch, setEditingBranch] =
+    useState<ConversationBranchWithDetails | null>(null);
   const [newBranchName, setNewBranchName] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -77,11 +74,13 @@ export function BranchNavigator({
   const loadBranchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [branchesResult, historyResult, isBranchResult] = await Promise.all([
-        conversationBranchingService.getBranchesForSession(sessionId),
-        conversationBranchingService.getBranchHistory(sessionId),
-        conversationBranchingService.isBranchSession(sessionId),
-      ]);
+      const [branchesResult, historyResult, isBranchResult] = await Promise.all(
+        [
+          conversationBranchingService.getBranchesForSession(sessionId),
+          conversationBranchingService.getBranchHistory(sessionId),
+          conversationBranchingService.isBranchSession(sessionId),
+        ]
+      );
 
       setBranches(branchesResult);
       setBranchHistory(historyResult);
@@ -174,13 +173,16 @@ export function BranchNavigator({
         </TooltipProvider>
 
         <PopoverContent className="w-80 p-0" align="start">
-          <div className="border-b border-border p-3">
+          <div className="border-border border-b p-3">
             <div className="flex items-center gap-2">
-              <FolderTree className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <FolderTree
+                className="text-muted-foreground h-4 w-4"
+                aria-hidden="true"
+              />
               <h3 className="text-sm font-medium">Conversation Branches</h3>
             </div>
             {isBranch && (
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-xs">
                 This is a branched conversation
               </p>
             )}
@@ -189,8 +191,8 @@ export function BranchNavigator({
           <ScrollArea className="max-h-80">
             {/* Branch History (Ancestors) */}
             {hasHistory && (
-              <div className="border-b border-border p-3">
-                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <div className="border-border border-b p-3">
+                <div className="text-muted-foreground mb-2 flex items-center gap-2 text-xs font-medium">
                   <History className="h-3 w-3" aria-hidden="true" />
                   Branch History
                 </div>
@@ -210,13 +212,15 @@ export function BranchNavigator({
                           {/* Tree connector */}
                           <div className="flex w-4 flex-shrink-0 items-center justify-center">
                             {index > 0 && (
-                              <div className="h-full w-px bg-border" />
+                              <div className="bg-border h-full w-px" />
                             )}
                           </div>
                           <ChevronRight
                             className={cn(
                               'h-3 w-3 flex-shrink-0',
-                              isCurrent ? 'text-primary' : 'text-muted-foreground'
+                              isCurrent
+                                ? 'text-primary'
+                                : 'text-muted-foreground'
                             )}
                             aria-hidden="true"
                           />
@@ -231,11 +235,12 @@ export function BranchNavigator({
                             className={cn(
                               'truncate text-xs transition-colors',
                               isCurrent
-                                ? 'cursor-default font-medium text-foreground'
+                                ? 'text-foreground cursor-default font-medium'
                                 : 'text-muted-foreground hover:text-foreground'
                             )}
                           >
-                            {entry.branchName || (isLast ? 'Root' : `Branch ${entry.depth}`)}
+                            {entry.branchName ||
+                              (isLast ? 'Root' : `Branch ${entry.depth}`)}
                             {isCurrent && ' (current)'}
                           </button>
                         </div>
@@ -248,7 +253,7 @@ export function BranchNavigator({
             {/* Direct Branches */}
             {branches.length > 0 && (
               <div className="p-3">
-                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="text-muted-foreground mb-2 flex items-center gap-2 text-xs font-medium">
                   <GitFork className="h-3 w-3" aria-hidden="true" />
                   Branches from this conversation
                 </div>
@@ -256,10 +261,10 @@ export function BranchNavigator({
                   {branches.map((branch) => (
                     <div
                       key={branch.id}
-                      className="group flex items-start gap-2 rounded-lg border border-border bg-card p-2 transition-colors hover:bg-muted/50"
+                      className="group border-border bg-card hover:bg-muted/50 flex items-start gap-2 rounded-lg border p-2 transition-colors"
                     >
                       <GitBranch
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary"
+                        className="text-primary mt-0.5 h-4 w-4 flex-shrink-0"
                         aria-hidden="true"
                       />
                       <div className="min-w-0 flex-1">
@@ -268,14 +273,16 @@ export function BranchNavigator({
                             onNavigateToBranch(branch.childSessionId);
                             setIsPopoverOpen(false);
                           }}
-                          className="block truncate text-left text-sm font-medium text-foreground hover:text-primary"
+                          className="text-foreground hover:text-primary block truncate text-left text-sm font-medium"
                         >
                           {branch.branchName ||
                             branch.childSession?.title ||
                             'Untitled Branch'}
                         </button>
-                        <p className="text-[10px] text-muted-foreground">
-                          {formatDistanceToNow(branch.createdAt, { addSuffix: true })}
+                        <p className="text-muted-foreground text-[10px]">
+                          {formatDistanceToNow(branch.createdAt, {
+                            addSuffix: true,
+                          })}
                         </p>
                       </div>
                       <div className="flex flex-shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
@@ -293,7 +300,10 @@ export function BranchNavigator({
                                 }}
                                 aria-label="Rename branch"
                               >
-                                <Pencil className="h-3 w-3" aria-hidden="true" />
+                                <Pencil
+                                  className="h-3 w-3"
+                                  aria-hidden="true"
+                                />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>Rename</TooltipContent>
@@ -312,7 +322,10 @@ export function BranchNavigator({
                                 }}
                                 aria-label="Open branch"
                               >
-                                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                                <ExternalLink
+                                  className="h-3 w-3"
+                                  aria-hidden="true"
+                                />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>Open</TooltipContent>
@@ -323,14 +336,17 @@ export function BranchNavigator({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-destructive hover:text-destructive"
+                                className="text-destructive hover:text-destructive h-6 w-6"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleDeleteBranch(branch);
                                 }}
                                 aria-label="Remove branch"
                               >
-                                <Trash2 className="h-3 w-3" aria-hidden="true" />
+                                <Trash2
+                                  className="h-3 w-3"
+                                  aria-hidden="true"
+                                />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>Remove</TooltipContent>
@@ -346,11 +362,14 @@ export function BranchNavigator({
             {/* Empty state */}
             {!isLoading && branches.length === 0 && !hasHistory && (
               <div className="p-6 text-center">
-                <GitFork className="mx-auto h-8 w-8 text-muted-foreground/50" aria-hidden="true" />
-                <p className="mt-2 text-sm text-muted-foreground">
+                <GitFork
+                  className="text-muted-foreground/50 mx-auto h-8 w-8"
+                  aria-hidden="true"
+                />
+                <p className="text-muted-foreground mt-2 text-sm">
                   No branches yet
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground/70">
+                <p className="text-muted-foreground/70 mt-1 text-xs">
                   Branch from any message to explore alternate paths
                 </p>
               </div>
@@ -402,7 +421,10 @@ export function BranchNavigator({
             >
               Cancel
             </Button>
-            <Button onClick={handleUpdateBranchName} disabled={!newBranchName.trim()}>
+            <Button
+              onClick={handleUpdateBranchName}
+              disabled={!newBranchName.trim()}
+            >
               Save
             </Button>
           </DialogFooter>
@@ -449,7 +471,7 @@ export function BranchIndicator({
   if (compact) {
     return (
       <GitBranch
-        className={cn('h-3 w-3 text-primary', className)}
+        className={cn('text-primary h-3 w-3', className)}
         aria-label={`${branchCount} branches`}
       />
     );
@@ -485,7 +507,8 @@ export function MessageBranchIndicator({
 
   useEffect(() => {
     const loadBranches = async () => {
-      const result = await conversationBranchingService.getBranchesAtMessage(messageId);
+      const result =
+        await conversationBranchingService.getBranchesAtMessage(messageId);
       setBranches(result);
     };
 
@@ -503,7 +526,7 @@ export function MessageBranchIndicator({
           <button
             onClick={() => onBranchClick?.(branches)}
             className={cn(
-              'inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary transition-colors hover:bg-primary/20',
+              'bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors',
               className
             )}
             aria-label={`${branches.length} branch${branches.length > 1 ? 'es' : ''} from this message`}
@@ -513,7 +536,8 @@ export function MessageBranchIndicator({
           </button>
         </TooltipTrigger>
         <TooltipContent>
-          {branches.length} branch{branches.length > 1 ? 'es' : ''} from this message
+          {branches.length} branch{branches.length > 1 ? 'es' : ''} from this
+          message
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

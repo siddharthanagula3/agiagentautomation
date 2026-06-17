@@ -500,10 +500,12 @@ export class ToolsExecutionService {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       try {
         // Get current session for auth header
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
         const response = await fetch(
-          `/.netlify/functions/utilities/fetch-page?url=${encodeURIComponent(path)}`,
+          `/api/utilities/fetch-page?url=${encodeURIComponent(path)}`,
           {
             headers: session?.access_token
               ? { Authorization: `Bearer ${session.access_token}` }

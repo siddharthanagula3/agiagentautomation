@@ -15,15 +15,18 @@ export const lazyWithRetry = <T extends ComponentType<Record<string, unknown>>>(
             .then(resolve)
             .catch((retryError) => {
               // If retry fails, log and show error component
-              logger.error('[LazyLoadWrapper] Component load failed after retry', retryError);
+              logger.error(
+                '[LazyLoadWrapper] Component load failed after retry',
+                retryError
+              );
               resolve({
                 default: () => (
-                  <div className="flex h-screen items-center justify-center bg-background">
+                  <div className="bg-background flex h-screen items-center justify-center">
                     <div className="text-center">
-                      <h2 className="mb-2 text-lg font-semibold text-destructive">
+                      <h2 className="text-destructive mb-2 text-lg font-semibold">
                         Failed to Load Component
                       </h2>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Please refresh the page to try again.
                       </p>
                     </div>

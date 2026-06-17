@@ -147,15 +147,12 @@ export async function deductTokens(
   try {
     const { provider, model, totalTokens } = metadata;
 
-    const result = await supabase.rpc(
-      'deduct_user_tokens',
-      {
-        p_user_id: userId,
-        p_tokens: totalTokens,
-        p_provider: provider,
-        p_model: model,
-      }
-    );
+    const result = await supabase.rpc('deduct_user_tokens', {
+      p_user_id: userId,
+      p_tokens: totalTokens,
+      p_provider: provider,
+      p_model: model,
+    });
     const { data: newBalance, error } = result ?? {};
 
     if (error) {
@@ -198,10 +195,9 @@ export async function getUserTokenBalance(
   userId: string
 ): Promise<number | null> {
   try {
-    const rpcResult = await supabase.rpc(
-      'get_or_create_token_balance',
-      { p_user_id: userId }
-    );
+    const rpcResult = await supabase.rpc('get_or_create_token_balance', {
+      p_user_id: userId,
+    });
     const { data: rpcData, error: rpcError } = rpcResult ?? {};
 
     if (!rpcError && rpcData !== null && rpcData !== undefined) {
@@ -226,7 +222,10 @@ export async function getUserTokenBalance(
       .maybeSingle();
 
     if (balanceError) {
-      logger.error('[Token Balance] Error fetching token balance:', balanceError.message);
+      logger.error(
+        '[Token Balance] Error fetching token balance:',
+        balanceError.message
+      );
       // SECURITY: Fail closed on database errors
       return null;
     }
@@ -246,7 +245,10 @@ export async function getUserTokenBalance(
       .maybeSingle();
 
     if (userError) {
-      logger.error('[Token Balance] Error fetching user plan:', userError.message);
+      logger.error(
+        '[Token Balance] Error fetching user plan:',
+        userError.message
+      );
       return null;
     }
 

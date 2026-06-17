@@ -71,7 +71,7 @@ export function AgentStatusCard({ agent, className }: AgentStatusCardProps) {
   return (
     <div
       className={cn(
-        'border-b border-gray-200 bg-background p-4 dark:border-gray-800',
+        'bg-background border-b border-gray-200 p-4 dark:border-gray-800',
         className
       )}
     >
@@ -109,7 +109,7 @@ export function AgentStatusCard({ agent, className }: AgentStatusCardProps) {
 
           {/* Current Task */}
           {agent.currentTask && (
-            <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-1.5 line-clamp-2 text-xs">
               {agent.currentTask}
             </p>
           )}

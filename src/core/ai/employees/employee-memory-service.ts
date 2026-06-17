@@ -175,7 +175,9 @@ export class EmployeeMemoryService {
     const context = this.contextWindows[key];
 
     if (!context) {
-      logger.warn(`[Employee Memory] No context window found for employee ${employeeId}`);
+      logger.warn(
+        `[Employee Memory] No context window found for employee ${employeeId}`
+      );
       return;
     }
 
@@ -332,7 +334,10 @@ export class EmployeeMemoryService {
         return memory;
       }
     } catch (error) {
-      logger.warn('[Employee Memory] Failed to load employee memory from database:', error);
+      logger.warn(
+        '[Employee Memory] Failed to load employee memory from database:',
+        error
+      );
     }
 
     // Create new memory
@@ -493,7 +498,10 @@ export class EmployeeMemoryService {
         }
       );
     } catch (error) {
-      logger.warn('[Employee Memory] Failed to persist employee memory:', error);
+      logger.warn(
+        '[Employee Memory] Failed to persist employee memory:',
+        error
+      );
     }
   }
 

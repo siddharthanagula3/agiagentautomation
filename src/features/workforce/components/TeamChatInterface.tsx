@@ -25,9 +25,7 @@ import {
   type WorkforceResponse,
   type ExecutionUpdate,
 } from '@core/ai/orchestration/workforce-orchestrator';
-import {
-  Task,
-} from '@core/ai/orchestration/reasoning/task-breakdown';
+import { Task } from '@core/ai/orchestration/reasoning/task-breakdown';
 import { Card } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';

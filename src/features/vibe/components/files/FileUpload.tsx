@@ -163,8 +163,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           'relative cursor-pointer overflow-hidden transition-all duration-200',
           compact ? 'p-4' : 'p-6',
           isDragging
-            ? 'border-2 border-primary bg-primary/5'
-            : 'border-2 border-dashed hover:border-primary/50'
+            ? 'border-primary bg-primary/5 border-2'
+            : 'hover:border-primary/50 border-2 border-dashed'
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -207,7 +207,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           >
             {isDragging ? 'Drop files here' : 'Drag & drop files here'}
           </p>
-          <p className="mb-3 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mb-3 text-xs">
             or click to browse
           </p>
 
@@ -294,13 +294,13 @@ const FileUploadItem: React.FC<FileUploadItemProps> = ({
               <StatusIcon status={status} />
             </div>
             <div className="mt-1 flex items-center gap-2">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {formatFileSize(file.size)}
               </p>
               {error && (
                 <>
-                  <span className="text-xs text-muted-foreground">•</span>
-                  <p className="truncate text-xs text-destructive">{error}</p>
+                  <span className="text-muted-foreground text-xs">•</span>
+                  <p className="text-destructive truncate text-xs">{error}</p>
                 </>
               )}
             </div>
@@ -334,11 +334,11 @@ const StatusIcon: React.FC<{ status: UploadedFile['status'] }> = ({
 }) => {
   switch (status) {
     case 'uploading':
-      return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
+      return <Loader2 className="text-primary h-4 w-4 animate-spin" />;
     case 'success':
       return <CheckCircle2 className="h-4 w-4 text-green-500" />;
     case 'error':
-      return <AlertCircle className="h-4 w-4 text-destructive" />;
+      return <AlertCircle className="text-destructive h-4 w-4" />;
     default:
       return null;
   }
@@ -352,14 +352,14 @@ const FileIconDisplay: React.FC<{ filename: string }> = ({ filename }) => {
   const ext = filename.split('.').pop()?.toLowerCase();
 
   if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext || '')) {
-    return <Image className="h-5 w-5 text-muted-foreground" />;
+    return <Image className="text-muted-foreground h-5 w-5" />;
   }
 
   if (['pdf', 'doc', 'docx', 'txt', 'md'].includes(ext || '')) {
-    return <FileText className="h-5 w-5 text-muted-foreground" />;
+    return <FileText className="text-muted-foreground h-5 w-5" />;
   }
 
-  return <File className="h-5 w-5 text-muted-foreground" />;
+  return <File className="text-muted-foreground h-5 w-5" />;
 };
 
 /**

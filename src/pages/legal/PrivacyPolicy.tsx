@@ -95,7 +95,7 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <SEOHead
         title="Privacy Policy | AGI Workforce"
         description="Privacy Policy for AGI Workforce platform. Learn how we collect, use, and protect your personal information and data."
@@ -113,7 +113,7 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
       />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/5 to-transparent px-4 pb-12 pt-32 sm:px-6 lg:px-8">
+      <section className="from-primary/5 bg-gradient-to-b to-transparent px-4 pt-32 pb-12 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -128,10 +128,10 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
             <h1 className="mb-6 text-5xl font-bold md:text-6xl">
               Your Privacy Matters
             </h1>
-            <p className="mb-4 text-lg text-muted-foreground">
+            <p className="text-muted-foreground mb-4 text-lg">
               Last updated: {lastUpdated}
             </p>
-            <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
               We're committed to protecting your privacy and being transparent
               about how we collect, use, and safeguard your information.
             </p>
@@ -148,12 +148,12 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
             viewport={{ once: true }}
             className="prose prose-lg dark:prose-invert max-w-none"
           >
-            <p className="text-lg leading-relaxed text-muted-foreground">
-              This Privacy Policy explains how AGI Workforce ("we", "us",
-              "our") collects, uses, discloses, and protects your personal
-              information when you use our AI automation platform and services.
-              By using our services, you agree to the collection and use of
-              information in accordance with this policy.
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              This Privacy Policy explains how AGI Workforce ("we", "us", "our")
+              collects, uses, discloses, and protects your personal information
+              when you use our AI automation platform and services. By using our
+              services, you agree to the collection and use of information in
+              accordance with this policy.
             </p>
           </motion.div>
         </div>
@@ -169,15 +169,15 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="glass rounded-2xl border border-border/50 p-8"
+              className="glass border-border/50 rounded-2xl border p-8"
             >
               <div className="mb-4 flex items-start gap-4">
-                <div className="rounded-xl bg-primary/10 p-3">
-                  <section.icon className="h-6 w-6 text-primary" />
+                <div className="bg-primary/10 rounded-xl p-3">
+                  <section.icon className="text-primary h-6 w-6" />
                 </div>
                 <div className="flex-1">
                   <h2 className="mb-4 text-2xl font-bold">{section.title}</h2>
-                  <div className="whitespace-pre-line leading-relaxed text-muted-foreground">
+                  <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
                     {section.content}
                   </div>
                 </div>
@@ -198,7 +198,7 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
             <h2 className="mb-4 text-3xl font-bold">
               Questions About Privacy?
             </h2>
-            <p className="mb-6 text-lg text-muted-foreground">
+            <p className="text-muted-foreground mb-6 text-lg">
               If you have any questions or concerns about our privacy practices,
               please contact us.
             </p>
@@ -206,11 +206,11 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
               <div>
                 <strong>Email:</strong> privacy@agiworkforce.com
               </div>
-              <div className="hidden text-muted-foreground sm:block">|</div>
+              <div className="text-muted-foreground hidden sm:block">|</div>
               <div>
                 <strong>DPO:</strong> dpo@agiworkforce.com
               </div>
-              <div className="hidden text-muted-foreground sm:block">|</div>
+              <div className="text-muted-foreground hidden sm:block">|</div>
               <div>
                 <strong>Support:</strong> support@agiworkforce.com
               </div>

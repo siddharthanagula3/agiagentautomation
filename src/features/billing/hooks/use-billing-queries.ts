@@ -166,9 +166,12 @@ const PRO_PROVIDER_LIMIT = 2_500_000;
  */
 async function fetchTokenBalance(userId: string): Promise<TokenBalance> {
   // Try get_credit_balance RPC first (shared Supabase billing)
-  const { data: rpcData, error: rpcError } = await supabase.rpc('get_credit_balance', {
-    p_user_id: userId,
-  });
+  const { data: rpcData, error: rpcError } = await supabase.rpc(
+    'get_credit_balance',
+    {
+      p_user_id: userId,
+    }
+  );
 
   if (!rpcError && rpcData !== null && rpcData !== undefined) {
     const creditsCents = Math.max(Number(rpcData), 0);
@@ -180,7 +183,10 @@ async function fetchTokenBalance(userId: string): Promise<TokenBalance> {
   }
 
   if (rpcError) {
-    logger.warn('[BillingQuery] get_credit_balance RPC failed, falling back:', rpcError.message);
+    logger.warn(
+      '[BillingQuery] get_credit_balance RPC failed, falling back:',
+      rpcError.message
+    );
   }
 
   // Fallback: direct query to token_credits table
@@ -476,19 +482,28 @@ export function useTokenAnalytics(
         (sessions || []) as SessionWithTokens[]
       )
         .filter(
-          (s): s is SessionWithTokens & { chat_session_tokens: NonNullable<SessionWithTokens['chat_session_tokens']> } =>
-            s.chat_session_tokens !== null && s.chat_session_tokens.total_tokens > 0
+          (
+            s
+          ): s is SessionWithTokens & {
+            chat_session_tokens: NonNullable<
+              SessionWithTokens['chat_session_tokens']
+            >;
+          } =>
+            s.chat_session_tokens !== null &&
+            s.chat_session_tokens.total_tokens > 0
         )
-        .map((s): AnalyticsSession => ({
-          sessionId: s.id,
-          sessionTitle: s.title || 'Untitled',
-          totalTokens: s.chat_session_tokens.total_tokens || 0,
-          inputTokens: s.chat_session_tokens.total_input_tokens || 0,
-          outputTokens: s.chat_session_tokens.total_output_tokens || 0,
-          totalCost: s.chat_session_tokens.total_cost || 0,
-          provider: s.provider || 'openai',
-          createdAt: new Date(s.created_at),
-        }));
+        .map(
+          (s): AnalyticsSession => ({
+            sessionId: s.id,
+            sessionTitle: s.title || 'Untitled',
+            totalTokens: s.chat_session_tokens.total_tokens || 0,
+            inputTokens: s.chat_session_tokens.total_input_tokens || 0,
+            outputTokens: s.chat_session_tokens.total_output_tokens || 0,
+            totalCost: s.chat_session_tokens.total_cost || 0,
+            provider: s.provider || 'openai',
+            createdAt: new Date(s.created_at),
+          })
+        );
 
       // Calculate stats
       const totalTokens = processedData.reduce(
@@ -722,7 +737,10 @@ export function useInvoices(): UseQueryResult<Invoice[], Error> {
 
       if (error) {
         // Table might not exist
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
           logger.warn('[useInvoices] Invoices table does not exist');
           return [];
         }
@@ -807,8 +825,13 @@ export function usePaymentMethods(): UseQueryResult<PaymentMethod[], Error> {
 
       if (error) {
         // Table might not exist
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
-          logger.warn('[usePaymentMethods] Payment methods table does not exist');
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
+          logger.warn(
+            '[usePaymentMethods] Payment methods table does not exist'
+          );
           return [];
         }
         throw error;
@@ -896,13 +919,25 @@ export function useTokenUsageHistory(
   options?: TokenUsageHistoryOptions
 ): UseQueryResult<TokenUsageHistoryRecord[], Error> {
   const { user } = useAuthStore();
-  const { limit = 50, offset = 0, provider, startDate, endDate } = options || {};
+  const {
+    limit = 50,
+    offset = 0,
+    provider,
+    startDate,
+    endDate,
+  } = options || {};
 
   return useQuery<TokenUsageHistoryRecord[], Error>({
     queryKey: [
       ...queryKeys.billing.tokenUsage(user?.id ?? ''),
       'history',
-      { limit, offset, provider, startDate: startDate?.toISOString(), endDate: endDate?.toISOString() },
+      {
+        limit,
+        offset,
+        provider,
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
+      },
     ],
     queryFn: async (): Promise<TokenUsageHistoryRecord[]> => {
       if (!user?.id) return [];
@@ -929,8 +964,13 @@ export function useTokenUsageHistory(
       const { data, error } = await query;
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
-          logger.warn('[useTokenUsageHistory] Token usage table does not exist');
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
+          logger.warn(
+            '[useTokenUsageHistory] Token usage table does not exist'
+          );
           return [];
         }
         throw error;
@@ -1027,7 +1067,10 @@ export function useBillingAnalytics(
   const { user } = useAuthStore();
 
   return useQuery<BillingAnalyticsData | null, Error>({
-    queryKey: [...queryKeys.billing.analytics(user?.id ?? '', timeRange), 'enhanced'],
+    queryKey: [
+      ...queryKeys.billing.analytics(user?.id ?? '', timeRange),
+      'enhanced',
+    ],
     queryFn: async (): Promise<BillingAnalyticsData | null> => {
       if (!user?.id) return null;
 
@@ -1036,11 +1079,13 @@ export function useBillingAnalytics(
         '7d': 7,
         '30d': 30,
         '90d': 90,
-        'all': 365,
+        all: 365,
       };
       const days = daysMap[timeRange];
       const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-      const previousStartDate = new Date(startDate.getTime() - days * 24 * 60 * 60 * 1000);
+      const previousStartDate = new Date(
+        startDate.getTime() - days * 24 * 60 * 60 * 1000
+      );
 
       // Fetch token usage data
       const { data: usageData, error: usageError } = await supabase
@@ -1051,7 +1096,10 @@ export function useBillingAnalytics(
         .order('created_at', { ascending: true });
 
       if (usageError) {
-        if (usageError.code === '42P01' || usageError.message?.includes('does not exist')) {
+        if (
+          usageError.code === '42P01' ||
+          usageError.message?.includes('does not exist')
+        ) {
           logger.warn('[useBillingAnalytics] Token usage table does not exist');
           return null;
         }
@@ -1069,17 +1117,30 @@ export function useBillingAnalytics(
       );
 
       // Calculate overview
-      const totalSpent = currentRecords.reduce((sum, r) => sum + (r.total_cost || 0), 0);
-      const totalTokensUsed = currentRecords.reduce((sum, r) => sum + (r.total_tokens || 0), 0);
+      const totalSpent = currentRecords.reduce(
+        (sum, r) => sum + (r.total_cost || 0),
+        0
+      );
+      const totalTokensUsed = currentRecords.reduce(
+        (sum, r) => sum + (r.total_tokens || 0),
+        0
+      );
       const avgCostPerDay = totalSpent / days;
       const avgTokensPerDay = totalTokensUsed / days;
       const projectedMonthlySpend = avgCostPerDay * 30;
 
       // Calculate trends
-      const trendsMap = new Map<string, { tokens: number; cost: number; sessions: number }>();
+      const trendsMap = new Map<
+        string,
+        { tokens: number; cost: number; sessions: number }
+      >();
       currentRecords.forEach((r) => {
         const date = r.created_at.split('T')[0];
-        const existing = trendsMap.get(date) || { tokens: 0, cost: 0, sessions: 0 };
+        const existing = trendsMap.get(date) || {
+          tokens: 0,
+          cost: 0,
+          sessions: 0,
+        };
         trendsMap.set(date, {
           tokens: existing.tokens + (r.total_tokens || 0),
           cost: existing.cost + (r.total_cost || 0),
@@ -1092,21 +1153,31 @@ export function useBillingAnalytics(
       }));
 
       // Calculate provider breakdown
-      const providerMap = new Map<string, { tokens: number; cost: number; sessions: number }>();
+      const providerMap = new Map<
+        string,
+        { tokens: number; cost: number; sessions: number }
+      >();
       currentRecords.forEach((r) => {
         const provider = r.provider || 'unknown';
-        const existing = providerMap.get(provider) || { tokens: 0, cost: 0, sessions: 0 };
+        const existing = providerMap.get(provider) || {
+          tokens: 0,
+          cost: 0,
+          sessions: 0,
+        };
         providerMap.set(provider, {
           tokens: existing.tokens + (r.total_tokens || 0),
           cost: existing.cost + (r.total_cost || 0),
           sessions: existing.sessions + 1,
         });
       });
-      const providerBreakdown = Array.from(providerMap.entries()).map(([provider, data]) => ({
-        provider,
-        ...data,
-        percentage: totalTokensUsed > 0 ? (data.tokens / totalTokensUsed) * 100 : 0,
-      }));
+      const providerBreakdown = Array.from(providerMap.entries()).map(
+        ([provider, data]) => ({
+          provider,
+          ...data,
+          percentage:
+            totalTokensUsed > 0 ? (data.tokens / totalTokensUsed) * 100 : 0,
+        })
+      );
 
       // Period comparison
       const currentPeriod = {
@@ -1115,22 +1186,31 @@ export function useBillingAnalytics(
         sessions: currentRecords.length,
       };
       const previousPeriod = {
-        tokens: previousRecords.reduce((sum, r) => sum + (r.total_tokens || 0), 0),
+        tokens: previousRecords.reduce(
+          (sum, r) => sum + (r.total_tokens || 0),
+          0
+        ),
         cost: previousRecords.reduce((sum, r) => sum + (r.total_cost || 0), 0),
         sessions: previousRecords.length,
       };
       const percentChange = {
         tokens:
           previousPeriod.tokens > 0
-            ? ((currentPeriod.tokens - previousPeriod.tokens) / previousPeriod.tokens) * 100
+            ? ((currentPeriod.tokens - previousPeriod.tokens) /
+                previousPeriod.tokens) *
+              100
             : 0,
         cost:
           previousPeriod.cost > 0
-            ? ((currentPeriod.cost - previousPeriod.cost) / previousPeriod.cost) * 100
+            ? ((currentPeriod.cost - previousPeriod.cost) /
+                previousPeriod.cost) *
+              100
             : 0,
         sessions:
           previousPeriod.sessions > 0
-            ? ((currentPeriod.sessions - previousPeriod.sessions) / previousPeriod.sessions) * 100
+            ? ((currentPeriod.sessions - previousPeriod.sessions) /
+                previousPeriod.sessions) *
+              100
             : 0,
       };
 
@@ -1186,7 +1266,7 @@ export function useCancelSubscription(): UseMutationResult<
       }
 
       // Call Netlify function to cancel subscription
-      const response = await fetch('/.netlify/functions/payments/cancel-subscription', {
+      const response = await fetch('/api/payments/cancel-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1200,7 +1280,9 @@ export function useCancelSubscription(): UseMutationResult<
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.billing.subscription() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.billing.subscription(),
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.billing.all() });
       toast.success('Subscription cancelled successfully');
     },
@@ -1230,7 +1312,7 @@ export function useUpdatePaymentMethod(): UseMutationResult<
         throw new Error('You must be logged in');
       }
 
-      const response = await fetch('/.netlify/functions/payments/update-payment-method', {
+      const response = await fetch('/api/payments/update-payment-method', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1244,7 +1326,9 @@ export function useUpdatePaymentMethod(): UseMutationResult<
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.billing.paymentMethods() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.billing.paymentMethods(),
+      });
       toast.success('Payment method updated successfully');
     },
     onError: (error: Error) => {

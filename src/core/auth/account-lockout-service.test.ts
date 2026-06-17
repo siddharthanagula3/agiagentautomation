@@ -64,7 +64,9 @@ describe('AccountLockoutService', () => {
     it('should return locked status when account is locked', async () => {
       const lockedUntil = new Date(Date.now() + 30 * 60 * 1000).toISOString();
       mockSupabase.rpc.mockResolvedValue({
-        data: [{ is_locked: true, locked_until: lockedUntil, failed_attempts: 5 }],
+        data: [
+          { is_locked: true, locked_until: lockedUntil, failed_attempts: 5 },
+        ],
         error: null,
       });
 

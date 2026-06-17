@@ -32,11 +32,11 @@ const NotFoundPage = () => {
         noindex
       />
 
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background to-muted/20 px-4">
+      <div className="from-background to-muted/20 flex min-h-screen flex-col items-center justify-center bg-gradient-to-b px-4">
         <div className="mx-auto max-w-2xl text-center">
           {/* 404 Animation */}
           <div className="mb-8">
-            <h1 className="text-8xl font-extrabold text-primary/20 sm:text-9xl">
+            <h1 className="text-primary/20 text-8xl font-extrabold sm:text-9xl">
               404
             </h1>
             <div className="relative -mt-8">
@@ -44,7 +44,7 @@ const NotFoundPage = () => {
             </div>
           </div>
 
-          <p className="mb-8 text-lg text-muted-foreground">
+          <p className="text-muted-foreground mb-8 text-lg">
             The page you're looking for doesn't exist or has been moved. Let's
             help you find what you need.
           </p>
@@ -53,7 +53,7 @@ const NotFoundPage = () => {
           <form onSubmit={handleSearch} className="mb-12">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
                 <Input
                   type="text"
                   placeholder="Search our site..."
@@ -68,7 +68,7 @@ const NotFoundPage = () => {
 
           {/* Quick Links */}
           <div className="mb-8">
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="text-muted-foreground mb-4 text-sm font-semibold tracking-wider uppercase">
               Quick Links
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -97,9 +97,9 @@ const NotFoundPage = () => {
           </Button>
 
           {/* Additional Help */}
-          <div className="mt-12 rounded-lg border bg-card p-6 text-left">
+          <div className="bg-card mt-12 rounded-lg border p-6 text-left">
             <h3 className="mb-2 font-semibold">Need More Help?</h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mb-4 text-sm">
               If you believe this is an error or you need assistance, our
               support team is here to help.
             </p>

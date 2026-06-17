@@ -1530,12 +1530,7 @@ Respond in JSON format:
       const agent = this.agents[planTask.agentId];
       if (!agent) continue;
 
-      store.updateEmployeeStatus(
-        agent.name,
-        'thinking',
-        null,
-        planTask.task
-      );
+      store.updateEmployeeStatus(agent.name, 'thinking', null, planTask.task);
 
       try {
         const step: WorkflowStep = {
@@ -1770,7 +1765,8 @@ Respond with JSON:
         r.output.trim().startsWith('#') || r.output.trim().includes('\n## ');
       if (startsWithMarkdown) score += 0.5;
 
-      const hasBulletPoints = r.output.includes('- ') || r.output.includes('* ');
+      const hasBulletPoints =
+        r.output.includes('- ') || r.output.includes('* ');
       if (hasBulletPoints) score += 0.5;
 
       // Keyword density check matching the agent's actual expertise fields

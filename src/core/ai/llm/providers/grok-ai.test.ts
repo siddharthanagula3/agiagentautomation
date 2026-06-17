@@ -4,11 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  GrokProvider,
-  GrokError,
-  GrokMessage,
-} from './grok-ai';
+import { GrokProvider, GrokError, GrokMessage } from './grok-ai';
 
 // Mock external dependencies
 vi.mock('@shared/lib/supabase-client', () => ({
@@ -267,7 +263,11 @@ describe('GrokProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Test response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -358,7 +358,7 @@ describe('GrokProvider', () => {
       await provider.sendMessage(mockMessages);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/grok-proxy',
+        '/api/llm-proxies/grok-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -385,7 +385,11 @@ describe('GrokProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -437,7 +441,11 @@ describe('GrokProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -472,7 +480,11 @@ describe('GrokProvider', () => {
                 sentiment: { positive: 60, negative: 20, neutral: 20 },
                 trends: [{ topic: 'AI', volume: 10000, growth: '+50%' }],
                 topPosts: [
-                  { content: 'Great AI news', author: '@tech', engagement: 5000 },
+                  {
+                    content: 'Great AI news',
+                    author: '@tech',
+                    engagement: 5000,
+                  },
                 ],
               }),
             },
@@ -617,7 +629,9 @@ describe('GrokProvider', () => {
     });
 
     it('should handle database save error gracefully', async () => {
-      const insertMock = vi.fn().mockResolvedValue({ error: new Error('DB error') });
+      const insertMock = vi
+        .fn()
+        .mockResolvedValue({ error: new Error('DB error') });
       vi.mocked(supabase.from).mockReturnValue({
         insert: insertMock,
       } as never);

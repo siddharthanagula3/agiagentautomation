@@ -21,9 +21,7 @@ import {
   estimateTokensForRequest,
   deductTokens,
 } from '@core/billing/token-enforcement-service';
-import {
-  checkUserInput,
-} from '@core/security/prompt-injection-detector';
+import { checkUserInput } from '@core/security/prompt-injection-detector';
 
 export interface StreamChunk {
   type: 'content' | 'tool_call' | 'error' | 'done';
@@ -375,7 +373,7 @@ export async function streamOpenAI(
   }
 
   // SECURITY: Use Netlify proxy to keep API keys secure
-  const proxyUrl = '/.netlify/functions/llm-proxies/openai-proxy';
+  const proxyUrl = '/api/llm-proxies/openai-proxy';
 
   const response = await fetch(proxyUrl, {
     method: 'POST',
@@ -483,7 +481,7 @@ export async function streamAnthropic(
   );
 
   // SECURITY: Use Netlify proxy to keep API keys secure
-  const proxyUrl = '/.netlify/functions/llm-proxies/anthropic-proxy';
+  const proxyUrl = '/api/llm-proxies/anthropic-proxy';
 
   const response = await fetch(proxyUrl, {
     method: 'POST',
@@ -584,7 +582,7 @@ export async function streamGoogle(
   }
 
   // SECURITY: Use Netlify proxy to keep API keys secure
-  const proxyUrl = '/.netlify/functions/llm-proxies/google-proxy';
+  const proxyUrl = '/api/llm-proxies/google-proxy';
 
   // Extract system message from sanitized messages
   const systemMessage = securityCheck.sanitizedMessages.find(
@@ -694,7 +692,7 @@ export async function streamPerplexity(
   }
 
   // SECURITY: Use Netlify proxy to keep API keys secure
-  const proxyUrl = '/.netlify/functions/llm-proxies/perplexity-proxy';
+  const proxyUrl = '/api/llm-proxies/perplexity-proxy';
 
   const response = await fetch(proxyUrl, {
     method: 'POST',

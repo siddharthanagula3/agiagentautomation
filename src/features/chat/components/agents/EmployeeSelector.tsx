@@ -84,7 +84,7 @@ const EmployeeAvatarButton = memo(function EmployeeAvatarButton({
             {/* Status Indicator */}
             <div
               className={cn(
-                'absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white',
+                'absolute -right-1 -bottom-1 h-3 w-3 rounded-full border-2 border-white',
                 employee.status === 'working' && 'bg-green-500',
                 employee.status === 'thinking' && 'bg-yellow-500',
                 employee.status === 'idle' && 'bg-gray-400'

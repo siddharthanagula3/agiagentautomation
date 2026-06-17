@@ -176,7 +176,7 @@ const HelpPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <SEOHead
         title="Help & Support | AGI Workforce"
         description="Get help with AGI Workforce platform. Find answers to common questions, tutorials, and contact our support team for assistance."
@@ -218,7 +218,7 @@ const HelpPage: React.FC = () => {
       />
 
       {/* Hero Section */}
-      <section className="px-4 pb-16 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-16 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -226,17 +226,17 @@ const HelpPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
               How Can We Help?
             </h1>
-            <p className="mb-8 text-xl text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-xl">
               Search our knowledge base or get in touch with support
             </p>
 
             {/* Search Bar */}
             <div className="relative mx-auto max-w-2xl">
               <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="text-muted-foreground absolute top-1/2 left-4 -translate-y-1/2"
                 size={20}
               />
               <Input
@@ -244,7 +244,7 @@ const HelpPage: React.FC = () => {
                 placeholder="Search for help articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-12 border-border/40 bg-background/60 pl-12 text-base backdrop-blur-xl sm:h-14 sm:text-lg"
+                className="border-border/40 bg-background/60 h-12 pl-12 text-base backdrop-blur-xl sm:h-14 sm:text-lg"
               />
             </div>
           </motion.div>
@@ -307,7 +307,7 @@ const HelpPage: React.FC = () => {
               animate={{ opacity: 1 }}
               className="py-12 text-center"
             >
-              <p className="text-xl text-muted-foreground">
+              <p className="text-muted-foreground text-xl">
                 No results found. Try a different search term.
               </p>
             </motion.div>
@@ -371,10 +371,10 @@ const HelpPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-12 text-center backdrop-blur-xl"
+            className="border-border/40 from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden rounded-3xl border bg-gradient-to-r p-12 text-center backdrop-blur-xl"
           >
             <h2 className="mb-4 text-3xl font-bold">Join Our Community</h2>
-            <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto mb-8 max-w-2xl">
               Connect with other users, share best practices, and get tips from
               AI automation experts
             </p>
@@ -384,17 +384,14 @@ const HelpPage: React.FC = () => {
                 size="lg"
                 className="border-border/40"
                 onClick={() =>
-                  window.open(
-                    'https://community.agiworkforce.com',
-                    '_blank'
-                  )
+                  window.open('https://community.agiworkforce.com', '_blank')
                 }
               >
                 <Users className="mr-2" size={18} />
                 Community Forum
               </Button>
               <Button
-                className="bg-gradient-to-r from-primary to-accent"
+                className="from-primary to-accent bg-gradient-to-r"
                 size="lg"
                 onClick={() =>
                   window.open('https://discord.gg/agiworkforce', '_blank')
@@ -434,7 +431,7 @@ const CategoryCard: React.FC<{ category: SupportCategory; index: number }> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl transition-all hover:border-primary/50"
+      className="group border-border/40 bg-background/60 hover:border-primary/50 relative cursor-pointer overflow-hidden rounded-2xl border p-6 backdrop-blur-xl transition-all"
       whileHover={{ y: -8 }}
       onClick={handleClick}
     >
@@ -443,14 +440,14 @@ const CategoryCard: React.FC<{ category: SupportCategory; index: number }> = ({
       >
         <Icon size={24} />
       </div>
-      <h3 className="mb-2 text-xl font-bold transition-colors group-hover:text-primary">
+      <h3 className="group-hover:text-primary mb-2 text-xl font-bold transition-colors">
         {category.title}
       </h3>
-      <p className="mb-4 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mb-4 text-sm">
         {category.description}
       </p>
-      <div className="flex items-center justify-between border-t border-border/40 pt-4">
-        <span className="text-sm text-muted-foreground">
+      <div className="border-border/40 flex items-center justify-between border-t pt-4">
+        <span className="text-muted-foreground text-sm">
           {category.articleCount} articles
         </span>
         <ExternalLink
@@ -477,11 +474,11 @@ const FAQCard: React.FC<{
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="overflow-hidden rounded-xl border border-border/40 bg-background/60 backdrop-blur-xl"
+      className="border-border/40 bg-background/60 overflow-hidden rounded-xl border backdrop-blur-xl"
     >
       <button
         onClick={onToggle}
-        className="flex w-full items-center justify-between p-6 text-left transition-colors hover:bg-accent/5"
+        className="hover:bg-accent/5 flex w-full items-center justify-between p-6 text-left transition-colors"
       >
         <div className="flex flex-1 items-start gap-4">
           <div className="mt-1">
@@ -507,7 +504,7 @@ const FAQCard: React.FC<{
             className="overflow-hidden"
           >
             <div className="px-6 pb-6 pl-16">
-              <p className="leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground leading-relaxed">
                 {faq.answer}
               </p>
             </div>
@@ -536,7 +533,7 @@ const ContactCard: React.FC<{
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-background/60 p-6 text-center backdrop-blur-xl transition-all hover:border-primary/50"
+      className="group border-border/40 bg-background/60 hover:border-primary/50 relative overflow-hidden rounded-2xl border p-6 text-center backdrop-blur-xl transition-all"
       whileHover={{ y: -8 }}
     >
       <div
@@ -545,7 +542,7 @@ const ContactCard: React.FC<{
         <Icon size={28} />
       </div>
       <h3 className="mb-2 text-xl font-bold">{title}</h3>
-      <p className="mb-6 text-sm text-muted-foreground">{description}</p>
+      <p className="text-muted-foreground mb-6 text-sm">{description}</p>
       <Button variant="outline" className="w-full" onClick={onClick}>
         {cta}
       </Button>

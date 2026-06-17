@@ -109,8 +109,13 @@ class GlobalSearchService {
 
       // Track search in history (fire and forget, don't block)
       if (options.trackSearch && filters.query.trim()) {
-        this.trackSearch(userId, filters.query, stats.totalResults, filters).catch(
-          (err) => console.warn('[GlobalSearch] Failed to track search:', err)
+        this.trackSearch(
+          userId,
+          filters.query,
+          stats.totalResults,
+          filters
+        ).catch((err) =>
+          console.warn('[GlobalSearch] Failed to track search:', err)
         );
       }
 
@@ -205,7 +210,11 @@ class GlobalSearchService {
       }
 
       return (data || []).map(
-        (row: { query: string; search_count: number; avg_results: number }) => ({
+        (row: {
+          query: string;
+          search_count: number;
+          avg_results: number;
+        }) => ({
           query: row.query,
           searchCount: row.search_count,
           avgResults: row.avg_results || 0,
@@ -447,7 +456,10 @@ class GlobalSearchService {
       });
 
       if (error) {
-        console.error('[GlobalSearch] get_search_suggestions RPC failed:', error);
+        console.error(
+          '[GlobalSearch] get_search_suggestions RPC failed:',
+          error
+        );
         return [];
       }
 
@@ -508,10 +520,6 @@ class GlobalSearchService {
 }
 
 // Export types for external use
-export type {
-  RecentSearch,
-  PopularSearch,
-  SearchSuggestion,
-};
+export type { RecentSearch, PopularSearch, SearchSuggestion };
 
 export const globalSearchService = new GlobalSearchService();

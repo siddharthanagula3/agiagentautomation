@@ -66,7 +66,7 @@ export const TaskBreakdown: React.FC<TaskBreakdownProps> = ({
         <div className="mb-3 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold">Task Breakdown</h3>
-            <p className="mt-0.5 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-0.5 text-sm">
               {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} total
             </p>
           </div>
@@ -97,7 +97,7 @@ export const TaskBreakdown: React.FC<TaskBreakdownProps> = ({
         {/* Overall Progress */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               Overall Progress
             </span>
             <span className="text-sm font-medium">{progress}%</span>
@@ -187,8 +187,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
             {/* Assigned Employee */}
             {employee && (
               <div className="mb-2 flex items-center gap-2">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
+                <User className="text-muted-foreground h-3.5 w-3.5" />
+                <span className="text-muted-foreground text-xs">
                   Assigned to{' '}
                   <span className="font-medium">{employee.name}</span>
                 </span>
@@ -198,8 +198,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
             {/* Dependencies */}
             {showDependencies && task.dependencies.length > 0 && (
               <div className="mb-2 flex items-center gap-2">
-                <GitBranch className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
+                <GitBranch className="text-muted-foreground h-3.5 w-3.5" />
+                <span className="text-muted-foreground text-xs">
                   Depends on {task.dependencies.length}{' '}
                   {task.dependencies.length === 1 ? 'task' : 'tasks'}
                 </span>
@@ -208,15 +208,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
             {/* Error Message */}
             {task.error && (
-              <div className="mt-2 rounded-md bg-destructive/10 p-2">
-                <p className="text-xs text-destructive">{task.error}</p>
+              <div className="bg-destructive/10 mt-2 rounded-md p-2">
+                <p className="text-destructive text-xs">{task.error}</p>
               </div>
             )}
 
             {/* Result Preview */}
             {task.result && task.status === 'completed' && (
-              <div className="mt-2 rounded-md bg-muted/50 p-2">
-                <p className="line-clamp-2 text-xs text-muted-foreground">
+              <div className="bg-muted/50 mt-2 rounded-md p-2">
+                <p className="text-muted-foreground line-clamp-2 text-xs">
                   {typeof task.result === 'string'
                     ? task.result
                     : JSON.stringify(task.result)}
@@ -225,7 +225,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             )}
 
             {/* Timestamps */}
-            <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
               <span>Created {formatTimestamp(task.created_at)}</span>
               {task.completed_at && (
                 <>
@@ -289,14 +289,14 @@ const TaskTimeline: React.FC<TaskTimelineProps> = ({ tasks }) => {
                 className={cn('h-4 w-4 flex-shrink-0', statusConfig.iconColor)}
               />
               {index < sortedTasks.length - 1 && (
-                <div className="mt-1 h-8 w-0.5 bg-border" />
+                <div className="bg-border mt-1 h-8 w-0.5" />
               )}
             </div>
 
             {/* Timeline Content */}
             <div className="flex-1 pb-2">
               <p className="text-sm font-medium">{task.description}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 text-xs">
                 {formatTimestamp(task.created_at)}
               </p>
             </div>

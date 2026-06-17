@@ -582,7 +582,10 @@ export function useConversationTree(
     queryKey: queryKeys.branches.tree(sessionId ?? ''),
     queryFn: async () => {
       if (!sessionId || !userId) return null;
-      return conversationBranchingService.getConversationTree(sessionId, userId);
+      return conversationBranchingService.getConversationTree(
+        sessionId,
+        userId
+      );
     },
     enabled: !!sessionId && !!userId,
     staleTime: 2 * 60 * 1000,

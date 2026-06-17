@@ -18,7 +18,11 @@ export {
 } from './global-settings-store';
 
 // Auth Store - Authentication and user management (unified)
-export { useAuthStore, type AuthState, type AuthResult } from './authentication-store';
+export {
+  useAuthStore,
+  type AuthState,
+  type AuthResult,
+} from './authentication-store';
 
 // Chat Store - Chat conversations and messages
 export {

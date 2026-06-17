@@ -6,8 +6,8 @@ import { Cookie, Settings, BarChart3, Shield } from 'lucide-react';
 
 const CookiePolicyPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <section className="px-4 pb-12 pt-32 sm:px-6 lg:px-8">
+    <div className="bg-background min-h-screen">
+      <section className="px-4 pt-32 pb-12 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -21,7 +21,7 @@ const CookiePolicyPage: React.FC = () => {
             <h1 className="mb-6 text-5xl font-bold md:text-6xl">
               Cookie Policy
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-xl">
               Last updated: January 15, 2026
             </p>
           </motion.div>
@@ -34,15 +34,15 @@ const CookiePolicyPage: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass rounded-2xl border border-border/50 p-8"
+            className="glass border-border/50 rounded-2xl border p-8"
           >
             <div className="flex items-start gap-4">
-              <div className="rounded-xl bg-primary/10 p-3">
-                <Cookie className="h-6 w-6 text-primary" />
+              <div className="bg-primary/10 rounded-xl p-3">
+                <Cookie className="text-primary h-6 w-6" />
               </div>
               <div className="flex-1">
                 <h2 className="mb-4 text-2xl font-bold">What Are Cookies?</h2>
-                <p className="leading-relaxed text-muted-foreground">
+                <p className="text-muted-foreground leading-relaxed">
                   Cookies are small text files stored on your device when you
                   visit our website. They help us provide you with a better
                   experience by remembering your preferences and understanding
@@ -56,19 +56,19 @@ const CookiePolicyPage: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass rounded-2xl border border-border/50 p-8"
+            className="glass border-border/50 rounded-2xl border p-8"
           >
             <div className="flex items-start gap-4">
-              <div className="rounded-xl bg-primary/10 p-3">
-                <Settings className="h-6 w-6 text-primary" />
+              <div className="bg-primary/10 rounded-xl p-3">
+                <Settings className="text-primary h-6 w-6" />
               </div>
               <div className="flex-1">
                 <h2 className="mb-4 text-2xl font-bold">
                   Types of Cookies We Use
                 </h2>
-                <div className="space-y-4 text-muted-foreground">
+                <div className="text-muted-foreground space-y-4">
                   <div>
-                    <h3 className="mb-2 font-semibold text-foreground">
+                    <h3 className="text-foreground mb-2 font-semibold">
                       Essential Cookies (Required)
                     </h3>
                     <p>
@@ -78,7 +78,7 @@ const CookiePolicyPage: React.FC = () => {
                     </p>
                   </div>
                   <div>
-                    <h3 className="mb-2 font-semibold text-foreground">
+                    <h3 className="text-foreground mb-2 font-semibold">
                       Performance Cookies
                     </h3>
                     <p>
@@ -88,7 +88,7 @@ const CookiePolicyPage: React.FC = () => {
                     </p>
                   </div>
                   <div>
-                    <h3 className="mb-2 font-semibold text-foreground">
+                    <h3 className="text-foreground mb-2 font-semibold">
                       Functionality Cookies
                     </h3>
                     <p>
@@ -97,7 +97,7 @@ const CookiePolicyPage: React.FC = () => {
                     </p>
                   </div>
                   <div>
-                    <h3 className="mb-2 font-semibold text-foreground">
+                    <h3 className="text-foreground mb-2 font-semibold">
                       Marketing Cookies (Optional)
                     </h3>
                     <p>
@@ -114,17 +114,17 @@ const CookiePolicyPage: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass rounded-2xl border border-border/50 p-8"
+            className="glass border-border/50 rounded-2xl border p-8"
           >
             <div className="flex items-start gap-4">
-              <div className="rounded-xl bg-primary/10 p-3">
-                <Shield className="h-6 w-6 text-primary" />
+              <div className="bg-primary/10 rounded-xl p-3">
+                <Shield className="text-primary h-6 w-6" />
               </div>
               <div className="flex-1">
                 <h2 className="mb-4 text-2xl font-bold">
                   Managing Your Cookies
                 </h2>
-                <p className="leading-relaxed text-muted-foreground">
+                <p className="text-muted-foreground leading-relaxed">
                   You can control cookies through your browser settings. Note
                   that disabling essential cookies may affect platform
                   functionality. Most browsers allow you to refuse cookies or

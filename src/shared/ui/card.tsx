@@ -20,14 +20,23 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, as = 'div', 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledBy, ...props }, ref) => {
+  (
+    {
+      className,
+      as = 'div',
+      'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
+      ...props
+    },
+    ref
+  ) => {
     const Component = as;
-    
+
     return (
       <Component
         ref={ref}
         className={cn(
-          'rounded-lg border bg-card text-card-foreground shadow-sm',
+          'bg-card text-card-foreground rounded-lg border shadow-sm',
           className
         )}
         role={as === 'div' ? undefined : undefined}
@@ -65,7 +74,7 @@ const CardTitle = React.forwardRef<HTMLParagraphElement, CardTitleProps>(
     <Component
       ref={ref as React.Ref<HTMLHeadingElement>}
       className={cn(
-        'text-2xl font-semibold leading-none tracking-tight',
+        'text-2xl leading-none font-semibold tracking-tight',
         className
       )}
       {...props}
@@ -80,7 +89,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
+    className={cn('text-muted-foreground text-sm', className)}
     {...props}
   />
 ));

@@ -80,7 +80,7 @@ const AboutPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <SEOHead
         title="About Us | Replace $100K Employees with $19/mo AI | Save 99.8%"
         description="We're on a mission to replace expensive human employees with affordable AI employees. Save 99.8% on payroll costs. 50,000+ AI employees created, $500M+ saved for businesses worldwide."
@@ -122,7 +122,7 @@ const AboutPage: React.FC = () => {
       />
 
       {/* Hero Section */}
-      <section className="px-4 pb-20 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -134,16 +134,16 @@ const AboutPage: React.FC = () => {
               <Rocket className="mr-2 h-4 w-4" />
               About Us
             </Badge>
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
+            <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
               Replacing $100K Employees with $29/Month AI ($24.99/month if
               billed yearly)
             </h1>
-            <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-xl leading-relaxed">
               We're on a mission to make world-class talent accessible to every
               business. No more $100K salaries, benefits, or sick days. Just{' '}
-              <span className="font-bold text-primary">24/7 AI employees</span>{' '}
+              <span className="text-primary font-bold">24/7 AI employees</span>{' '}
               at{' '}
-              <span className="font-bold text-primary">1/100th the cost</span>.
+              <span className="text-primary font-bold">1/100th the cost</span>.
               Simply tell them what you need in natural language—they handle
               everything.
             </p>
@@ -162,11 +162,11 @@ const AboutPage: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + idx * 0.1 }}
-                className="glass rounded-2xl border border-border/50 p-6 text-center transition-all hover:border-primary/50"
+                className="glass border-border/50 hover:border-primary/50 rounded-2xl border p-6 text-center transition-all"
               >
-                <stat.icon className="mx-auto mb-3 h-8 w-8 text-primary" />
+                <stat.icon className="text-primary mx-auto mb-3 h-8 w-8" />
                 <div className="mb-1 text-3xl font-bold">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-muted-foreground text-sm">
                   {stat.label}
                 </div>
               </motion.div>
@@ -192,7 +192,7 @@ const AboutPage: React.FC = () => {
               <h2 className="mb-6 text-4xl font-bold md:text-5xl">
                 End the $100K Employee Era
               </h2>
-              <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
                 We believe the old workforce model is broken. Why pay
                 $100,000+/year for a human employee who works 40 hours/week when
                 you can hire FREE AI employees (no cost to hire) and only pay
@@ -200,16 +200,16 @@ const AboutPage: React.FC = () => {
                 ($29/month) includes 10M tokens/month. They work 24/7, never
                 gets sick, and delivers expert-level work instantly?
               </p>
-              <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
                 Our platform makes it possible to{' '}
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground font-semibold">
                   hire specialized AI employees in under 60 seconds
                 </span>
                 —no interviews, no onboarding, no training. Just tell them what
                 you need in natural language via our chat interface, and watch
                 them work.
               </p>
-              <p className="text-lg leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground text-lg leading-relaxed">
                 From solo founders to Fortune 500 enterprises, we're enabling
                 businesses to save 99%+ on payroll while getting better results.
                 Powered by Supabase for bank-level security and the world's best
@@ -217,7 +217,7 @@ const AboutPage: React.FC = () => {
               </p>
             </div>
             <div className="relative">
-              <div className="glass rounded-3xl border border-border/50 p-8">
+              <div className="glass border-border/50 rounded-3xl border p-8">
                 <div className="space-y-4">
                   {values.map((value, idx) => (
                     <motion.div
@@ -226,14 +226,14 @@ const AboutPage: React.FC = () => {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: idx * 0.1 }}
-                      className="flex items-start gap-4 rounded-xl p-4 transition-colors hover:bg-accent/5"
+                      className="hover:bg-accent/5 flex items-start gap-4 rounded-xl p-4 transition-colors"
                     >
-                      <div className="rounded-lg bg-primary/10 p-2">
-                        <value.icon className="h-5 w-5 text-primary" />
+                      <div className="bg-primary/10 rounded-lg p-2">
+                        <value.icon className="text-primary h-5 w-5" />
                       </div>
                       <div>
                         <h3 className="mb-1 font-semibold">{value.title}</h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           {value.description}
                         </p>
                       </div>
@@ -262,7 +262,7 @@ const AboutPage: React.FC = () => {
             <h2 className="mb-4 text-4xl font-bold md:text-5xl">
               Meet the Minds Behind AGI Workforce
             </h2>
-            <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
               A team of AI experts, engineers, and visionaries working to
               transform the future of work
             </p>
@@ -276,14 +276,14 @@ const AboutPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="glass group rounded-2xl border border-border/50 p-6 transition-all hover:border-primary/50"
+                className="glass group border-border/50 hover:border-primary/50 rounded-2xl border p-6 transition-all"
               >
                 <div className="mb-4 text-6xl transition-transform group-hover:scale-110">
                   {member.avatar}
                 </div>
                 <h3 className="mb-1 text-xl font-bold">{member.name}</h3>
-                <p className="mb-3 text-sm text-primary">{member.role}</p>
-                <p className="text-sm text-muted-foreground">{member.bio}</p>
+                <p className="text-primary mb-3 text-sm">{member.role}</p>
+                <p className="text-muted-foreground text-sm">{member.bio}</p>
               </motion.div>
             ))}
           </div>
@@ -291,7 +291,7 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 px-4 py-20 sm:px-6 lg:px-8">
+      <section className="from-primary/10 via-accent/10 to-secondary/10 bg-gradient-to-br px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -301,11 +301,11 @@ const AboutPage: React.FC = () => {
             <h2 className="mb-6 text-4xl font-bold md:text-5xl">
               Ready to Save 99%+ on Payroll?
             </h2>
-            <p className="mb-4 text-2xl font-semibold text-foreground">
+            <p className="text-foreground mb-4 text-2xl font-semibold">
               Start Free Forever (1M tokens/month) • Upgrade to Pro ($29/month
               for 10M tokens/month)
             </p>
-            <p className="mb-8 text-xl text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-xl">
               Hire your first AI employee in under 60 seconds. No credit card
               required. Just tell them what you need in natural language—they
               handle everything.
@@ -314,7 +314,7 @@ const AboutPage: React.FC = () => {
               <Button
                 size="lg"
                 asChild
-                className="bg-gradient-to-r from-primary to-accent"
+                className="from-primary to-accent bg-gradient-to-r"
               >
                 <Link to="/auth/register">Start Free Forever</Link>
               </Button>

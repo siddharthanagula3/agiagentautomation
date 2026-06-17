@@ -52,13 +52,13 @@ import { AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react';
 
 // Error fallback component for Vibe page
 const VibeErrorFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center bg-background p-8">
+  <div className="bg-background flex h-screen w-screen items-center justify-center p-8">
     <div className="max-w-md text-center">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
-        <AlertTriangle className="h-10 w-10 text-destructive" />
+      <div className="bg-destructive/10 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full">
+        <AlertTriangle className="text-destructive h-10 w-10" />
       </div>
       <h2 className="mb-2 text-2xl font-bold">Vibe Workspace Error</h2>
-      <p className="mb-6 text-muted-foreground">
+      <p className="text-muted-foreground mb-6">
         Something went wrong in the Vibe AI development workspace. Your work may
         not have been saved.
       </p>
@@ -677,7 +677,7 @@ const VibeDashboard: React.FC = () => {
   if (!user || !hiredEmployees) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="text-primary h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -691,11 +691,11 @@ const VibeDashboard: React.FC = () => {
       <VibeLayout>
         <div className="flex h-full flex-col">
           {/* Header with Phase Timeline */}
-          <div className="border-b border-border bg-gradient-to-r from-purple-600/10 to-blue-600/10 px-4 py-3">
+          <div className="border-border border-b bg-gradient-to-r from-purple-600/10 to-blue-600/10 px-4 py-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                  <Sparkles className="text-primary h-5 w-5" />
                   <h1 className="text-lg font-bold">Vibe</h1>
                 </div>
                 {/* Compact Phase Timeline - VibeSDK-inspired */}
@@ -728,10 +728,10 @@ const VibeDashboard: React.FC = () => {
                   />
                 </Panel>
 
-                <PanelResizeHandle className="group relative w-1 bg-border transition-colors hover:bg-primary">
+                <PanelResizeHandle className="group bg-border hover:bg-primary relative w-1 transition-colors">
                   <div className="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                    <div className="rounded-sm border border-border bg-background p-1 shadow-lg">
-                      <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    <div className="border-border bg-background rounded-sm border p-1 shadow-lg">
+                      <GripVertical className="text-muted-foreground h-4 w-4" />
                     </div>
                   </div>
                 </PanelResizeHandle>
@@ -744,10 +744,10 @@ const VibeDashboard: React.FC = () => {
                       <CodeEditorPanel />
                     </Panel>
 
-                    <PanelResizeHandle className="group relative h-1 bg-border transition-colors hover:bg-primary">
+                    <PanelResizeHandle className="group bg-border hover:bg-primary relative h-1 transition-colors">
                       <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                        <div className="rounded-sm border border-border bg-background px-1 py-0.5 shadow-lg">
-                          <GripVertical className="h-4 w-4 rotate-90 text-muted-foreground" />
+                        <div className="border-border bg-background rounded-sm border px-1 py-0.5 shadow-lg">
+                          <GripVertical className="text-muted-foreground h-4 w-4 rotate-90" />
                         </div>
                       </div>
                     </PanelResizeHandle>
@@ -764,7 +764,7 @@ const VibeDashboard: React.FC = () => {
             {/* Mobile Layout: Vertical stack */}
             <div className="flex h-full flex-col md:hidden">
               {/* Chat */}
-              <div className="flex-1 overflow-hidden border-b border-border">
+              <div className="border-border flex-1 overflow-hidden border-b">
                 <SimpleChatPanel
                   messages={messages}
                   isLoading={isLoading}
@@ -774,7 +774,7 @@ const VibeDashboard: React.FC = () => {
               </div>
 
               {/* Code Editor */}
-              <div className="flex-1 overflow-hidden border-b border-border">
+              <div className="border-border flex-1 overflow-hidden border-b">
                 <CodeEditorPanel />
               </div>
 

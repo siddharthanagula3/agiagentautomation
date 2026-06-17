@@ -54,10 +54,13 @@ const LoginPage: React.FC = () => {
   // Show session timeout notification if redirected for that reason
   useEffect(() => {
     if (location.state?.reason === 'session_timeout') {
-      toast.info('Your session has expired due to inactivity. Please log in again.', {
-        duration: 5000,
-        icon: <Shield className="h-4 w-4 text-yellow-500" />,
-      });
+      toast.info(
+        'Your session has expired due to inactivity. Please log in again.',
+        {
+          duration: 5000,
+          icon: <Shield className="h-4 w-4 text-yellow-500" />,
+        }
+      );
     }
   }, [location.state?.reason]);
 
@@ -151,9 +154,9 @@ const LoginPage: React.FC = () => {
   // Don't render login form if user is already authenticated
   if (isAuthenticated && user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 to-purple-500/5 p-4">
+      <div className="from-primary/5 flex min-h-screen items-center justify-center bg-gradient-to-br to-purple-500/5 p-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+          <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2"></div>
           <p className="text-muted-foreground">Redirecting to dashboard...</p>
         </div>
       </div>
@@ -175,7 +178,7 @@ const LoginPage: React.FC = () => {
             scale: [1, 1.1, 1],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-20 top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl md:h-96 md:w-96"
+          className="bg-primary/20 absolute top-20 left-20 h-64 w-64 rounded-full blur-3xl md:h-96 md:w-96"
         />
         <motion.div
           animate={{
@@ -184,7 +187,7 @@ const LoginPage: React.FC = () => {
             scale: [1, 1.15, 1],
           }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-20 right-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl md:h-96 md:w-96"
+          className="bg-accent/20 absolute right-20 bottom-20 h-64 w-64 rounded-full blur-3xl md:h-96 md:w-96"
         />
       </div>
 
@@ -194,7 +197,7 @@ const LoginPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="border border-border/50 bg-background/60 shadow-2xl backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/60 border shadow-2xl backdrop-blur-xl">
           <CardHeader className="space-y-1 pb-8 text-center">
             <motion.div
               className="mb-4 flex justify-center"
@@ -203,11 +206,11 @@ const LoginPage: React.FC = () => {
               transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             >
               <motion.div
-                className="rounded-full bg-primary/10 p-3"
+                className="bg-primary/10 rounded-full p-3"
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
-                <Bot className="h-8 w-8 text-primary" />
+                <Bot className="text-primary h-8 w-8" />
               </motion.div>
             </motion.div>
             <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
@@ -229,7 +232,7 @@ const LoginPage: React.FC = () => {
 
             <form id="login-form" onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="flex items-center space-x-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive">
+                <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-center space-x-2 rounded-lg border p-3">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-sm">{error}</span>
                 </div>
@@ -238,7 +241,7 @@ const LoginPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="email"
                     name="email"
@@ -256,7 +259,7 @@ const LoginPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="password"
                     name="password"
@@ -264,14 +267,14 @@ const LoginPage: React.FC = () => {
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="pl-10 pr-10"
+                    className="pr-10 pl-10"
                     required
                     disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground absolute top-3 right-3 h-4 w-4"
                     disabled={isLoading}
                   >
                     {showPassword ? (
@@ -286,7 +289,7 @@ const LoginPage: React.FC = () => {
               <div className="mb-4 flex items-center justify-end">
                 <Link
                   to="/auth/forgot-password"
-                  className="text-sm text-primary hover:underline"
+                  className="text-primary text-sm hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -315,7 +318,7 @@ const LoginPage: React.FC = () => {
                     <span className="w-full border-t" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
+                    <span className="bg-background text-muted-foreground px-2">
                       Quick Demo
                     </span>
                   </div>
@@ -339,7 +342,7 @@ const LoginPage: React.FC = () => {
               </span>
               <Link
                 to="/auth/register"
-                className="font-medium text-primary hover:underline"
+                className="text-primary font-medium hover:underline"
               >
                 Sign up
               </Link>

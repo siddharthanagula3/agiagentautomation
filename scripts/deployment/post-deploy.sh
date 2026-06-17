@@ -7,8 +7,8 @@ set -e
 
 echo "🎉 Starting post-deployment verification..."
 
-# Get the deployment URL (this would be provided by Netlify)
-DEPLOY_URL=${NETLIFY_URL:-"https://your-app.netlify.app"}
+# Get the deployment URL (this would be provided by Vercel)
+DEPLOY_URL=${VERCEL_URL:-"https://agiworkforce.com"}
 
 echo "🌐 Checking deployment at: $DEPLOY_URL"
 
@@ -25,7 +25,7 @@ fi
 echo "🔍 Checking API endpoints..."
 
 # Check health endpoint (if exists)
-if curl -f -s "$DEPLOY_URL/.netlify/functions/health" > /dev/null; then
+if curl -f -s "$DEPLOY_URL/api/health" > /dev/null; then
     echo "✅ Health endpoint is working"
 else
     echo "⚠️  Warning: Health endpoint not found or not working"

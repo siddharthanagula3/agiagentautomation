@@ -16,14 +16,20 @@ import {
 } from './settings-validation';
 
 // Helper to get error messages from Zod result (compatible with Zod v4)
-function getErrorMessages(result: z.SafeParseReturnType<unknown, unknown>): string[] {
+function getErrorMessages(
+  result: z.SafeParseReturnType<unknown, unknown>
+): string[] {
   if (result.success) return [];
   // Zod v4 uses issues instead of errors in some cases
-  const issues = (result.error as { issues?: Array<{ message: string }> }).issues || [];
+  const issues =
+    (result.error as { issues?: Array<{ message: string }> }).issues || [];
   return issues.map((issue) => issue.message);
 }
 
-function hasErrorContaining(result: z.SafeParseReturnType<unknown, unknown>, text: string): boolean {
+function hasErrorContaining(
+  result: z.SafeParseReturnType<unknown, unknown>,
+  text: string
+): boolean {
   const messages = getErrorMessages(result);
   return messages.some((msg) => msg.toLowerCase().includes(text.toLowerCase()));
 }
@@ -311,7 +317,9 @@ describe('Settings Validation Schemas', () => {
 
       const result = securitySettingsSchema.safeParse(invalidSettings);
       expect(result.success).toBe(false);
-      expect(hasErrorContaining(result, '24') || hasErrorContaining(result, '1440')).toBe(true);
+      expect(
+        hasErrorContaining(result, '24') || hasErrorContaining(result, '1440')
+      ).toBe(true);
     });
   });
 

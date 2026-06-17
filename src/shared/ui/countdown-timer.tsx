@@ -68,7 +68,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   return (
     <div className={`flex items-center justify-center gap-4 ${className}`}>
       {showLabel && (
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
           <Clock className="h-4 w-4" />
           <span>{labelText}</span>
         </div>
@@ -79,23 +79,23 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className="flex min-w-[60px] flex-col items-center justify-center rounded-lg border border-primary/30 bg-gradient-to-br from-primary/20 to-accent/20 p-2"
+              className="border-primary/30 from-primary/20 to-accent/20 flex min-w-[60px] flex-col items-center justify-center rounded-lg border bg-gradient-to-br p-2"
             >
               <motion.div
                 key={block.value}
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                className="bg-gradient-to-r from-primary to-accent bg-clip-text text-2xl font-bold text-transparent"
+                className="from-primary to-accent bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent"
               >
                 {block.value.toString().padStart(2, '0')}
               </motion.div>
-              <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+              <div className="text-muted-foreground mt-1 text-xs tracking-wide uppercase">
                 {block.label}
               </div>
             </motion.div>
             {index < timeBlocks.length - 1 && (
-              <div className="flex items-center text-2xl font-bold text-primary">
+              <div className="text-primary flex items-center text-2xl font-bold">
                 :
               </div>
             )}

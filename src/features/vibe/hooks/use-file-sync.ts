@@ -9,7 +9,10 @@
  */
 
 import { useEffect, useCallback, useRef } from 'react';
-import { vibeFileSyncService, type SyncStatus } from '../services/vibe-file-sync';
+import {
+  vibeFileSyncService,
+  type SyncStatus,
+} from '../services/vibe-file-sync';
 import { vibeFileSystem } from '../services/vibe-file-system';
 import {
   useVibeFileStore,
@@ -133,7 +136,12 @@ export interface UseFileSyncReturn {
  * ```
  */
 export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
-  const { sessionId, autoSave = true, onSyncStatusChange, onSyncError } = options;
+  const {
+    sessionId,
+    autoSave = true,
+    onSyncStatusChange,
+    onSyncError,
+  } = options;
 
   const hasUnsavedChanges = useHasUnsavedFileChanges();
   const syncSummary = useSyncStatusSummary();
@@ -153,12 +161,18 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
         return;
       }
 
-      if (sessionId === previousSessionIdRef.current && isInitializedRef.current) {
+      if (
+        sessionId === previousSessionIdRef.current &&
+        isInitializedRef.current
+      ) {
         return;
       }
 
       // If there was a previous session, end it first
-      if (previousSessionIdRef.current && previousSessionIdRef.current !== sessionId) {
+      if (
+        previousSessionIdRef.current &&
+        previousSessionIdRef.current !== sessionId
+      ) {
         try {
           await vibeFileSyncService.endSession();
         } catch (err) {
@@ -176,7 +190,8 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
         isInitializedRef.current = true;
         setError(null);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to initialize sync';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to initialize sync';
         setError(errorMessage);
         console.error('[useFileSync] Failed to initialize session:', err);
       } finally {
@@ -212,15 +227,24 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
           await vibeFileSyncService.scheduleFileSave(path, content);
 
           // Update sync state in store
-          updateSyncState(path, { status: 'pending', lastModifiedAt: new Date() });
+          updateSyncState(path, {
+            status: 'pending',
+            lastModifiedAt: new Date(),
+          });
 
           if (onSyncStatusChange) {
             onSyncStatusChange(path, 'pending');
           }
         } catch (err) {
-          console.error(`[useFileSync] Failed to schedule save for ${path}:`, err);
+          console.error(
+            `[useFileSync] Failed to schedule save for ${path}:`,
+            err
+          );
           if (onSyncError) {
-            onSyncError(path, err instanceof Error ? err.message : 'Unknown error');
+            onSyncError(
+              path,
+              err instanceof Error ? err.message : 'Unknown error'
+            );
           }
         }
       }
@@ -247,7 +271,10 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
           onSyncStatusChange(path, 'syncing');
         }
 
-        const result = await vibeFileSyncService.saveFileImmediately(path, content);
+        const result = await vibeFileSyncService.saveFileImmediately(
+          path,
+          content
+        );
 
         if (result) {
           updateSyncState(path, { status: 'synced', lastSyncedAt: new Date() });
@@ -265,7 +292,8 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
 
         return result;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error';
         updateSyncState(path, { status: 'error', error: errorMessage });
         if (onSyncError) {
           onSyncError(path, errorMessage);
@@ -280,17 +308,25 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
   const scheduleFileSave = useCallback(
     async (path: string, content: string): Promise<boolean> => {
       if (!sessionId || !isInitializedRef.current) {
-        console.warn('[useFileSync] Cannot schedule save: session not initialized');
+        console.warn(
+          '[useFileSync] Cannot schedule save: session not initialized'
+        );
         return false;
       }
 
       try {
-        updateSyncState(path, { status: 'pending', lastModifiedAt: new Date() });
+        updateSyncState(path, {
+          status: 'pending',
+          lastModifiedAt: new Date(),
+        });
         if (onSyncStatusChange) {
           onSyncStatusChange(path, 'pending');
         }
 
-        const result = await vibeFileSyncService.scheduleFileSave(path, content);
+        const result = await vibeFileSyncService.scheduleFileSave(
+          path,
+          content
+        );
 
         if (result) {
           updateSyncState(path, { status: 'synced', lastSyncedAt: new Date() });
@@ -302,7 +338,8 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
 
         return result;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error';
         updateSyncState(path, { status: 'error', error: errorMessage });
         if (onSyncError) {
           onSyncError(path, errorMessage);
@@ -340,9 +377,12 @@ export function useFileSync(options: UseFileSyncOptions): UseFileSyncReturn {
   }, []);
 
   // Get sync state for a file
-  const getSyncState = useCallback((path: string): FileSyncState | undefined => {
-    return vibeFileSyncService.getSyncState(path);
-  }, []);
+  const getSyncState = useCallback(
+    (path: string): FileSyncState | undefined => {
+      return vibeFileSyncService.getSyncState(path);
+    },
+    []
+  );
 
   return {
     hasUnsavedChanges,

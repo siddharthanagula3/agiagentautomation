@@ -83,7 +83,7 @@ export function VibeKeyboardShortcutsDialog({
           {Object.entries(groupedShortcuts).map(
             ([category, categoryShortcuts]) => (
               <div key={category}>
-                <h3 className="mb-3 text-sm font-semibold text-foreground">
+                <h3 className="text-foreground mb-3 text-sm font-semibold">
                   {categoryLabels[category] || category}
                 </h3>
 
@@ -91,9 +91,9 @@ export function VibeKeyboardShortcutsDialog({
                   {categoryShortcuts.map((shortcut) => (
                     <div
                       key={`vibe-shortcut-${shortcut.key}-${shortcut.description}`}
-                      className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3"
+                      className="border-border bg-muted/30 flex items-center justify-between rounded-lg border p-3"
                     >
-                      <span className="text-sm text-foreground">
+                      <span className="text-foreground text-sm">
                         {shortcut.description}
                       </span>
 
@@ -107,7 +107,7 @@ export function VibeKeyboardShortcutsDialog({
                               {key}
                             </Badge>
                             {keyIndex < formatShortcut(shortcut).length - 1 && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs">
                                 +
                               </span>
                             )}
@@ -127,7 +127,7 @@ export function VibeKeyboardShortcutsDialog({
           )}
         </div>
 
-        <div className="mt-4 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+        <div className="bg-muted/50 text-muted-foreground mt-4 rounded-lg p-3 text-xs">
           <p>
             <strong>Tip:</strong> Press{' '}
             <Badge variant="outline" className="font-mono">

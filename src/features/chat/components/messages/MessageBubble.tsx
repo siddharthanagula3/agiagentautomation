@@ -169,14 +169,14 @@ const CodeBlock = ({
 
   if (!match) {
     return (
-      <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{children}</code>
+      <code className="bg-muted rounded px-1.5 py-0.5 text-sm">{children}</code>
     );
   }
 
   return (
-    <div className="group relative my-3 overflow-hidden rounded-lg border border-border">
-      <div className="flex items-center justify-between bg-muted/50 px-4 py-2">
-        <span className="text-xs font-medium text-muted-foreground">
+    <div className="group border-border relative my-3 overflow-hidden rounded-lg border">
+      <div className="bg-muted/50 flex items-center justify-between px-4 py-2">
+        <span className="text-muted-foreground text-xs font-medium">
           {language}
         </span>
         <Button
@@ -204,13 +204,13 @@ const CodeBlock = ({
 const markdownComponents: Components = {
   code: CodeBlock as Components['code'],
   h1: ({ children }) => (
-    <h1 className="mb-4 mt-6 text-xl font-bold">{children}</h1>
+    <h1 className="mt-6 mb-4 text-xl font-bold">{children}</h1>
   ),
   h2: ({ children }) => (
-    <h2 className="mb-3 mt-5 text-lg font-semibold">{children}</h2>
+    <h2 className="mt-5 mb-3 text-lg font-semibold">{children}</h2>
   ),
   h3: ({ children }) => (
-    <h3 className="mb-2 mt-4 text-base font-semibold">{children}</h3>
+    <h3 className="mt-4 mb-2 text-base font-semibold">{children}</h3>
   ),
   p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
   ul: ({ children }) => <ul className="mb-3 list-disc pl-6">{children}</ul>,
@@ -222,12 +222,12 @@ const markdownComponents: Components = {
     </div>
   ),
   th: ({ children }) => (
-    <th className="border border-border bg-muted px-3 py-2 text-left font-semibold">
+    <th className="border-border bg-muted border px-3 py-2 text-left font-semibold">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="border border-border px-3 py-2">{children}</td>
+    <td className="border-border border px-3 py-2">{children}</td>
   ),
   a: ({ href, children }) => (
     <a
@@ -366,14 +366,14 @@ export const MessageBubble = React.memo(function MessageBubble({
                     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
                     .join(' ') || 'AI'}
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {formatTime(message.timestamp)}
             </span>
             {message.metadata?.isPinned && (
               <Pin className="h-3 w-3 text-amber-500" aria-hidden="true" />
             )}
             {hasBranches && (
-              <GitFork className="h-3 w-3 text-primary" aria-hidden="true" />
+              <GitFork className="text-primary h-3 w-3" aria-hidden="true" />
             )}
           </div>
 
@@ -385,8 +385,8 @@ export const MessageBubble = React.memo(function MessageBubble({
             )}
           >
             {message.isStreaming && !cleanedContent.trim() ? (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-primary" />
+              <div className="text-muted-foreground flex items-center gap-2">
+                <span className="bg-primary inline-block h-2 w-2 animate-pulse rounded-full" />
                 <span className="text-sm">Thinking...</span>
               </div>
             ) : (
@@ -399,7 +399,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                   {cleanedContent}
                 </ReactMarkdown>
                 {message.isStreaming && cleanedContent.trim() && (
-                  <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-primary" />
+                  <span className="bg-primary ml-1 inline-block h-4 w-0.5 animate-pulse" />
                 )}
               </>
             )}
@@ -419,7 +419,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             message.metadata?.toolType === 'image-generation' &&
             message.metadata?.imageUrl && (
               <div className="mt-4">
-                <div className="overflow-hidden rounded-xl border border-border">
+                <div className="border-border overflow-hidden rounded-xl border">
                   <img
                     src={message.metadata.imageUrl}
                     alt="Generated image"
@@ -429,8 +429,10 @@ export const MessageBubble = React.memo(function MessageBubble({
                       const target = e.currentTarget;
                       target.style.display = 'none';
                       const errorDiv = document.createElement('div');
-                      errorDiv.className = 'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground';
-                      errorDiv.innerHTML = '<span class="text-sm">⚠️ Image failed to load</span>';
+                      errorDiv.className =
+                        'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground';
+                      errorDiv.innerHTML =
+                        '<span class="text-sm">⚠️ Image failed to load</span>';
                       target.parentNode?.appendChild(errorDiv);
                     }}
                   />
@@ -465,8 +467,10 @@ export const MessageBubble = React.memo(function MessageBubble({
                     const target = e.currentTarget;
                     target.style.display = 'none';
                     const errorDiv = document.createElement('div');
-                    errorDiv.className = 'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground rounded-xl';
-                    errorDiv.innerHTML = '<span class="text-sm">⚠️ Video failed to load</span>';
+                    errorDiv.className =
+                      'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground rounded-xl';
+                    errorDiv.innerHTML =
+                      '<span class="text-sm">⚠️ Video failed to load</span>';
                     target.parentNode?.appendChild(errorDiv);
                   }}
                 />
@@ -492,7 +496,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             >
               <CollapsibleTrigger asChild>
                 <button
-                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-xs"
                   aria-expanded={showThinking}
                   aria-label="Toggle thinking process visibility"
                 >
@@ -509,13 +513,13 @@ export const MessageBubble = React.memo(function MessageBubble({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-2">
-                <div className="space-y-2 rounded-lg bg-muted/50 p-3">
+                <div className="bg-muted/50 space-y-2 rounded-lg p-3">
                   {message.metadata?.thinkingSteps?.map((step, stepIndex) => (
                     <div
                       key={`thinking-step-${stepIndex}-${step.slice(0, 20)}`}
-                      className="flex gap-2 text-xs text-muted-foreground"
+                      className="text-muted-foreground flex gap-2 text-xs"
                     >
-                      <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-semibold text-primary">
+                      <span className="bg-primary/20 text-primary flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-semibold">
                         {stepIndex + 1}
                       </span>
                       <span>{step}</span>
@@ -535,7 +539,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             >
               <CollapsibleTrigger asChild>
                 <button
-                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-xs"
                   aria-expanded={showContributions}
                   aria-label="Toggle agent contributions visibility"
                 >
@@ -554,7 +558,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                   (collab, collabIndex) => (
                     <div
                       key={`collab-${collabIndex}-${collab.employeeName}`}
-                      className="rounded-lg border border-border bg-card p-3"
+                      className="border-border bg-card rounded-lg border p-3"
                     >
                       <div className="mb-2 flex items-center gap-2">
                         <Avatar className="h-5 w-5">
@@ -707,7 +711,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                     {message.metadata?.tokensUsed && (
                       <>
                         <DropdownMenuSeparator />
-                        <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                        <div className="text-muted-foreground px-2 py-1.5 text-xs">
                           {message.metadata.tokensUsed.toLocaleString()} tokens
                           {message.metadata.model &&
                             ` · ${message.metadata.model}`}

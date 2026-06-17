@@ -48,9 +48,10 @@ const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
  */
 async function getTOTPEncryptionKey(): Promise<CryptoKey> {
   // Try to get key from environment (for server-side rendering/Netlify functions)
-  const envKey = typeof process !== 'undefined'
-    ? process.env.TOTP_ENCRYPTION_KEY || process.env.VITE_TOTP_ENCRYPTION_KEY
-    : undefined;
+  const envKey =
+    typeof process !== 'undefined'
+      ? process.env.TOTP_ENCRYPTION_KEY || process.env.VITE_TOTP_ENCRYPTION_KEY
+      : undefined;
 
   let keyMaterial: Uint8Array;
 
@@ -61,7 +62,8 @@ async function getTOTPEncryptionKey(): Promise<CryptoKey> {
   } else {
     // Fallback: derive key from Supabase URL (deterministic but not ideal)
     // This ensures the same key is used across sessions
-    const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || 'default-key-material';
+    const supabaseUrl =
+      import.meta.env?.VITE_SUPABASE_URL || 'default-key-material';
     const encoder = new TextEncoder();
     const baseKey = encoder.encode(supabaseUrl + '-totp-encryption-v1');
     const hash = await crypto.subtle.digest('SHA-256', baseKey);
@@ -119,7 +121,9 @@ async function decryptTOTPSecret(encryptedSecret: string): Promise<string> {
   const key = await getTOTPEncryptionKey();
 
   // Decode base64
-  const combined = Uint8Array.from(atob(encryptedSecret), c => c.charCodeAt(0));
+  const combined = Uint8Array.from(atob(encryptedSecret), (c) =>
+    c.charCodeAt(0)
+  );
 
   // Extract IV (first 12 bytes) and encrypted data
   const iv = combined.slice(0, 12);
@@ -317,7 +321,10 @@ function generateOTPAuthURL(
 /**
  * Generate HMAC-SHA1 hash using Web Crypto API
  */
-async function hmacSha1(key: Uint8Array, message: Uint8Array): Promise<Uint8Array> {
+async function hmacSha1(
+  key: Uint8Array,
+  message: Uint8Array
+): Promise<Uint8Array> {
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     key,
@@ -856,7 +863,9 @@ class SettingsService {
 
       const { data, error } = await supabase
         .from('user_settings')
-        .select('two_factor_enabled, totp_enabled_at, backup_codes, backup_codes_used')
+        .select(
+          'two_factor_enabled, totp_enabled_at, backup_codes, backup_codes_used'
+        )
         .eq('id', user.id)
         .maybeSingle();
 
@@ -1064,7 +1073,9 @@ class SettingsService {
 
       const { data: settings, error: fetchError } = await supabase
         .from('user_settings')
-        .select('totp_secret, two_factor_enabled, backup_codes, backup_codes_used')
+        .select(
+          'totp_secret, two_factor_enabled, backup_codes, backup_codes_used'
+        )
         .eq('id', user.id)
         .maybeSingle();
 
@@ -1074,7 +1085,10 @@ class SettingsService {
       }
 
       if (!settings?.two_factor_enabled || !settings.totp_secret) {
-        return { valid: false, error: 'Two-factor authentication is not enabled' };
+        return {
+          valid: false,
+          error: 'Two-factor authentication is not enabled',
+        };
       }
 
       // Updated: Jan 30th 2026 - Decrypt TOTP secret before verification
@@ -1089,7 +1103,10 @@ class SettingsService {
 
       // If TOTP fails, try backup codes
       if (settings.backup_codes && settings.backup_codes.length > 0) {
-        const backupCodeIndex = await verifyBackupCode(code, settings.backup_codes);
+        const backupCodeIndex = await verifyBackupCode(
+          code,
+          settings.backup_codes
+        );
 
         if (backupCodeIndex !== -1) {
           // Mark the backup code as used by incrementing the counter
@@ -1123,7 +1140,9 @@ class SettingsService {
   /**
    * Disable 2FA (requires valid TOTP code or backup code for security)
    */
-  async disable2FA(code: string): Promise<{ success: boolean; error?: string }> {
+  async disable2FA(
+    code: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
       const {
         data: { user },
@@ -1133,7 +1152,8 @@ class SettingsService {
       }
 
       // Verify the code before disabling
-      const { valid, error: validationError } = await this.validateTOTPCode(code);
+      const { valid, error: validationError } =
+        await this.validateTOTPCode(code);
 
       if (!valid) {
         return {

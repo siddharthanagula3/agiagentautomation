@@ -99,8 +99,12 @@ describe('Unified Tool Types', () => {
     });
 
     it('should require all permissions', () => {
-      expect(hasToolPermission('standard', ['file:read', 'file:write'])).toBe(true);
-      expect(hasToolPermission('standard', ['file:read', 'system:execute'])).toBe(false);
+      expect(hasToolPermission('standard', ['file:read', 'file:write'])).toBe(
+        true
+      );
+      expect(
+        hasToolPermission('standard', ['file:read', 'system:execute'])
+      ).toBe(false);
     });
   });
 
@@ -229,7 +233,11 @@ describe('UnifiedToolRegistry', () => {
 
   describe('Tool Execution', () => {
     it('should execute tool by canonical name', async () => {
-      const call = await registry.executeTool('file-reader', { file_path: '/test.txt' }, context);
+      const call = await registry.executeTool(
+        'file-reader',
+        { file_path: '/test.txt' },
+        context
+      );
 
       expect(call.name).toBe('file-reader');
       expect(call.status).toMatch(/completed|failed/);
@@ -237,7 +245,11 @@ describe('UnifiedToolRegistry', () => {
     });
 
     it('should execute tool by alias', async () => {
-      const call = await registry.executeTool('Read', { file_path: '/test.txt' }, context);
+      const call = await registry.executeTool(
+        'Read',
+        { file_path: '/test.txt' },
+        context
+      );
 
       expect(call.name).toBe('Read');
       expect(call.canonicalName).toBe('file-reader');
@@ -252,8 +264,15 @@ describe('UnifiedToolRegistry', () => {
     });
 
     it('should fail for permission denied', async () => {
-      const basicContext = { ...context, permissionLevel: 'basic' as UserPermissionLevel };
-      const call = await registry.executeTool('Bash', { command: 'ls' }, basicContext);
+      const basicContext = {
+        ...context,
+        permissionLevel: 'basic' as UserPermissionLevel,
+      };
+      const call = await registry.executeTool(
+        'Bash',
+        { command: 'ls' },
+        basicContext
+      );
 
       expect(call.status).toBe('failed');
       expect(call.error).toContain('system:execute');
@@ -269,14 +288,22 @@ describe('UnifiedToolRegistry', () => {
 
   describe('Bounded Execution History', () => {
     it('should add executions to history', async () => {
-      await registry.executeTool('file-reader', { file_path: '/test.txt' }, context);
+      await registry.executeTool(
+        'file-reader',
+        { file_path: '/test.txt' },
+        context
+      );
 
       const history = registry.getExecutionHistory();
       expect(history.length).toBe(1);
     });
 
     it('should track userId in history', async () => {
-      await registry.executeTool('file-reader', { file_path: '/test.txt' }, context);
+      await registry.executeTool(
+        'file-reader',
+        { file_path: '/test.txt' },
+        context
+      );
 
       const history = registry.getExecutionHistory({ userId: 'test-user' });
       expect(history.length).toBe(1);
@@ -284,7 +311,11 @@ describe('UnifiedToolRegistry', () => {
     });
 
     it('should filter history by status', async () => {
-      await registry.executeTool('file-reader', { file_path: '/test.txt' }, context);
+      await registry.executeTool(
+        'file-reader',
+        { file_path: '/test.txt' },
+        context
+      );
       await registry.executeTool('nonexistent', {}, context); // Will fail
 
       const failed = registry.getExecutionHistory({ status: 'failed' });
@@ -293,7 +324,11 @@ describe('UnifiedToolRegistry', () => {
     });
 
     it('should clear history', async () => {
-      await registry.executeTool('file-reader', { file_path: '/test.txt' }, context);
+      await registry.executeTool(
+        'file-reader',
+        { file_path: '/test.txt' },
+        context
+      );
 
       expect(registry.getHistorySize()).toBe(1);
 
@@ -312,7 +347,11 @@ describe('UnifiedToolRegistry', () => {
 
       // Execute more tools than max
       for (let i = 0; i < 5; i++) {
-        await smallRegistry.executeTool('file-reader', { file_path: `/test${i}.txt` }, context);
+        await smallRegistry.executeTool(
+          'file-reader',
+          { file_path: `/test${i}.txt` },
+          context
+        );
       }
 
       expect(smallRegistry.getHistorySize()).toBe(3);
@@ -322,8 +361,16 @@ describe('UnifiedToolRegistry', () => {
 
   describe('Usage Statistics', () => {
     it('should track tool usage', async () => {
-      await registry.executeTool('file-reader', { file_path: '/test.txt' }, context);
-      await registry.executeTool('file-reader', { file_path: '/test2.txt' }, context);
+      await registry.executeTool(
+        'file-reader',
+        { file_path: '/test.txt' },
+        context
+      );
+      await registry.executeTool(
+        'file-reader',
+        { file_path: '/test2.txt' },
+        context
+      );
 
       const stats = registry.getUsageStats('file-reader');
       expect(stats).toBeDefined();
@@ -331,7 +378,11 @@ describe('UnifiedToolRegistry', () => {
     });
 
     it('should track successful vs failed executions', async () => {
-      await registry.executeTool('file-reader', { file_path: '/test.txt' }, context);
+      await registry.executeTool(
+        'file-reader',
+        { file_path: '/test.txt' },
+        context
+      );
       await registry.executeTool('file-reader', {}, context); // Invalid params - will fail validation
 
       const stats = registry.getUsageStats('file-reader') as {
@@ -427,7 +478,13 @@ describe('Backwards Compatibility', () => {
   });
 
   it('should support vibe-agent-tools names', () => {
-    const vibeTools = ['read_files', 'write_files', 'list_files', 'search_files', 'web_search'];
+    const vibeTools = [
+      'read_files',
+      'write_files',
+      'list_files',
+      'search_files',
+      'web_search',
+    ];
 
     for (const toolName of vibeTools) {
       const resolved = resolveToolName(toolName);
@@ -436,7 +493,13 @@ describe('Backwards Compatibility', () => {
   });
 
   it('should support tool-execution-handler names', () => {
-    const execTools = ['file_reader', 'file_writer', 'code_runner', 'image_gen', 'web_search'];
+    const execTools = [
+      'file_reader',
+      'file_writer',
+      'code_runner',
+      'image_gen',
+      'web_search',
+    ];
 
     for (const toolName of execTools) {
       const resolved = resolveToolName(toolName);

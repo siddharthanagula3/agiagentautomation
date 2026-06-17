@@ -212,7 +212,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       case 'rejected':
         return <AlertCircle className="h-4 w-4 text-red-600" />;
       default:
-        return <Clock className="h-4 w-4 text-muted-foreground" />;
+        return <Clock className="text-muted-foreground h-4 w-4" />;
     }
   };
 
@@ -327,7 +327,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 rounded-lg bg-muted p-1">
+      <div className="bg-muted flex space-x-1 rounded-lg p-1">
         <Button
           variant={activeTab === 'o1-visa' ? 'default' : 'ghost'}
           size="sm"
@@ -381,7 +381,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Overall Progress</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     {Math.round(calculateProgress(o1Documents))}% Complete
                   </span>
                 </div>
@@ -419,7 +419,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                     <div className="text-muted-foreground">Draft</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-muted-foreground">
+                    <div className="text-muted-foreground text-2xl font-bold">
                       {o1Documents.length}
                     </div>
                     <div className="text-muted-foreground">Total</div>
@@ -462,7 +462,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                         </Badge>
                       </div>
 
-                      <p className="mb-3 text-muted-foreground">
+                      <p className="text-muted-foreground mb-3">
                         {document.description}
                       </p>
 
@@ -531,7 +531,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Overall Progress</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     {Math.round(calculateProgress(legalDocuments))}% Complete
                   </span>
                 </div>
@@ -569,7 +569,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                     <div className="text-muted-foreground">Draft</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-muted-foreground">
+                    <div className="text-muted-foreground text-2xl font-bold">
                       {legalDocuments.length}
                     </div>
                     <div className="text-muted-foreground">Total</div>
@@ -612,7 +612,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                         </Badge>
                       </div>
 
-                      <p className="mb-3 text-muted-foreground">
+                      <p className="text-muted-foreground mb-3">
                         {document.description}
                       </p>
 
@@ -630,9 +630,9 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                       </div>
 
                       {document.notes && (
-                        <div className="mt-3 rounded bg-muted/50 p-3">
+                        <div className="bg-muted/50 mt-3 rounded p-3">
                           <span className="text-sm font-medium">Notes:</span>
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-muted-foreground mt-1 text-sm">
                             {document.notes}
                           </p>
                         </div>
@@ -708,7 +708,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                   <span className="text-sm font-medium">
                     Overall Compliance
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     85% Complete
                   </span>
                 </div>
@@ -753,7 +753,9 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
   );
 };
 
-export const BusinessLegalPageWithErrorBoundary: React.FC<BusinessLegalPageProps> = (props) => (
+export const BusinessLegalPageWithErrorBoundary: React.FC<
+  BusinessLegalPageProps
+> = (props) => (
   <ErrorBoundary componentName="BusinessLegalPage" showReportDialog>
     <BusinessLegalPage {...props} />
   </ErrorBoundary>

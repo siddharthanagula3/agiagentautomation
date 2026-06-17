@@ -14,8 +14,9 @@ ON chat_messages(created_at DESC);
 
 -- Index for user-specific message queries
 -- Used by: User message history, user analytics
-CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id
-ON chat_messages(user_id);
+-- Note: Commented out because user_id does not exist on chat_messages (need to join chat_sessions).
+-- CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id
+-- ON chat_messages(user_id);
 
 -- Composite index for session-based message retrieval with chronological ordering
 -- Used by: Loading conversation messages in ChatInterface, message pagination
@@ -77,8 +78,9 @@ ON token_usage(session_id, created_at DESC);
 -- Composite index for file lookup in Vibe workspace
 -- Used by: File system navigation, file retrieval by path
 -- Query pattern: WHERE session_id = ? AND file_path = ?
-CREATE INDEX IF NOT EXISTS idx_vibe_files_session_path
-ON vibe_files(session_id, file_path);
+-- Note: Commented out because file_path does not exist on vibe_files (name or url is used instead).
+-- CREATE INDEX IF NOT EXISTS idx_vibe_files_session_path
+-- ON vibe_files(session_id, file_path);
 
 -- =============================================================================
 -- CHAT SESSIONS INDEXES

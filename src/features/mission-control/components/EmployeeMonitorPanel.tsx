@@ -64,13 +64,13 @@ export const WorkforceStatusPanel: React.FC = () => {
   const activeEmployees = Object.values(activeEmployeesRecord);
 
   return (
-    <Card className="h-full border-border bg-card">
+    <Card className="border-border bg-card h-full">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Bot className="h-5 w-5 text-primary" />
+          <Bot className="text-primary h-5 w-5" />
           Active Workforce
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {activeEmployees.length}{' '}
           {activeEmployees.length === 1 ? 'employee' : 'employees'} active
         </p>
@@ -78,9 +78,9 @@ export const WorkforceStatusPanel: React.FC = () => {
       <CardContent className="space-y-3">
         {activeEmployees.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <Bot className="mb-3 h-12 w-12 text-muted-foreground opacity-50" />
-            <p className="text-sm text-muted-foreground">No employees active</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <Bot className="text-muted-foreground mb-3 h-12 w-12 opacity-50" />
+            <p className="text-muted-foreground text-sm">No employees active</p>
+            <p className="text-muted-foreground mt-1 text-xs">
               Start a mission to deploy your AI workforce
             </p>
           </div>
@@ -91,7 +91,7 @@ export const WorkforceStatusPanel: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="rounded-lg border border-border bg-card/50 p-3 transition-all hover:bg-card"
+              className="border-border bg-card/50 hover:bg-card rounded-lg border p-3 transition-all"
             >
               <div className="flex items-start gap-3">
                 {/* Avatar */}
@@ -109,11 +109,11 @@ export const WorkforceStatusPanel: React.FC = () => {
                 <div className="flex-1 space-y-2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-foreground">
+                      <p className="text-foreground text-sm font-semibold">
                         {employee.name}
                       </p>
                       {employee.currentTask && (
-                        <p className="line-clamp-1 text-xs text-muted-foreground">
+                        <p className="text-muted-foreground line-clamp-1 text-xs">
                           {employee.currentTask}
                         </p>
                       )}
@@ -135,7 +135,7 @@ export const WorkforceStatusPanel: React.FC = () => {
                           <span className="text-muted-foreground">
                             Progress
                           </span>
-                          <span className="font-medium text-foreground">
+                          <span className="text-foreground font-medium">
                             {employee.progress}%
                           </span>
                         </div>
@@ -145,9 +145,9 @@ export const WorkforceStatusPanel: React.FC = () => {
 
                   {/* Current Tool */}
                   {employee.currentTool && (
-                    <div className="flex items-center gap-1.5 rounded bg-muted/50 px-2 py-1">
-                      <Wrench className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
+                    <div className="bg-muted/50 flex items-center gap-1.5 rounded px-2 py-1">
+                      <Wrench className="text-muted-foreground h-3 w-3" />
+                      <span className="text-muted-foreground text-xs">
                         Using: {employee.currentTool}
                       </span>
                     </div>
@@ -155,8 +155,8 @@ export const WorkforceStatusPanel: React.FC = () => {
 
                   {/* Recent Log Entry */}
                   {employee.log.length > 0 && (
-                    <div className="rounded bg-muted/30 px-2 py-1.5">
-                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                    <div className="bg-muted/30 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground line-clamp-2 text-xs">
                         {employee.log[employee.log.length - 1]}
                       </p>
                     </div>

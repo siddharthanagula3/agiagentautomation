@@ -490,7 +490,7 @@ export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-slate-400" />
+                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-slate-400" />
                     <Input
                       placeholder="Search teams, projects, or members..."
                       value={searchQuery}
@@ -931,7 +931,7 @@ const TeamDetailView: React.FC<TeamDetailViewProps> = ({ workforce }) => {
                               : 'bg-gray-500'
                         )}
                       />
-                      <span className="text-xs capitalize text-slate-400">
+                      <span className="text-xs text-slate-400 capitalize">
                         {member.employee.status}
                       </span>
                     </div>
@@ -1123,7 +1123,9 @@ interface AnalyticsViewProps {
   workforces: AIWorkforce[];
 }
 
-const AnalyticsView: React.FC<AnalyticsViewProps> = ({ workforces: _workforces }) => {
+const AnalyticsView: React.FC<AnalyticsViewProps> = ({
+  workforces: _workforces,
+}) => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white">Workforce Analytics</h2>

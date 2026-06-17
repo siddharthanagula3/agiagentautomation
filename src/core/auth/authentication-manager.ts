@@ -6,9 +6,13 @@
  * - Account lockout after failed login attempts (brute force protection)
  * - Security audit logging
  * - Session timeout handling
+ *
+ * Demo Mode: When DEMO_MODE is true, all methods return mock data without
+ * touching Supabase. This allows the app to run with a paused/offline backend.
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { DEMO_MODE, DEMO_USER } from '@shared/lib/demo-mode';
 import {
   accountLockoutService,
   type LockoutCheckResult,
@@ -55,6 +59,12 @@ export interface AuthResponse {
 
 class AuthService {
   async getCurrentUser(): Promise<AuthResponse> {
+    // DEMO MODE: Return mock user without touching Supabase
+    if (DEMO_MODE) {
+      logger.auth('[Demo Mode] getCurrentUser: returning demo user');
+      return { user: DEMO_USER, error: null };
+    }
+
     try {
       // Add timeout to prevent hanging on invalid tokens
       const timeoutPromise = new Promise<never>((_, reject) =>
@@ -106,9 +116,17 @@ class AuthService {
   }
 
   async login(loginData: LoginData): Promise<AuthResponse> {
+    // DEMO MODE: Accept any credentials and return demo user
+    if (DEMO_MODE) {
+      logger.auth('[Demo Mode] login: returning demo user');
+      return { user: DEMO_USER, error: null };
+    }
+
     try {
       // SECURITY: Check if account is locked before attempting login
-      const lockoutCheck = await accountLockoutService.checkLockout(loginData.email);
+      const lockoutCheck = await accountLockoutService.checkLockout(
+        loginData.email
+      );
       if (lockoutCheck.isLocked) {
         logger.auth(`Login blocked - account locked: ${loginData.email}`);
         return {
@@ -196,6 +214,17 @@ class AuthService {
   }
 
   async register(registerData: RegisterData): Promise<AuthResponse> {
+    // DEMO MODE: Return demo user for any registration attempt
+    if (DEMO_MODE) {
+      logger.auth('[Demo Mode] register: returning demo user');
+      const demoUser = {
+        ...DEMO_USER,
+        email: registerData.email,
+        name: registerData.name || DEMO_USER.name,
+      };
+      return { user: demoUser, error: null };
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email: registerData.email,
@@ -237,6 +266,12 @@ class AuthService {
   }
 
   async logout(): Promise<{ error: string | null }> {
+    // DEMO MODE: No-op logout
+    if (DEMO_MODE) {
+      logger.auth('[Demo Mode] logout: no-op');
+      return { error: null };
+    }
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -407,5 +442,11 @@ export const authService = new AuthService();
 export default authService;
 
 // Re-export lockout types for convenience
-export type { LockoutCheckResult, FailedLoginResult } from './account-lockout-service';
-export { accountLockoutService, LOCKOUT_PRESETS } from './account-lockout-service';
+export type {
+  LockoutCheckResult,
+  FailedLoginResult,
+} from './account-lockout-service';
+export {
+  accountLockoutService,
+  LOCKOUT_PRESETS,
+} from './account-lockout-service';

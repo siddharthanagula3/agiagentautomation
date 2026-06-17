@@ -66,7 +66,7 @@ describe('useSessionTimeout utilities', () => {
 
     it('should determine if session is expired', () => {
       const timeoutMs = DEFAULT_SESSION_TIMEOUT_MINUTES * 60 * 1000;
-      const lastActivity = Date.now() - (61 * 60 * 1000); // 61 minutes ago
+      const lastActivity = Date.now() - 61 * 60 * 1000; // 61 minutes ago
       const elapsed = Date.now() - lastActivity;
       const isExpired = elapsed >= timeoutMs;
       expect(isExpired).toBe(true);
@@ -74,7 +74,7 @@ describe('useSessionTimeout utilities', () => {
 
     it('should determine if session is active', () => {
       const timeoutMs = DEFAULT_SESSION_TIMEOUT_MINUTES * 60 * 1000;
-      const lastActivity = Date.now() - (30 * 60 * 1000); // 30 minutes ago
+      const lastActivity = Date.now() - 30 * 60 * 1000; // 30 minutes ago
       const elapsed = Date.now() - lastActivity;
       const isExpired = elapsed >= timeoutMs;
       expect(isExpired).toBe(false);
@@ -82,7 +82,7 @@ describe('useSessionTimeout utilities', () => {
 
     it('should determine if warning should show', () => {
       const timeoutMs = DEFAULT_SESSION_TIMEOUT_MINUTES * 60 * 1000;
-      const lastActivity = Date.now() - (59 * 60 * 1000); // 59 minutes ago
+      const lastActivity = Date.now() - 59 * 60 * 1000; // 59 minutes ago
       const elapsed = Date.now() - lastActivity;
       const timeRemaining = timeoutMs - elapsed;
       const shouldShowWarning = timeRemaining <= WARNING_TIME_BEFORE_TIMEOUT_MS;
@@ -91,7 +91,7 @@ describe('useSessionTimeout utilities', () => {
 
     it('should not show warning when plenty of time remains', () => {
       const timeoutMs = DEFAULT_SESSION_TIMEOUT_MINUTES * 60 * 1000;
-      const lastActivity = Date.now() - (30 * 60 * 1000); // 30 minutes ago
+      const lastActivity = Date.now() - 30 * 60 * 1000; // 30 minutes ago
       const elapsed = Date.now() - lastActivity;
       const timeRemaining = timeoutMs - elapsed;
       const shouldShowWarning = timeRemaining <= WARNING_TIME_BEFORE_TIMEOUT_MS;
@@ -150,7 +150,7 @@ describe('useSessionTimeout utilities', () => {
   describe('seconds remaining calculation', () => {
     it('should calculate seconds remaining correctly', () => {
       const timeoutMs = DEFAULT_SESSION_TIMEOUT_MINUTES * 60 * 1000;
-      const lastActivity = Date.now() - (59 * 60 * 1000); // 59 minutes ago
+      const lastActivity = Date.now() - 59 * 60 * 1000; // 59 minutes ago
       const elapsed = Date.now() - lastActivity;
       const timeRemaining = timeoutMs - elapsed;
       const secondsRemaining = Math.ceil(timeRemaining / 1000);
@@ -162,7 +162,7 @@ describe('useSessionTimeout utilities', () => {
 
     it('should return 0 when time has expired', () => {
       const timeoutMs = DEFAULT_SESSION_TIMEOUT_MINUTES * 60 * 1000;
-      const lastActivity = Date.now() - (61 * 60 * 1000); // 61 minutes ago
+      const lastActivity = Date.now() - 61 * 60 * 1000; // 61 minutes ago
       const elapsed = Date.now() - lastActivity;
       const timeRemaining = timeoutMs - elapsed;
       const secondsRemaining = Math.max(0, Math.ceil(timeRemaining / 1000));

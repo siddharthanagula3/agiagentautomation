@@ -169,7 +169,7 @@ export function VibeTemplateSelector({
               key={template.id}
               onClick={() => handleTemplateSelect(template)}
               className={cn(
-                'flex flex-col items-start gap-3 rounded-lg border-2 p-4 text-left transition-all hover:bg-accent',
+                'hover:bg-accent flex flex-col items-start gap-3 rounded-lg border-2 p-4 text-left transition-all',
                 selectedTemplate?.id === template.id
                   ? 'border-primary bg-primary/5'
                   : 'border-transparent'
@@ -187,12 +187,12 @@ export function VibeTemplateSelector({
               </div>
 
               {/* Description */}
-              <p className="line-clamp-2 text-xs text-muted-foreground">
+              <p className="text-muted-foreground line-clamp-2 text-xs">
                 {template.description}
               </p>
 
               {/* File Count */}
-              <div className="text-xs text-muted-foreground">
+              <div className="text-muted-foreground text-xs">
                 {template.files.length} file
                 {template.files.length !== 1 ? 's' : ''}
               </div>

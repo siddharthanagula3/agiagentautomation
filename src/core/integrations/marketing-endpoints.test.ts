@@ -386,7 +386,10 @@ describe('Marketing Endpoints', () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      const result = await trackResourceDownload('resource-123', 'user@example.com');
+      const result = await trackResourceDownload(
+        'resource-123',
+        'user@example.com'
+      );
 
       expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
@@ -541,7 +544,10 @@ describe('Marketing Endpoints', () => {
       });
       articlesBuilder.then = vi.fn((resolve: (value: unknown) => void) => {
         resolve({ data: [{ id: '1', title: 'Article' }], error: null });
-        return Promise.resolve({ data: [{ id: '1', title: 'Article' }], error: null });
+        return Promise.resolve({
+          data: [{ id: '1', title: 'Article' }],
+          error: null,
+        });
       });
 
       // The function calls from('help_articles') first, then from('support_categories')
@@ -682,7 +688,9 @@ describe('Marketing Endpoints', () => {
 
       await getUserTickets();
 
-      expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
+      expect(orderMock).toHaveBeenCalledWith('created_at', {
+        ascending: false,
+      });
     });
 
     it('should throw error on fetch failure', async () => {

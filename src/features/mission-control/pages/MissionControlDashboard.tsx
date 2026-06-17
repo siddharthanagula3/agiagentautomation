@@ -46,8 +46,7 @@ import ErrorBoundary from '@shared/components/ErrorBoundary';
 const MissionControlPageRefactored: React.FC = () => {
   const { user } = useAuthStore();
   const { status, isOrchestrating, isPaused, error } = useMissionStatus();
-  const { pauseMission, resumeMission, reset, setMode } =
-    useMissionStore();
+  const { pauseMission, resumeMission, reset, setMode } = useMissionStore();
 
   const [userInput, setUserInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -155,7 +154,7 @@ const MissionControlPageRefactored: React.FC = () => {
         <div className="flex h-full items-center justify-center p-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Mission Control error</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="text-muted-foreground mt-2">
               Something went wrong with Mission Control. Please refresh the
               page.
             </p>
@@ -176,7 +175,7 @@ const MissionControlPageRefactored: React.FC = () => {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="flex items-center gap-2 text-2xl font-bold text-white sm:text-3xl">
-                <Sparkles className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
+                <Sparkles className="text-primary h-6 w-6 sm:h-7 sm:w-7" />
                 Mission Control
               </h1>
               <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -303,7 +302,7 @@ const MissionControlPageRefactored: React.FC = () => {
           className="flex min-h-0 flex-1 flex-col"
         >
           {/* Mobile: Stacked Layout */}
-          <div className="flex flex-1 flex-col gap-4 overflow-hidden rounded-lg border border-border sm:hidden">
+          <div className="border-border flex flex-1 flex-col gap-4 overflow-hidden rounded-lg border sm:hidden">
             {/* Mission Log + Input (Priority on mobile) */}
             <div className="flex min-h-0 flex-1 flex-col p-3">
               {/* Mission Log */}
@@ -312,16 +311,16 @@ const MissionControlPageRefactored: React.FC = () => {
               </div>
 
               {/* Input Area */}
-              <div className="space-y-2 rounded-lg border border-border bg-card p-3">
+              <div className="border-border bg-card space-y-2 rounded-lg border p-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-foreground">
+                  <label className="text-foreground text-sm font-medium">
                     {currentMode === 'mission'
                       ? 'Mission Objective'
                       : 'Message'}
                   </label>
                   {currentMode === 'chat' &&
                     agentCollaboration.selectedAgents.length > 0 && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         {agentCollaboration.selectedAgents.length} agent(s)
                         selected
                       </span>
@@ -340,7 +339,7 @@ const MissionControlPageRefactored: React.FC = () => {
                   disabled={isOrchestrating && !isPaused}
                 />
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {isOrchestrating
                       ? isPaused
                         ? currentMode === 'mission'
@@ -390,7 +389,7 @@ const MissionControlPageRefactored: React.FC = () => {
             </div>
 
             {/* Workforce Status (Collapsible on mobile) */}
-            <div className="max-h-64 overflow-y-auto border-t border-border p-3">
+            <div className="border-border max-h-64 overflow-y-auto border-t p-3">
               <AgentStatusPanel />
             </div>
           </div>
@@ -398,7 +397,7 @@ const MissionControlPageRefactored: React.FC = () => {
           {/* Desktop: Resizable Panels */}
           <ResizablePanelGroup
             direction="horizontal"
-            className="hidden flex-1 rounded-lg border border-border sm:flex"
+            className="border-border hidden flex-1 rounded-lg border sm:flex"
           >
             {/* Left Panel: Workforce Status */}
             <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
@@ -418,16 +417,16 @@ const MissionControlPageRefactored: React.FC = () => {
                 </div>
 
                 {/* Input Area */}
-                <div className="space-y-2 rounded-lg border border-border bg-card p-3 sm:p-4">
+                <div className="border-border bg-card space-y-2 rounded-lg border p-3 sm:p-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-foreground">
+                    <label className="text-foreground text-sm font-medium">
                       {currentMode === 'mission'
                         ? 'Mission Objective'
                         : 'Message'}
                     </label>
                     {currentMode === 'chat' &&
                       agentCollaboration.selectedAgents.length > 0 && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                           {agentCollaboration.selectedAgents.length} agent(s)
                           selected
                         </span>
@@ -447,7 +446,7 @@ const MissionControlPageRefactored: React.FC = () => {
                   />
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex flex-col gap-1">
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {isOrchestrating
                           ? isPaused
                             ? currentMode === 'mission'

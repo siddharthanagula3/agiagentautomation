@@ -303,7 +303,8 @@ describe('Authentication Store', () => {
     });
 
     it('should cleanup other stores on logout', async () => {
-      const { cleanupWorkforceSubscription } = await import('./workforce-store');
+      const { cleanupWorkforceSubscription } =
+        await import('./workforce-store');
 
       vi.mocked(mockAuthService.logout).mockResolvedValue({ error: null });
 
@@ -532,7 +533,9 @@ describe('Authentication Store', () => {
     });
 
     it('should handle non-Error exceptions in register', async () => {
-      vi.mocked(mockAuthService.register).mockRejectedValue({ custom: 'error' });
+      vi.mocked(mockAuthService.register).mockRejectedValue({
+        custom: 'error',
+      });
 
       const result = await useAuthStore.getState().register({
         email: 'test@example.com',

@@ -403,8 +403,14 @@ export type NormalizedRetryConfig = Required<
  */
 const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
   maxRetries: 3,
-  initialDelay: typeof process !== 'undefined' && process.env.NODE_ENV === 'test' ? 1 : 1000,
-  maxDelay: typeof process !== 'undefined' && process.env.NODE_ENV === 'test' ? 5 : 10000,
+  initialDelay:
+    typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
+      ? 1
+      : 1000,
+  maxDelay:
+    typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
+      ? 5
+      : 10000,
   backoffFactor: 2,
   enabled: true,
   shouldRetry: isRetryableError,
@@ -511,13 +517,12 @@ export async function retryWithBackoff<T>(
  */
 export function getRetryDelay(
   attempt: number,
-  options: Pick<RetryOptions, 'initialDelay' | 'maxDelay' | 'backoffFactor'> = {}
+  options: Pick<
+    RetryOptions,
+    'initialDelay' | 'maxDelay' | 'backoffFactor'
+  > = {}
 ): number {
-  const {
-    initialDelay = 1000,
-    maxDelay = 10000,
-    backoffFactor = 2,
-  } = options;
+  const { initialDelay = 1000, maxDelay = 10000, backoffFactor = 2 } = options;
 
   const exponentialDelay = Math.min(
     initialDelay * Math.pow(backoffFactor, attempt - 1),

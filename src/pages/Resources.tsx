@@ -290,7 +290,7 @@ const ResourcesPage: React.FC = () => {
       : resources.filter((r) => r.type === selectedType);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <SEOHead
         title="Resources | AI Automation Guides & Templates | AGI Workforce"
         description="Free resources for AI automation success. Download guides, templates, and tutorials to maximize your AI employee productivity and automation workflows."
@@ -331,7 +331,7 @@ const ResourcesPage: React.FC = () => {
       />
 
       {/* Hero Section */}
-      <section className="px-4 pb-16 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-16 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -339,10 +339,10 @@ const ResourcesPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mx-auto max-w-3xl text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
               Resources & Learning Center
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-xl">
               Everything you need to master AI automation and build your AI
               workforce
             </p>
@@ -365,8 +365,8 @@ const ResourcesPage: React.FC = () => {
                 onClick={() => setSelectedType(type.name)}
                 className={`rounded-full px-6 py-3 text-sm font-medium transition-all ${
                   selectedType === type.name
-                    ? 'scale-105 bg-gradient-to-r from-primary to-accent text-white shadow-lg'
-                    : 'border border-border/40 bg-background/60 text-foreground/80 backdrop-blur-xl hover:border-primary/50'
+                    ? 'from-primary to-accent scale-105 bg-gradient-to-r text-white shadow-lg'
+                    : 'border-border/40 bg-background/60 text-foreground/80 hover:border-primary/50 border backdrop-blur-xl'
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -407,17 +407,17 @@ const ResourcesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6 text-center backdrop-blur-xl sm:p-8 md:p-12"
+            className="border-border/40 from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden rounded-3xl border bg-gradient-to-r p-6 text-center backdrop-blur-xl sm:p-8 md:p-12"
           >
             <h2 className="mb-4 text-2xl font-bold sm:text-3xl">
               Need Custom Resources?
             </h2>
-            <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto mb-8 max-w-2xl">
               Our team can create tailored guides, templates, and training
               materials for your specific use case.
             </p>
             <Button
-              className="bg-gradient-to-r from-primary to-accent"
+              className="from-primary to-accent bg-gradient-to-r"
               size="lg"
             >
               Contact Our Team
@@ -443,7 +443,7 @@ const FeaturedResourceCard: React.FC<{ resource: Resource }> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}
-      className="group relative overflow-hidden rounded-3xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
+      className="group border-border/40 bg-background/60 hover:border-primary/50 relative overflow-hidden rounded-3xl border backdrop-blur-xl transition-all"
     >
       <div className="grid gap-0 md:grid-cols-2">
         <div className="relative h-48 overflow-hidden sm:h-64 md:h-full">
@@ -454,9 +454,9 @@ const FeaturedResourceCard: React.FC<{ resource: Resource }> = ({
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-          <div className="absolute left-4 top-4">
-            <span className="rounded-full bg-gradient-to-r from-primary to-accent px-3 py-1 text-xs font-medium text-white">
+          <div className="from-background/80 absolute inset-0 bg-gradient-to-t to-transparent" />
+          <div className="absolute top-4 left-4">
+            <span className="from-primary to-accent rounded-full bg-gradient-to-r px-3 py-1 text-xs font-medium text-white">
               Featured
             </span>
           </div>
@@ -468,21 +468,21 @@ const FeaturedResourceCard: React.FC<{ resource: Resource }> = ({
             >
               <Icon size={24} />
             </div>
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <span className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium">
               {resource.type}
             </span>
           </div>
-          <h2 className="mb-4 text-3xl font-bold transition-colors group-hover:text-primary">
+          <h2 className="group-hover:text-primary mb-4 text-3xl font-bold transition-colors">
             {resource.title}
           </h2>
-          <p className="mb-6 text-muted-foreground">{resource.description}</p>
-          <div className="mb-6 flex items-center gap-4 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mb-6">{resource.description}</p>
+          <div className="text-muted-foreground mb-6 flex items-center gap-4 text-sm">
             <span className="flex items-center gap-1">
               <Download size={14} />
               {resource.downloadCount} downloads
             </span>
           </div>
-          <Button className="w-fit bg-gradient-to-r from-primary to-accent">
+          <Button className="from-primary to-accent w-fit bg-gradient-to-r">
             Download Now
             <Download className="ml-2" size={16} />
           </Button>
@@ -506,7 +506,7 @@ const ResourceCard: React.FC<{ resource: Resource; index: number }> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
+      className="group border-border/40 bg-background/60 hover:border-primary/50 relative cursor-pointer overflow-hidden rounded-2xl border backdrop-blur-xl transition-all"
       whileHover={{ y: -8 }}
     >
       <div className="relative h-32 overflow-hidden sm:h-40">
@@ -517,27 +517,27 @@ const ResourceCard: React.FC<{ resource: Resource; index: number }> = ({
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-60" />
-        <div className="absolute left-3 top-3">
-          <span className="rounded-full bg-background/80 px-2 py-1 text-xs font-medium text-foreground backdrop-blur-xl">
+        <div className="from-background absolute inset-0 bg-gradient-to-t to-transparent opacity-60" />
+        <div className="absolute top-3 left-3">
+          <span className="bg-background/80 text-foreground rounded-full px-2 py-1 text-xs font-medium backdrop-blur-xl">
             {resource.type}
           </span>
         </div>
         <div
-          className={`absolute bottom-3 right-3 rounded-lg bg-gradient-to-br p-2 ${resource.color} text-white`}
+          className={`absolute right-3 bottom-3 rounded-lg bg-gradient-to-br p-2 ${resource.color} text-white`}
         >
           <Icon size={20} />
         </div>
       </div>
       <div className="p-4 sm:p-6">
-        <h3 className="mb-2 line-clamp-2 text-lg font-bold transition-colors group-hover:text-primary">
+        <h3 className="group-hover:text-primary mb-2 line-clamp-2 text-lg font-bold transition-colors">
           {resource.title}
         </h3>
-        <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
           {resource.description}
         </p>
-        <div className="flex items-center justify-between border-t border-border/40 pt-4">
-          <div className="text-xs text-muted-foreground">
+        <div className="border-border/40 flex items-center justify-between border-t pt-4">
+          <div className="text-muted-foreground text-xs">
             {resource.duration && (
               <span className="flex items-center gap-1">
                 <FileText size={12} />

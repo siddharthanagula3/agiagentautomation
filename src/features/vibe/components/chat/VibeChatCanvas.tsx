@@ -20,10 +20,10 @@ const VibeMessageList: React.FC<{ messages: unknown[] }> = ({ messages }) => {
       {messages.length === 0 ? (
         <div className="flex h-full items-center justify-center text-center">
           <div className="max-w-md space-y-4">
-            <h2 className="text-2xl font-semibold text-muted-foreground">
+            <h2 className="text-muted-foreground text-2xl font-semibold">
               Start a conversation
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Type a message below to begin working with your AI employees. Use
               # to mention specific agents and @ to reference files.
             </p>
@@ -38,8 +38,8 @@ const VibeMessageList: React.FC<{ messages: unknown[] }> = ({ messages }) => {
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                 message.role === 'user'
-                  ? 'rounded-br-sm bg-primary text-primary-foreground'
-                  : 'rounded-bl-sm border border-border bg-card'
+                  ? 'bg-primary text-primary-foreground rounded-br-sm'
+                  : 'border-border bg-card rounded-bl-sm border'
               }`}
             >
               {message.employee_name && (
@@ -52,7 +52,7 @@ const VibeMessageList: React.FC<{ messages: unknown[] }> = ({ messages }) => {
                   )}
                 </div>
               )}
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
                 {message.content}
               </p>
               <div className="mt-1 text-xs opacity-60">
@@ -172,11 +172,11 @@ const VibeChatCanvas: React.FC = () => {
   return (
     <div className="flex h-screen flex-1 flex-col">
       {/* Header */}
-      <header className="shrink-0 border-b border-border bg-card/50 px-6 py-4 backdrop-blur-sm">
+      <header className="border-border bg-card/50 shrink-0 border-b px-6 py-4 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold">AI Workforce Vibe</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {activeAgentsList.length}{' '}
               {activeAgentsList.length === 1 ? 'agent' : 'agents'} active
             </p>
@@ -192,7 +192,7 @@ const VibeChatCanvas: React.FC = () => {
       </ScrollArea>
 
       {/* Input */}
-      <div className="shrink-0 border-t border-border bg-card/50 p-4 backdrop-blur-sm">
+      <div className="border-border bg-card/50 shrink-0 border-t p-4 backdrop-blur-sm">
         <VibeMessageInput onSend={handleSendMessage} />
       </div>
     </div>

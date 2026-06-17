@@ -58,7 +58,7 @@ const ExpandableChat: React.FC<ExpandableChatProps> = ({
       <div
         ref={chatRef}
         className={cn(
-          'duration-250 fixed inset-0 flex h-full w-full flex-col overflow-hidden border bg-background shadow-md transition-all ease-out sm:absolute sm:inset-auto sm:h-[80vh] sm:w-[90vw] sm:rounded-lg',
+          'bg-background fixed inset-0 flex h-full w-full flex-col overflow-hidden border shadow-md transition-all duration-250 ease-out sm:absolute sm:inset-auto sm:h-[80vh] sm:w-[90vw] sm:rounded-lg',
           chatConfig.chatPositions[position],
           chatConfig.dimensions[size],
           isOpen ? chatConfig.states.open : chatConfig.states.closed,
@@ -69,7 +69,7 @@ const ExpandableChat: React.FC<ExpandableChatProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 sm:hidden"
+          className="absolute top-2 right-2 sm:hidden"
           onClick={toggleChat}
         >
           <X className="h-4 w-4" />

@@ -471,7 +471,9 @@ describe('AuthService', () => {
       mockSupabase.rpc.mockImplementation((fnName: string) => {
         if (fnName === 'check_account_lockout') {
           return Promise.resolve({
-            data: [{ is_locked: false, locked_until: null, failed_attempts: 0 }],
+            data: [
+              { is_locked: false, locked_until: null, failed_attempts: 0 },
+            ],
             error: null,
           });
         }
@@ -511,7 +513,9 @@ describe('AuthService', () => {
       mockSupabase.rpc.mockImplementation((fnName: string) => {
         if (fnName === 'check_account_lockout') {
           return Promise.resolve({
-            data: [{ is_locked: false, locked_until: null, failed_attempts: 4 }],
+            data: [
+              { is_locked: false, locked_until: null, failed_attempts: 4 },
+            ],
             error: null,
           });
         }
@@ -595,10 +599,13 @@ describe('AuthService', () => {
     it('should unlock an account', async () => {
       mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
 
-      const result = await authService.adminUnlockAccount('locked@example.com', {
-        adminUserId: 'admin-123',
-        reason: 'User request',
-      });
+      const result = await authService.adminUnlockAccount(
+        'locked@example.com',
+        {
+          adminUserId: 'admin-123',
+          reason: 'User request',
+        }
+      );
 
       expect(result).toBe(true);
     });

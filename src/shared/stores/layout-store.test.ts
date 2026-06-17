@@ -226,7 +226,9 @@ describe('Layout Store', () => {
 
       setCurrentConversation('conv-123');
       setCurrentConversation(null);
-      expect(useUIStore.getState().chatInterface.currentConversation).toBeNull();
+      expect(
+        useUIStore.getState().chatInterface.currentConversation
+      ).toBeNull();
     });
   });
 

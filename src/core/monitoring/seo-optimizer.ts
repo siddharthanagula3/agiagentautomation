@@ -39,8 +39,7 @@ class SEOService {
   private defaultSEO: SEOData;
 
   constructor() {
-    this.baseUrl =
-      import.meta.env.VITE_APP_URL || 'https://agiworkforce.com';
+    this.baseUrl = import.meta.env.VITE_APP_URL || 'https://agiworkforce.com';
     this.defaultSEO = {
       title: 'AGI Workforce - Your AI Workforce, On Demand',
       description:

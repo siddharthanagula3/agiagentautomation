@@ -79,9 +79,7 @@ class BoundedExecutionHistory {
 
     if (filter) {
       if (filter.toolId) {
-        results = results.filter(
-          (e) => e.call.canonicalName === filter.toolId
-        );
+        results = results.filter((e) => e.call.canonicalName === filter.toolId);
       }
       if (filter.userId) {
         results = results.filter((e) => e.userId === filter.userId);
@@ -309,7 +307,10 @@ export class UnifiedToolRegistry {
     }
 
     if (!tool.isActive) {
-      return { allowed: false, reason: `Tool is currently disabled: ${tool.name}` };
+      return {
+        allowed: false,
+        reason: `Tool is currently disabled: ${tool.name}`,
+      };
     }
 
     if (!hasToolPermission(userLevel, tool.requiredPermissions)) {
@@ -389,7 +390,10 @@ export class UnifiedToolRegistry {
       }
 
       // Check permissions
-      const permCheck = this.hasPermission(nameOrAlias, context.permissionLevel);
+      const permCheck = this.hasPermission(
+        nameOrAlias,
+        context.permissionLevel
+      );
       if (!permCheck.allowed) {
         return this.failCall(call, permCheck.reason || 'Permission denied');
       }
@@ -440,7 +444,12 @@ export class UnifiedToolRegistry {
       });
 
       // Update stats
-      this.updateStats(tool.id, result.success, executionTime, tool.estimateCost(parameters));
+      this.updateStats(
+        tool.id,
+        result.success,
+        executionTime,
+        tool.estimateCost(parameters)
+      );
 
       return call;
     } catch (error) {
@@ -506,7 +515,8 @@ export class UnifiedToolRegistry {
 
     // Update moving average for execution time
     stats.averageExecutionTime =
-      (stats.averageExecutionTime * (stats.totalExecutions - 1) + executionTime) /
+      (stats.averageExecutionTime * (stats.totalExecutions - 1) +
+        executionTime) /
       stats.totalExecutions;
 
     this.usageStats.set(toolId, stats);
@@ -662,7 +672,10 @@ function createFileReaderTool(): UnifiedTool {
       return {
         success: true,
         output: `File read simulation for ${(params as { file_path: string }).file_path}`,
-        data: { path: (params as { file_path: string }).file_path, content: '' },
+        data: {
+          path: (params as { file_path: string }).file_path,
+          content: '',
+        },
       };
     },
     validate: (params): ValidationResult => {
@@ -1169,7 +1182,9 @@ export function checkToolPermission(
 /**
  * Get all tools accessible to a user
  */
-export function getAccessibleTools(userLevel: UserPermissionLevel): UnifiedTool[] {
+export function getAccessibleTools(
+  userLevel: UserPermissionLevel
+): UnifiedTool[] {
   return unifiedToolRegistry.getAccessibleTools(userLevel);
 }
 

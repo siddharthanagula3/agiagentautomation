@@ -1,6 +1,19 @@
 -- Add missing RLS policies for 9 unprotected tables
 -- This migration addresses CRITICAL security vulnerability F002
 
+DROP POLICY IF EXISTS "Users can manage their own API keys" ON user_api_keys;
+DROP POLICY IF EXISTS "Users can view their own credits" ON user_credits;
+DROP POLICY IF EXISTS "Service role can manage credits" ON user_credits;
+DROP POLICY IF EXISTS "Users can view their own subscriptions" ON user_subscriptions;
+DROP POLICY IF EXISTS "Service role can manage subscriptions" ON user_subscriptions;
+DROP POLICY IF EXISTS "Users can view their own credit transactions" ON credit_transactions;
+DROP POLICY IF EXISTS "Users can manage their own sessions" ON user_sessions;
+DROP POLICY IF EXISTS "Users can manage their own integration configs" ON integration_configs;
+DROP POLICY IF EXISTS "Users can view their own automation executions" ON automation_executions;
+DROP POLICY IF EXISTS "Users can create automation executions" ON automation_executions;
+DROP POLICY IF EXISTS "Service role can manage audit logs" ON audit_logs;
+DROP POLICY IF EXISTS "Users can manage their own webhook configs" ON webhook_configs;
+
 -- User API Keys - CRITICAL SECURITY
 CREATE POLICY "Users can manage their own API keys" 
 ON user_api_keys FOR ALL 

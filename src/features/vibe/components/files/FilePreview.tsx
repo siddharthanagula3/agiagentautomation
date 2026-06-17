@@ -56,10 +56,10 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       className={className}
     >
       <Card
-        className={cn('overflow-hidden', isExpanded && 'fixed inset-4 z-modal')}
+        className={cn('overflow-hidden', isExpanded && 'z-modal fixed inset-4')}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+        <div className="bg-muted/30 flex items-center justify-between border-b px-4 py-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             {/* File Icon */}
             <FileTypeIcon type={fileType} className="h-5 w-5 flex-shrink-0" />
@@ -68,7 +68,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{file.name}</p>
               <div className="mt-0.5 flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {formatFileSize(file.size)}
                 </span>
                 <Badge variant="secondary" className="h-5 px-1.5 py-0 text-xs">
@@ -129,7 +129,7 @@ function renderPreview(
   switch (fileType) {
     case 'image':
       return (
-        <div className="flex items-center justify-center bg-muted/20 p-4">
+        <div className="bg-muted/20 flex items-center justify-center p-4">
           <img
             src={file.url}
             alt={file.name}
@@ -153,7 +153,7 @@ function renderPreview(
     case 'text':
       return (
         <ScrollArea className="h-full">
-          <div className="whitespace-pre-wrap p-4 text-sm">
+          <div className="p-4 text-sm whitespace-pre-wrap">
             {file.content || 'Loading...'}
           </div>
         </ScrollArea>
@@ -200,9 +200,9 @@ const PreviewPlaceholder: React.FC<PreviewPlaceholderProps> = ({
   action,
 }) => (
   <div className="flex h-full min-h-[200px] flex-col items-center justify-center p-8 text-center">
-    <Icon className="mb-3 h-12 w-12 text-muted-foreground" />
+    <Icon className="text-muted-foreground mb-3 h-12 w-12" />
     <p className="mb-1 text-sm font-medium">{message}</p>
-    {action && <p className="text-xs text-muted-foreground">{action}</p>}
+    {action && <p className="text-muted-foreground text-xs">{action}</p>}
   </div>
 );
 

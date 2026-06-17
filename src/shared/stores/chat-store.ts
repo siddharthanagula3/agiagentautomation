@@ -571,7 +571,10 @@ export const useChatStore = create<ChatStore>()(
 
             for (let i = 0; i < words.length; i++) {
               // Check if aborted via AbortController or stopGeneration
-              if (abortController.signal.aborted || !get().isStreamingResponse) {
+              if (
+                abortController.signal.aborted ||
+                !get().isStreamingResponse
+              ) {
                 break;
               }
 
@@ -609,7 +612,9 @@ export const useChatStore = create<ChatStore>()(
                 );
                 if (message) {
                   message.isStreaming = false;
-                  message.streamingComplete = !abortController.signal.aborted && get().isStreamingResponse;
+                  message.streamingComplete =
+                    !abortController.signal.aborted &&
+                    get().isStreamingResponse;
                   message.metadata = {
                     model: options.model || state.selectedModel,
                     tokensUsed: words.length * 1.3, // Rough estimate

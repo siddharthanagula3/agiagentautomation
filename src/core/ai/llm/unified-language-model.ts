@@ -730,7 +730,9 @@ export class UnifiedLLMService {
   /**
    * Type guard to check if response has the expected provider response shape
    */
-  private isProviderResponse(response: unknown): response is ProviderResponseShape {
+  private isProviderResponse(
+    response: unknown
+  ): response is ProviderResponseShape {
     return (
       typeof response === 'object' &&
       response !== null &&

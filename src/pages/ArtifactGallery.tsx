@@ -193,13 +193,13 @@ const ArtifactGalleryPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
+      <div className="border-border bg-card/50 border-b backdrop-blur-sm">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <h1 className="mb-2 text-4xl font-bold">Artifact Gallery</h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               Discover and explore interactive artifacts created by the
               community
             </p>
@@ -209,7 +209,7 @@ const ArtifactGalleryPage: React.FC = () => {
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 type="search"
                 placeholder="Search artifacts..."
@@ -261,7 +261,7 @@ const ArtifactGalleryPage: React.FC = () => {
               <div className="mb-4 text-lg font-medium">
                 Loading artifacts...
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 Fetching amazing community creations
               </div>
             </div>
@@ -270,7 +270,7 @@ const ArtifactGalleryPage: React.FC = () => {
           <div className="flex h-64 items-center justify-center">
             <div className="text-center">
               <div className="mb-4 text-lg font-medium">No artifacts found</div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 {searchQuery
                   ? 'Try adjusting your search or filters'
                   : 'Be the first to share an artifact!'}
@@ -310,7 +310,7 @@ const ArtifactGalleryPage: React.FC = () => {
                     </div>
 
                     {/* Author */}
-                    <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground mt-3 flex items-center gap-2 text-sm">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="text-xs">
                           {artifact.author.charAt(0).toUpperCase()}
@@ -342,7 +342,7 @@ const ArtifactGalleryPage: React.FC = () => {
                     )}
 
                     {/* Stats */}
-                    <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground mb-4 flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1">
                         <Eye className="h-4 w-4" />
                         <span>{artifact.views}</span>
@@ -366,9 +366,9 @@ const ArtifactGalleryPage: React.FC = () => {
         )}
 
         {/* Coming Soon Message */}
-        <div className="mt-12 rounded-lg border border-primary/30 bg-primary/5 p-6 text-center">
+        <div className="border-primary/30 bg-primary/5 mt-12 rounded-lg border p-6 text-center">
           <h3 className="mb-2 text-lg font-semibold">✨ Gallery Coming Soon</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             The Artifact Gallery is currently in development. Soon you'll be
             able to share your creations with the community and discover amazing
             artifacts from other users!

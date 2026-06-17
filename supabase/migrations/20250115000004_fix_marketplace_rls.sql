@@ -3,7 +3,7 @@
 
 -- First, ensure the ai_employees table exists and has proper RLS
 CREATE TABLE IF NOT EXISTS public.ai_employees (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    id text PRIMARY KEY DEFAULT gen_random_uuid()::text,
     name text NOT NULL,
     role text NOT NULL,
     category text NOT NULL,
@@ -48,6 +48,10 @@ DROP POLICY IF EXISTS "Users can view their own hired employees" ON public.purch
 DROP POLICY IF EXISTS "Users can hire employees (insert)" ON public.purchased_employees;
 DROP POLICY IF EXISTS "Users can update their own hired employees" ON public.purchased_employees;
 DROP POLICY IF EXISTS "Users can delete their own hired employees" ON public.purchased_employees;
+DROP POLICY IF EXISTS "purchased_employees_select_own" ON public.purchased_employees;
+DROP POLICY IF EXISTS "purchased_employees_insert_own" ON public.purchased_employees;
+DROP POLICY IF EXISTS "purchased_employees_update_own" ON public.purchased_employees;
+DROP POLICY IF EXISTS "purchased_employees_delete_own" ON public.purchased_employees;
 
 -- Create proper RLS policies for purchased_employees
 CREATE POLICY "purchased_employees_select_own" ON public.purchased_employees

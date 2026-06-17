@@ -115,9 +115,9 @@ const ApiReferencePage: React.FC = () => {
         ]}
       />
 
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-background to-muted/20 px-4 py-20 sm:px-6 lg:px-8">
+        <section className="border-border from-background to-muted/20 relative overflow-hidden border-b bg-gradient-to-b px-4 py-20 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-4xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -131,7 +131,7 @@ const ApiReferencePage: React.FC = () => {
               <h1 className="mb-6 text-5xl font-bold tracking-tight md:text-6xl">
                 API Reference
               </h1>
-              <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
+              <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
                 Integrate AGI Workforce into your applications with our
                 comprehensive REST API. Build powerful AI-powered features with
                 ease.
@@ -208,13 +208,13 @@ const ApiReferencePage: React.FC = () => {
                           </CardHeader>
                           <CardContent>
                             <div className="relative">
-                              <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
+                              <pre className="bg-muted overflow-x-auto rounded-lg p-4 text-sm">
                                 <code>{endpoint.example}</code>
                               </pre>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="absolute right-2 top-2"
+                                className="absolute top-2 right-2"
                                 onClick={() =>
                                   copyToClipboard(
                                     endpoint.example,
@@ -247,7 +247,7 @@ const ApiReferencePage: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="mb-6 text-muted-foreground">
+                    <p className="text-muted-foreground mb-6">
                       {authenticationInfo.description}
                     </p>
                     <div className="space-y-3">
@@ -260,7 +260,7 @@ const ApiReferencePage: React.FC = () => {
                         </div>
                       ))}
                     </div>
-                    <div className="mt-6 rounded-lg bg-muted p-4">
+                    <div className="bg-muted mt-6 rounded-lg p-4">
                       <p className="mb-2 text-sm font-semibold">
                         Example Header:
                       </p>
@@ -279,7 +279,7 @@ const ApiReferencePage: React.FC = () => {
                     <CardTitle>Rate Limits</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="mb-6 text-muted-foreground">
+                    <p className="text-muted-foreground mb-6">
                       Rate limits are applied per API key and vary by plan.
                       Exceeding limits will result in a 429 Too Many Requests
                       response.
@@ -288,11 +288,11 @@ const ApiReferencePage: React.FC = () => {
                       {rateLimits.map((limit) => (
                         <div
                           key={limit.plan}
-                          className="flex items-center justify-between rounded-lg border border-border p-4"
+                          className="border-border flex items-center justify-between rounded-lg border p-4"
                         >
                           <div>
                             <h3 className="font-semibold">{limit.plan} Plan</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                               {limit.requests} • {limit.tokens}
                             </p>
                           </div>
@@ -315,7 +315,7 @@ const ApiReferencePage: React.FC = () => {
                         JavaScript/TypeScript
                       </h3>
                       <div className="relative">
-                        <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
+                        <pre className="bg-muted overflow-x-auto rounded-lg p-4 text-sm">
                           <code>{`const response = await fetch('https://api.agiworkforce.com/api/chat/completion', {
   method: 'POST',
   headers: {
@@ -334,7 +334,7 @@ console.log(data);`}</code>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="absolute right-2 top-2"
+                          className="absolute top-2 right-2"
                           onClick={() =>
                             copyToClipboard(
                               `const response = await fetch('https://api.agiworkforce.com/api/chat/completion', {
@@ -367,7 +367,7 @@ console.log(data);`,
                     <div>
                       <h3 className="mb-3 font-semibold">Python</h3>
                       <div className="relative">
-                        <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
+                        <pre className="bg-muted overflow-x-auto rounded-lg p-4 text-sm">
                           <code>{`import requests
 
 response = requests.post(
@@ -388,7 +388,7 @@ print(data)`}</code>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="absolute right-2 top-2"
+                          className="absolute top-2 right-2"
                           onClick={() =>
                             copyToClipboard(
                               `import requests
@@ -427,7 +427,7 @@ print(data)`,
         </section>
 
         {/* Additional Resources */}
-        <section className="border-t border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8">
+        <section className="border-border bg-muted/30 border-t px-4 py-16 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-4xl">
             <Card className="border-border">
               <CardHeader>
@@ -439,24 +439,24 @@ print(data)`,
                     href="https://docs.mgx.dev/"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-3 rounded-lg border border-border p-4 transition-colors hover:border-primary"
+                    className="border-border hover:border-primary flex items-center gap-3 rounded-lg border p-4 transition-colors"
                   >
                     <ExternalLink className="h-5 w-5" />
                     <div>
                       <h3 className="font-semibold">Full API Documentation</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Complete API reference with all endpoints
                       </p>
                     </div>
                   </a>
                   <a
                     href="/documentation"
-                    className="flex items-center gap-3 rounded-lg border border-border p-4 transition-colors hover:border-primary"
+                    className="border-border hover:border-primary flex items-center gap-3 rounded-lg border p-4 transition-colors"
                   >
                     <BookOpen className="h-5 w-5" />
                     <div>
                       <h3 className="font-semibold">Platform Documentation</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Guides and tutorials for using the platform
                       </p>
                     </div>

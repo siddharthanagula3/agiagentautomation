@@ -59,7 +59,7 @@ const ForgotPasswordPage: React.FC = () => {
             scale: [1, 1.1, 1],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-20 top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl md:h-96 md:w-96"
+          className="bg-primary/20 absolute top-20 left-20 h-64 w-64 rounded-full blur-3xl md:h-96 md:w-96"
         />
         <motion.div
           animate={{
@@ -68,7 +68,7 @@ const ForgotPasswordPage: React.FC = () => {
             scale: [1, 1.15, 1],
           }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-20 right-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl md:h-96 md:w-96"
+          className="bg-accent/20 absolute right-20 bottom-20 h-64 w-64 rounded-full blur-3xl md:h-96 md:w-96"
         />
       </div>
 
@@ -78,7 +78,7 @@ const ForgotPasswordPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="border border-border/50 bg-background/60 shadow-2xl backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/60 border shadow-2xl backdrop-blur-xl">
           <CardHeader className="space-y-1 pb-8 text-center">
             <motion.div
               className="mb-4 flex justify-center"
@@ -87,11 +87,11 @@ const ForgotPasswordPage: React.FC = () => {
               transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             >
               <motion.div
-                className="rounded-full bg-primary/10 p-3"
+                className="bg-primary/10 rounded-full p-3"
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
-                <Bot className="h-8 w-8 text-primary" />
+                <Bot className="text-primary h-8 w-8" />
               </motion.div>
             </motion.div>
             <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
@@ -124,7 +124,7 @@ const ForgotPasswordPage: React.FC = () => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                  <div className="flex items-center space-x-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive">
+                  <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-center space-x-2 rounded-lg border p-3">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm">{error}</span>
                   </div>
@@ -133,7 +133,7 @@ const ForgotPasswordPage: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                     <Input
                       id="email"
                       name="email"

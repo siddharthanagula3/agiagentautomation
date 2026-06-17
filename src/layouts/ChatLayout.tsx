@@ -15,7 +15,7 @@ export function ChatLayout({
   sidebarOpen = true,
 }: ChatLayoutProps) {
   return (
-    <div className="flex h-[100dvh] bg-background text-foreground">
+    <div className="bg-background text-foreground flex h-[100dvh]">
       {/* Collapsible Sidebar */}
       <aside
         className={cn(

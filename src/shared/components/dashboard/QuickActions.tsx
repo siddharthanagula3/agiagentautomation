@@ -123,7 +123,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
                   <Icon className="h-4 w-4" />
                   <span className="text-sm font-medium">{action.title}</span>
                 </div>
-                <p className="text-left text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-left text-xs">
                   {action.description}
                 </p>
               </Button>
@@ -137,7 +137,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
               <h4 className="text-sm font-medium">
                 Need help getting started?
               </h4>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Check out our guides and tutorials
               </p>
             </div>

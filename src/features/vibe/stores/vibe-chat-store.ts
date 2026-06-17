@@ -66,9 +66,13 @@ function cleanupExpiredFingerprints(): void {
 
   // Also enforce max size by removing oldest entries
   if (recentMessageFingerprints.size > DEDUP_CONFIG.MAX_FINGERPRINTS) {
-    const sortedEntries = [...recentMessageFingerprints.entries()]
-      .sort((a, b) => a[1] - b[1]);
-    const toRemove = sortedEntries.slice(0, sortedEntries.length - DEDUP_CONFIG.MAX_FINGERPRINTS);
+    const sortedEntries = [...recentMessageFingerprints.entries()].sort(
+      (a, b) => a[1] - b[1]
+    );
+    const toRemove = sortedEntries.slice(
+      0,
+      sortedEntries.length - DEDUP_CONFIG.MAX_FINGERPRINTS
+    );
     for (const [key] of toRemove) {
       recentMessageFingerprints.delete(key);
     }
@@ -85,7 +89,10 @@ function isDuplicateMessage(sender: string, content: string): boolean {
 
   // Check fingerprint cache first (fastest check)
   const existingTimestamp = recentMessageFingerprints.get(fingerprint);
-  if (existingTimestamp && now - existingTimestamp < DEDUP_CONFIG.TIME_WINDOW_MS) {
+  if (
+    existingTimestamp &&
+    now - existingTimestamp < DEDUP_CONFIG.TIME_WINDOW_MS
+  ) {
     return true;
   }
 
@@ -239,7 +246,8 @@ export const useVibeChatStore = create<VibeChatState>()(
             (m) =>
               m.sender === message.sender &&
               m.content === message.content &&
-              Date.now() - new Date(m.timestamp).getTime() < DEDUP_CONFIG.TIME_WINDOW_MS
+              Date.now() - new Date(m.timestamp).getTime() <
+                DEDUP_CONFIG.TIME_WINDOW_MS
           );
           if (recentDuplicate) {
             return; // Skip duplicate

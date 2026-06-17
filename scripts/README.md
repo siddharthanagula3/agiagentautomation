@@ -33,7 +33,7 @@ npm run vibe:migrate
 🚀 Applying VIBE migration via Netlify function...
 
 📡 Calling run-sql function...
-   URL: https://agiagentautomation.com/.netlify/functions/run-sql
+   URL: https://agiagentautomation.vercel.app/.netlify/functions/run-sql
 
 ✅ Migration applied successfully!
 
@@ -213,7 +213,7 @@ Step 5: Deploying to Netlify...
 ✅ Pushed to GitHub - Netlify will auto-deploy
 
 📊 Deployment Info:
-   Site: https://agiagentautomation.com
+   Site: https://agiagentautomation.vercel.app
    Netlify Dashboard: https://app.netlify.com/projects/jocular-shortbread-1c7967
 
 Step 6: Monitor deployment...
@@ -225,7 +225,7 @@ Step 6: Monitor deployment...
 
 🎯 Next Steps:
    1. Verify migration applied: Check Supabase Dashboard
-   2. Test VIBE at: https://agiagentautomation.com/vibe
+   2. Test VIBE at: https://agiagentautomation.vercel.app/vibe
    3. Monitor agent actions in real-time
    4. Check deployment logs if issues occur
 ```
@@ -421,7 +421,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-local-service-key
 
 ## 🎯 Next Steps After Migration
 
-1. **Verify deployment** at https://agiagentautomation.com/vibe
+1. **Verify deployment** at https://agiagentautomation.vercel.app/vibe
 2. **Test message flow:**
    - Send user message
    - Verify workforce orchestrator call

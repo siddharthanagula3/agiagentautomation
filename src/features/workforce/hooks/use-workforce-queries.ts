@@ -305,7 +305,10 @@ export function useEmployeeReviews(
 
       if (error) {
         // Table might not exist, return empty array
-        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        if (
+          error.code === '42P01' ||
+          error.message?.includes('does not exist')
+        ) {
           logger.warn('[useEmployeeReviews] Reviews table does not exist');
           return [];
         }
@@ -365,7 +368,9 @@ export function useWorkforceStats(
         .eq('user_id', userId)
         .maybeSingle();
 
-      const totalTokensUsed = tokenData ? 1000000 - (tokenData.current_balance || 0) : 0;
+      const totalTokensUsed = tokenData
+        ? 1000000 - (tokenData.current_balance || 0)
+        : 0;
 
       return {
         totalHired: employees.length,
@@ -401,7 +406,9 @@ export function useHireEmployee(): UseMutationResult<
   const queryClient: QueryClient = useQueryClient();
 
   return useMutation<PurchasedEmployeeRecord, Error, AIEmployee>({
-    mutationFn: async (employee: AIEmployee): Promise<PurchasedEmployeeRecord> => {
+    mutationFn: async (
+      employee: AIEmployee
+    ): Promise<PurchasedEmployeeRecord> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in to hire an employee');

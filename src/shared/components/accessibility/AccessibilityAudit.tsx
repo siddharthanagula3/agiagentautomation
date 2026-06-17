@@ -70,7 +70,7 @@ const AccessibilityAudit: React.FC<AccessibilityAuditProps> = ({ onClose }) => {
   const getIssueIcon = (type: string) => {
     switch (type) {
       case 'error':
-        return <AlertTriangle className="h-4 w-4 text-destructive" />;
+        return <AlertTriangle className="text-destructive h-4 w-4" />;
       case 'warning':
         return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
       case 'info':
@@ -124,17 +124,17 @@ const AccessibilityAudit: React.FC<AccessibilityAuditProps> = ({ onClose }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="mb-2 text-sm text-muted-foreground">{issue.message}</p>
+        <p className="text-muted-foreground mb-2 text-sm">{issue.message}</p>
         <div className="space-y-2">
           <div>
             <span className="text-xs font-medium">Guideline:</span>
-            <span className="ml-1 text-xs text-muted-foreground">
+            <span className="text-muted-foreground ml-1 text-xs">
               {issue.wcagGuideline}
             </span>
           </div>
           <div>
             <span className="text-xs font-medium">Suggestion:</span>
-            <span className="ml-1 text-xs text-muted-foreground">
+            <span className="text-muted-foreground ml-1 text-xs">
               {issue.suggestion}
             </span>
           </div>
@@ -218,7 +218,7 @@ const AccessibilityAudit: React.FC<AccessibilityAuditProps> = ({ onClose }) => {
                     >
                       {auditResults.score}%
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Overall Score
                     </p>
                   </div>
@@ -230,7 +230,7 @@ const AccessibilityAudit: React.FC<AccessibilityAuditProps> = ({ onClose }) => {
                     <div className="text-3xl font-bold text-green-600">
                       {auditResults.passed}
                     </div>
-                    <p className="text-sm text-muted-foreground">Passed</p>
+                    <p className="text-muted-foreground text-sm">Passed</p>
                   </div>
                 </CardContent>
               </Card>
@@ -240,7 +240,7 @@ const AccessibilityAudit: React.FC<AccessibilityAuditProps> = ({ onClose }) => {
                     <div className="text-3xl font-bold text-red-600">
                       {auditResults.failed}
                     </div>
-                    <p className="text-sm text-muted-foreground">Failed</p>
+                    <p className="text-muted-foreground text-sm">Failed</p>
                   </div>
                 </CardContent>
               </Card>
@@ -250,7 +250,7 @@ const AccessibilityAudit: React.FC<AccessibilityAuditProps> = ({ onClose }) => {
                     <div className="text-3xl font-bold text-yellow-600">
                       {auditResults.warnings}
                     </div>
-                    <p className="text-sm text-muted-foreground">Warnings</p>
+                    <p className="text-muted-foreground text-sm">Warnings</p>
                   </div>
                 </CardContent>
               </Card>

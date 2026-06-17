@@ -3,16 +3,16 @@ import { motion } from 'framer-motion';
 import { Badge } from '@shared/ui/badge';
 import { User, Bot, Wrench } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import type {
-  MissionChatMessage,
-  MCPToolCallInfo,
-} from '@shared/types';
+import type { MissionChatMessage, MCPToolCallInfo } from '@shared/types';
 
 /**
  * Re-export canonical types for backward compatibility
  * @deprecated Import directly from @shared/types instead
  */
-export type { MissionChatMessage as ChatMessage, MCPToolCallInfo as MCPToolCall };
+export type {
+  MissionChatMessage as ChatMessage,
+  MCPToolCallInfo as MCPToolCall,
+};
 
 interface ChatMessageDisplayProps {
   message: MissionChatMessage;
@@ -57,7 +57,7 @@ export const ChatMessageDisplay: React.FC<ChatMessageDisplayProps> = ({
           )}
         </div>
 
-        <div className="max-w-full overflow-x-auto whitespace-pre-wrap break-words">
+        <div className="max-w-full overflow-x-auto break-words whitespace-pre-wrap">
           {message.content}
         </div>
 
@@ -68,7 +68,7 @@ export const ChatMessageDisplay: React.FC<ChatMessageDisplayProps> = ({
             {message.toolCalls.map((toolCall) => (
               <div
                 key={`toolcall-${toolCall.tool}-${toolCall.status}`}
-                className="rounded bg-background p-2 text-xs sm:text-sm"
+                className="bg-background rounded p-2 text-xs sm:text-sm"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Wrench className="h-3 w-3 flex-shrink-0" />
@@ -92,7 +92,7 @@ export const ChatMessageDisplay: React.FC<ChatMessageDisplayProps> = ({
           </div>
         )}
 
-        <div className="mt-2 text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-2 text-xs">
           {message.timestamp.toLocaleTimeString()}
         </div>
       </div>

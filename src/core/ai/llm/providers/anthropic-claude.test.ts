@@ -455,7 +455,9 @@ describe('AnthropicProvider', () => {
   });
 
   describe('streamMessage', () => {
-    const mockMessages: AnthropicMessage[] = [{ role: 'user', content: 'Hello' }];
+    const mockMessages: AnthropicMessage[] = [
+      { role: 'user', content: 'Hello' },
+    ];
 
     it('should yield chunks from simulated stream', async () => {
       mockFetch.mockResolvedValueOnce({
@@ -519,7 +521,12 @@ describe('AnthropicProvider', () => {
 
   describe('AnthropicError', () => {
     it('should create error with correct properties', () => {
-      const error = new AnthropicError('Test error', 'PAYMENT_REQUIRED', false, 402);
+      const error = new AnthropicError(
+        'Test error',
+        'PAYMENT_REQUIRED',
+        false,
+        402
+      );
 
       expect(error.message).toBe('Test error');
       expect(error.code).toBe('PAYMENT_REQUIRED');
@@ -529,7 +536,12 @@ describe('AnthropicProvider', () => {
     });
 
     it('should create retryable error', () => {
-      const error = new AnthropicError('Rate limited', 'RATE_LIMIT_EXCEEDED', true, 429);
+      const error = new AnthropicError(
+        'Rate limited',
+        'RATE_LIMIT_EXCEEDED',
+        true,
+        429
+      );
 
       expect(error.retryable).toBe(true);
     });
@@ -543,7 +555,9 @@ describe('AnthropicProvider', () => {
   });
 
   describe('Error Handling Edge Cases', () => {
-    const mockMessages: AnthropicMessage[] = [{ role: 'user', content: 'Test' }];
+    const mockMessages: AnthropicMessage[] = [
+      { role: 'user', content: 'Test' },
+    ];
 
     it('should handle network error', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));

@@ -166,7 +166,6 @@ class MultiAgentOrchestrator {
    * Analyze user intent and create an orchestration plan
    */
   async analyzeIntent(userRequest: string): Promise<OrchestrationPlan> {
-
     // Determine complexity
     const complexity = this.determineComplexity(userRequest);
 
@@ -425,7 +424,6 @@ class MultiAgentOrchestrator {
     plan: OrchestrationPlan,
     onCommunication: (comm: AgentCommunication) => void
   ): Promise<void> {
-
     for (const task of blockedTasks) {
       // Find which dependency is blocking
       const blockingDeps = task.dependencies.filter((depId) => {
@@ -1112,7 +1110,6 @@ class MultiAgentOrchestrator {
     provider: LLMProvider,
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<string> {
-
     // Update status: starting
     this.updateAgentStatus(
       agentName,

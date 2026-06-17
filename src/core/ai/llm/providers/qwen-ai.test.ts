@@ -4,11 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  QwenProvider,
-  QwenError,
-  QwenMessage,
-} from './qwen-ai';
+import { QwenProvider, QwenError, QwenMessage } from './qwen-ai';
 
 // Mock external dependencies
 vi.mock('@shared/lib/supabase-client', () => ({
@@ -259,7 +255,11 @@ describe('QwenProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Test response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -326,7 +326,7 @@ describe('QwenProvider', () => {
       await provider.sendMessage(mockMessages);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/qwen-proxy',
+        '/api/llm-proxies/qwen-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -382,7 +382,11 @@ describe('QwenProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -434,7 +438,11 @@ describe('QwenProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -530,7 +538,9 @@ describe('QwenProvider', () => {
     });
 
     it('should handle database save error gracefully', async () => {
-      const insertMock = vi.fn().mockResolvedValue({ error: new Error('DB error') });
+      const insertMock = vi
+        .fn()
+        .mockResolvedValue({ error: new Error('DB error') });
       vi.mocked(supabase.from).mockReturnValue({
         insert: insertMock,
       } as never);

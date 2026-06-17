@@ -25,7 +25,7 @@ async function getAuthToken(): Promise<string | null> {
 }
 
 // All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/llm-proxies/google-proxy
+// Proxy endpoints: /api/llm-proxies/google-proxy
 
 export interface GoogleMessage {
   role: 'user' | 'assistant' | 'system';
@@ -128,7 +128,7 @@ export class GoogleProvider {
   ): Promise<GoogleResponse> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/google-proxy';
+      const proxyUrl = '/api/llm-proxies/google-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -255,7 +255,7 @@ export class GoogleProvider {
    * authenticated Netlify proxy functions to keep API keys secure on the server side.
    *
    * TODO: To enable streaming in the future:
-   * 1. Implement Server-Sent Events (SSE) in /.netlify/functions/llm-proxies/google-proxy
+   * 1. Implement Server-Sent Events (SSE) in /api/llm-proxies/google-proxy
    * 2. Update this method to consume the SSE stream from the proxy
    * 3. Remove the DIRECT_API_DISABLED error below
    *
@@ -278,7 +278,7 @@ export class GoogleProvider {
   }> {
     // SECURITY: Direct API calls are disabled - use Netlify proxy instead
     throw new GoogleError(
-      'Direct Google streaming is disabled for security. Use /.netlify/functions/llm-proxies/google-proxy instead.',
+      'Direct Google streaming is disabled for security. Use /api/llm-proxies/google-proxy instead.',
       'DIRECT_API_DISABLED'
     );
 
@@ -286,7 +286,7 @@ export class GoogleProvider {
      * TODO: Future proxy-based streaming implementation
      * When SSE streaming is added to the Netlify proxy, replace the throw above with:
      *
-     * const proxyUrl = '/.netlify/functions/llm-proxies/google-proxy';
+     * const proxyUrl = '/api/llm-proxies/google-proxy';
      * const authToken = await getAuthToken();
      * if (!authToken) {
      *   throw new GoogleError('User not authenticated.', 'NOT_AUTHENTICATED');
@@ -400,10 +400,7 @@ export class GoogleProvider {
         logger.error('[Google Provider] Error saving message:', error);
       }
     } catch (error) {
-      logger.error(
-        '[Google Provider] Unexpected error saving message:',
-        error
-      );
+      logger.error('[Google Provider] Unexpected error saving message:', error);
     }
   }
 

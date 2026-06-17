@@ -171,9 +171,9 @@ class ErrorBoundary extends Component<Props, State> {
       // Compact error UI for inline components
       if (this.props.compact) {
         return (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-            <AlertTriangle className="mb-2 h-6 w-6 text-destructive" />
-            <p className="mb-2 text-sm text-destructive">
+          <div className="border-destructive/30 bg-destructive/5 flex flex-col items-center justify-center rounded-lg border p-4">
+            <AlertTriangle className="text-destructive mb-2 h-6 w-6" />
+            <p className="text-destructive mb-2 text-sm">
               {this.props.componentName
                 ? `${this.props.componentName} failed to load`
                 : 'Something went wrong'}
@@ -193,11 +193,11 @@ class ErrorBoundary extends Component<Props, State> {
 
       // Default full-page error UI
       return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div className="bg-background flex min-h-screen items-center justify-center p-4">
           <Card className="w-full max-w-2xl">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-8 w-8 text-destructive" />
+              <div className="bg-destructive/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                <AlertTriangle className="text-destructive h-8 w-8" />
               </div>
               <CardTitle className="text-2xl">Something went wrong</CardTitle>
               <CardDescription>
@@ -208,12 +208,12 @@ class ErrorBoundary extends Component<Props, State> {
             <CardContent className="space-y-6">
               {/* Error ID for support */}
               {this.state.errorId && (
-                <div className="rounded-lg bg-muted p-3">
-                  <p className="text-sm text-muted-foreground">
+                <div className="bg-muted rounded-lg p-3">
+                  <p className="text-muted-foreground text-sm">
                     Error ID:{' '}
                     <code className="font-mono">{this.state.errorId}</code>
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     Please include this ID when contacting support.
                   </p>
                 </div>
@@ -221,11 +221,11 @@ class ErrorBoundary extends Component<Props, State> {
 
               {/* Error details in development */}
               {import.meta.env.DEV && this.state.error && (
-                <div className="rounded-lg bg-destructive/10 p-4">
-                  <h4 className="mb-2 font-semibold text-destructive">
+                <div className="bg-destructive/10 rounded-lg p-4">
+                  <h4 className="text-destructive mb-2 font-semibold">
                     Error Details (Development)
                   </h4>
-                  <pre className="overflow-auto text-xs text-destructive">
+                  <pre className="text-destructive overflow-auto text-xs">
                     {this.state.error.toString()}
                   </pre>
                   {this.state.errorInfo && (
@@ -233,7 +233,7 @@ class ErrorBoundary extends Component<Props, State> {
                       <summary className="cursor-pointer text-sm font-medium">
                         Component Stack
                       </summary>
-                      <pre className="mt-1 overflow-auto text-xs text-muted-foreground">
+                      <pre className="text-muted-foreground mt-1 overflow-auto text-xs">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </details>
@@ -281,7 +281,7 @@ class ErrorBoundary extends Component<Props, State> {
               </div>
 
               {/* Support information */}
-              <div className="text-center text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-center text-sm">
                 <p>
                   If this problem persists, please{' '}
                   <a

@@ -49,8 +49,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   noindex = false,
   nofollow = false,
 }) => {
-  const baseUrl =
-    import.meta.env.VITE_APP_URL || 'https://agiworkforce.com';
+  const baseUrl = import.meta.env.VITE_APP_URL || 'https://agiworkforce.com';
   const currentUrl = canonicalUrl || `${baseUrl}${window.location.pathname}`;
 
   // Build robots meta content

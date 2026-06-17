@@ -101,8 +101,8 @@ const VirtualizedRowRenderer = React.memo(function VirtualizedRowRenderer({
     <div style={style} className="px-4">
       {row.type === 'time-header' && (
         <div className="flex items-center justify-center py-2">
-          <div className="rounded-full bg-muted px-3 py-1">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="bg-muted rounded-full px-3 py-1">
+            <span className="text-muted-foreground text-xs font-medium">
               {row.groupLabel}
             </span>
           </div>
@@ -145,15 +145,15 @@ const TypingIndicator = React.memo(function TypingIndicator({
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="text-xs font-medium text-muted-foreground">
+        <div className="text-muted-foreground text-xs font-medium">
           {Array.from(typingAgents).slice(0, 2).join(', ')}
           {typingAgents.size > 2 && ` and ${typingAgents.size - 2} more`}
           {typingAgents.size === 1 ? ' is typing' : ' are typing'}
         </div>
         <div className="mt-2 flex items-center gap-1">
-          <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-          <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-          <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+          <div className="bg-primary h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
+          <div className="bg-primary h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
+          <div className="bg-primary h-2 w-2 animate-bounce rounded-full" />
         </div>
       </div>
     </div>
@@ -353,7 +353,7 @@ function MessageClusterComponent({
         {!isUser && (
           <div className="flex items-center gap-2 px-2">
             <span className="text-xs font-semibold">{cluster.agentName}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {format(cluster.startTime, 'HH:mm')}
             </span>
             {agent && agent.status === 'active' && (
@@ -426,7 +426,7 @@ function MessageBubbleComponent({
             {message.attachments.map((attachment) => (
               <div
                 key={attachment.id}
-                className="flex items-center gap-2 rounded bg-background/50 px-2 py-1 text-xs"
+                className="bg-background/50 flex items-center gap-2 rounded px-2 py-1 text-xs"
               >
                 <span className="truncate">{attachment.name}</span>
                 <span className="text-muted-foreground">
@@ -439,7 +439,7 @@ function MessageBubbleComponent({
 
         {/* Metadata */}
         {message.metadata && (
-          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-2 flex items-center gap-2 text-xs">
             {message.metadata.model && (
               <Badge variant="outline" className="text-xs">
                 {message.metadata.model}
@@ -459,7 +459,7 @@ function MessageBubbleComponent({
             <button
               key={emoji}
               onClick={() => handleReaction(emoji)}
-              className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs hover:bg-muted/80"
+              className="bg-muted hover:bg-muted/80 flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
             >
               <span>{emoji}</span>
               <span className="text-muted-foreground">{count}</span>
@@ -471,7 +471,7 @@ function MessageBubbleComponent({
       {/* Reaction Buttons (on hover) */}
       <div
         className={cn(
-          'absolute -top-8 flex gap-1 rounded-lg border border-border bg-card p-1 opacity-0 shadow-lg transition-opacity group-hover:opacity-100',
+          'border-border bg-card absolute -top-8 flex gap-1 rounded-lg border p-1 opacity-0 shadow-lg transition-opacity group-hover:opacity-100',
           isUser ? 'right-0' : 'left-0'
         )}
       >
@@ -512,10 +512,10 @@ function MessageBubbleComponent({
       {/* Read Receipt */}
       {isUser && isLastInCluster && (
         <div className="mt-1 flex items-center justify-end gap-1 px-2">
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {format(message.timestamp, 'HH:mm')}
           </span>
-          <CheckCheck className="h-3 w-3 text-muted-foreground" />
+          <CheckCheck className="text-muted-foreground h-3 w-3" />
         </div>
       )}
     </div>

@@ -30,10 +30,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Search Query Header */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <Search className="h-4 w-4" />
         <span className="font-medium">Search results for:</span>
-        <span className="font-semibold text-foreground">"{query}"</span>
+        <span className="text-foreground font-semibold">"{query}"</span>
         {timestamp && (
           <div className="ml-auto flex items-center gap-1">
             <Clock className="h-3 w-3" />
@@ -58,7 +58,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             </div>
             {sources && sources.length > 0 && (
               <div className="flex flex-wrap gap-2 border-t pt-3">
-                <span className="text-xs font-medium text-muted-foreground">
+                <span className="text-muted-foreground text-xs font-medium">
                   Sources:
                 </span>
                 {sources.slice(0, 5).map((source, sourceIndex) => (
@@ -67,7 +67,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     href={source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                    className="text-primary inline-flex items-center gap-1 text-xs hover:underline"
                   >
                     [{sourceIndex + 1}]
                   </a>
@@ -81,7 +81,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       {/* Search Results List */}
       {results.length > 0 && (
         <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">
+          <div className="text-foreground text-sm font-medium">
             {results.length} {results.length === 1 ? 'result' : 'results'} found
           </div>
           <div className="space-y-2">
@@ -99,8 +99,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       {/* No Results */}
       {results.length === 0 && !answer && (
         <Card className="p-6 text-center">
-          <Search className="mx-auto h-12 w-12 text-muted-foreground/30" />
-          <p className="mt-4 text-sm text-muted-foreground">
+          <Search className="text-muted-foreground/30 mx-auto h-12 w-12" />
+          <p className="text-muted-foreground mt-4 text-sm">
             No search results found for "{query}"
           </p>
         </Card>
@@ -144,17 +144,17 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({
                     }}
                   />
                 ) : (
-                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <Globe className="text-muted-foreground h-4 w-4" />
                 )}
               </div>
 
               {/* Title and Source */}
               <div className="min-w-0 flex-1">
-                <h3 className="line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
+                <h3 className="text-foreground group-hover:text-primary line-clamp-2 text-sm font-semibold transition-colors">
                   {title}
                 </h3>
                 {source && (
-                  <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
                     <span className="truncate">{source}</span>
                     {publishedDate && (
                       <>
@@ -174,20 +174,20 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({
               <Badge variant="outline" className="text-xs">
                 {index + 1}
               </Badge>
-              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-primary" />
+              <ExternalLink className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-colors" />
             </div>
           </div>
 
           {/* Snippet */}
           {snippet && (
-            <p className="line-clamp-3 pl-7 text-sm text-muted-foreground">
+            <p className="text-muted-foreground line-clamp-3 pl-7 text-sm">
               {snippet}
             </p>
           )}
 
           {/* URL */}
           <div className="flex items-center gap-2 pl-7">
-            <span className="truncate text-xs text-muted-foreground/70">
+            <span className="text-muted-foreground/70 truncate text-xs">
               {url}
             </span>
           </div>
@@ -208,7 +208,7 @@ export const CompactSearchResults: React.FC<SearchResultsProps> = ({
 
   return (
     <div className={cn('space-y-2', className)}>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-2 text-xs">
         <Search className="h-3 w-3" />
         <span>Searched for: {query}</span>
         <Badge variant="secondary" className="text-xs">
@@ -248,16 +248,16 @@ export const SearchingIndicator: React.FC<{
   return (
     <div className={cn('flex items-center gap-3 p-4', className)}>
       <div className="relative">
-        <Search className="h-5 w-5 animate-pulse text-primary" />
+        <Search className="text-primary h-5 w-5 animate-pulse" />
         <div className="absolute inset-0 animate-ping">
-          <Search className="h-5 w-5 text-primary opacity-20" />
+          <Search className="text-primary h-5 w-5 opacity-20" />
         </div>
       </div>
       <div className="space-y-1">
         <div className="text-sm font-medium">
           Searching the web{query ? ` for "${query}"` : ''}...
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-muted-foreground text-xs">
           Finding the most relevant information
         </div>
       </div>

@@ -92,7 +92,10 @@ class MessageReactionsService {
     if (error) {
       // Handle duplicate reaction gracefully
       if (error.code === '23505') {
-        logger.debug('[Reactions] Reaction already exists', { messageId, emoji });
+        logger.debug('[Reactions] Reaction already exists', {
+          messageId,
+          emoji,
+        });
         throw new Error('You have already added this reaction');
       }
       logger.error('[Reactions] Failed to add reaction:', error);

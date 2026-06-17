@@ -79,7 +79,7 @@ export const EmployeeCard = memo(function EmployeeCard({
     return (
       <Card
         className={cn(
-          'border-border bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-lg',
+          'border-border bg-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg',
           className
         )}
       >
@@ -98,10 +98,10 @@ export const EmployeeCard = memo(function EmployeeCard({
               {/* Header */}
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold text-card-foreground">
+                  <h3 className="text-card-foreground font-semibold">
                     {employee.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {employee.role}
                   </p>
                 </div>
@@ -124,7 +124,7 @@ export const EmployeeCard = memo(function EmployeeCard({
               </div>
 
               {/* Description */}
-              <p className="line-clamp-2 text-sm text-muted-foreground">
+              <p className="text-muted-foreground line-clamp-2 text-sm">
                 {employee.description}
               </p>
 
@@ -194,7 +194,7 @@ export const EmployeeCard = memo(function EmployeeCard({
   return (
     <Card
       className={cn(
-        'border-border bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-lg',
+        'border-border bg-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg',
         className
       )}
     >
@@ -208,10 +208,10 @@ export const EmployeeCard = memo(function EmployeeCard({
               className="h-12 w-12"
             />
             <div>
-              <h3 className="font-semibold text-card-foreground">
+              <h3 className="text-card-foreground font-semibold">
                 {employee.name}
               </h3>
-              <p className="text-sm text-muted-foreground">{employee.role}</p>
+              <p className="text-muted-foreground text-sm">{employee.role}</p>
             </div>
           </div>
           <div className="flex items-center space-x-1">
@@ -232,14 +232,14 @@ export const EmployeeCard = memo(function EmployeeCard({
           </div>
         </div>
 
-        <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm">
           {employee.description}
         </p>
 
         <div className="space-y-3">
           {/* Skills */}
           <div>
-            <h4 className="mb-2 text-sm font-medium text-card-foreground">
+            <h4 className="text-card-foreground mb-2 text-sm font-medium">
               Skills
             </h4>
             <div className="flex flex-wrap gap-1">
@@ -274,7 +274,7 @@ export const EmployeeCard = memo(function EmployeeCard({
             <div className="flex items-center space-x-1">
               {employee.originalPrice &&
                 employee.originalPrice > employee.price && (
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-muted-foreground text-sm line-through">
                     ${employee.originalPrice}/mo
                   </span>
                 )}
@@ -282,7 +282,7 @@ export const EmployeeCard = memo(function EmployeeCard({
                 ${employee.price}/mo
               </span>
               {employee.yearlyPrice && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   (${employee.yearlyPrice}/year)
                 </span>
               )}
@@ -305,12 +305,12 @@ export const EmployeeCard = memo(function EmployeeCard({
 
           {/* Examples */}
           <div>
-            <h4 className="mb-2 text-sm font-medium text-card-foreground">
+            <h4 className="text-card-foreground mb-2 text-sm font-medium">
               Examples
             </h4>
             <div className="space-y-1">
               {employee.examples.slice(0, 2).map((example, index) => (
-                <div key={index} className="text-xs text-muted-foreground">
+                <div key={index} className="text-muted-foreground text-xs">
                   - {example}
                 </div>
               ))}

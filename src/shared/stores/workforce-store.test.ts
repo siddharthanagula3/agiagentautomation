@@ -131,7 +131,10 @@ describe('Workforce Store', () => {
     });
 
     it('should handle fetch errors', async () => {
-      mockSupabaseResponse = { data: null, error: { message: 'Database error' } };
+      mockSupabaseResponse = {
+        data: null,
+        error: { message: 'Database error' },
+      };
 
       await useWorkforceStore.getState().fetchHiredEmployees();
 

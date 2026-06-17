@@ -85,14 +85,14 @@ export const VibeAgentAvatar: React.FC<VibeAgentAvatarProps> = ({
           src={`/employees/${employee.name}.png`}
           alt={employee.name}
         />
-        <AvatarFallback className="bg-primary/10 font-semibold text-primary">
+        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
           {getInitials(employee.name)}
         </AvatarFallback>
       </Avatar>
 
       {/* Status Indicator */}
       <motion.div
-        className={`absolute -bottom-0.5 -right-0.5 ${statusIndicatorClasses[size]} ${getStatusColor()} rounded-full border-2 border-background`}
+        className={`absolute -right-0.5 -bottom-0.5 ${statusIndicatorClasses[size]} ${getStatusColor()} border-background rounded-full border-2`}
         animate={getStatusAnimation()}
         aria-label={`Agent status: ${status}`}
       />

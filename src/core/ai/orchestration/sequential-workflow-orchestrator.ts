@@ -310,7 +310,10 @@ export class SequentialWorkflowOrchestrator {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      logger.error('[Sequential Workflow] Workflow execution failed:', errorMessage);
+      logger.error(
+        '[Sequential Workflow] Workflow execution failed:',
+        errorMessage
+      );
 
       const execution = this.executions.get(executionId);
       if (execution) {
@@ -698,7 +701,10 @@ If no useful information, respond with "NO_LEARNING"`;
         source: 'inferred',
       });
     } catch (error) {
-      logger.warn('[Sequential Workflow] Failed to learn from interaction:', error);
+      logger.warn(
+        '[Sequential Workflow] Failed to learn from interaction:',
+        error
+      );
     }
   }
 

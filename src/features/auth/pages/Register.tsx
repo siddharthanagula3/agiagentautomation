@@ -125,7 +125,7 @@ const RegisterPage: React.FC = () => {
             scale: [1, 1.1, 1],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-20 top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl md:h-96 md:w-96"
+          className="bg-primary/20 absolute top-20 left-20 h-64 w-64 rounded-full blur-3xl md:h-96 md:w-96"
         />
         <motion.div
           animate={{
@@ -134,7 +134,7 @@ const RegisterPage: React.FC = () => {
             scale: [1, 1.15, 1],
           }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-20 right-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl md:h-96 md:w-96"
+          className="bg-accent/20 absolute right-20 bottom-20 h-64 w-64 rounded-full blur-3xl md:h-96 md:w-96"
         />
       </div>
 
@@ -145,7 +145,7 @@ const RegisterPage: React.FC = () => {
         transition={{ duration: 0.5 }}
       >
         {/* Register Card */}
-        <Card className="border border-border/50 bg-background/60 shadow-2xl backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/60 border shadow-2xl backdrop-blur-xl">
           <CardHeader className="space-y-1 pb-8 text-center">
             <motion.div
               className="mb-4 flex justify-center"
@@ -154,11 +154,11 @@ const RegisterPage: React.FC = () => {
               transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             >
               <motion.div
-                className="rounded-full bg-primary/10 p-3"
+                className="bg-primary/10 rounded-full p-3"
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
-                <Bot className="h-8 w-8 text-primary" />
+                <Bot className="text-primary h-8 w-8" />
               </motion.div>
             </motion.div>
             <CardTitle className="text-2xl font-bold">
@@ -171,7 +171,7 @@ const RegisterPage: React.FC = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="flex items-center space-x-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive">
+                <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-center space-x-2 rounded-lg border p-3">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-sm">{error}</span>
                 </div>
@@ -181,7 +181,7 @@ const RegisterPage: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                    <User className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                     <Input
                       id="name"
                       name="name"
@@ -211,7 +211,7 @@ const RegisterPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                  <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                   <Input
                     id="email"
                     name="email"
@@ -228,7 +228,7 @@ const RegisterPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="company">Company</Label>
                 <div className="relative">
-                  <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                  <Building className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                   <Input
                     id="company"
                     name="company"
@@ -245,7 +245,7 @@ const RegisterPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                  <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                   <Input
                     id="password"
                     name="password"
@@ -253,14 +253,14 @@ const RegisterPage: React.FC = () => {
                     placeholder="Create a strong password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="pl-10 pr-10"
+                    className="pr-10 pl-10"
                     required
                     minLength={8}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transform"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -274,7 +274,7 @@ const RegisterPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                  <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -282,13 +282,13 @@ const RegisterPage: React.FC = () => {
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="pl-10 pr-10"
+                    className="pr-10 pl-10"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transform"
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -306,12 +306,12 @@ const RegisterPage: React.FC = () => {
                     id="terms"
                     checked={acceptTerms}
                     onChange={(e) => setAcceptTerms(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded text-primary focus:ring-primary"
+                    className="text-primary focus:ring-primary mt-1 h-4 w-4 rounded"
                     required
                   />
                   <Label
                     htmlFor="terms"
-                    className="text-sm text-muted-foreground"
+                    className="text-muted-foreground text-sm"
                   >
                     I agree to the{' '}
                     <Link
@@ -334,11 +334,11 @@ const RegisterPage: React.FC = () => {
                   <input
                     type="checkbox"
                     id="marketing"
-                    className="mt-1 h-4 w-4 rounded text-primary focus:ring-primary"
+                    className="text-primary focus:ring-primary mt-1 h-4 w-4 rounded"
                   />
                   <Label
                     htmlFor="marketing"
-                    className="text-sm text-muted-foreground"
+                    className="text-muted-foreground text-sm"
                   >
                     I'd like to receive product updates and marketing emails
                   </Label>
@@ -363,10 +363,10 @@ const RegisterPage: React.FC = () => {
             <div className="mt-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
+                  <div className="border-border w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span className="bg-background text-muted-foreground px-2">
                     Or continue with
                   </span>
                 </div>
@@ -408,11 +408,11 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Already have an account?{' '}
                 <Link
                   to="/auth/login"
-                  className="font-medium text-primary hover:text-primary/80"
+                  className="text-primary hover:text-primary/80 font-medium"
                 >
                   Sign in
                 </Link>
@@ -423,15 +423,15 @@ const RegisterPage: React.FC = () => {
 
         {/* Benefits */}
         <div className="mt-8 grid grid-cols-1 gap-4 text-center md:grid-cols-3">
-          <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center space-x-2 text-sm">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <span>14-day free trial</span>
           </div>
-          <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center space-x-2 text-sm">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <span>No credit card required</span>
           </div>
-          <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center space-x-2 text-sm">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <span>Cancel anytime</span>
           </div>

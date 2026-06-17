@@ -9,7 +9,10 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import type { PermissionStatus, VoiceRecordingState } from './use-voice-recording';
+import type {
+  PermissionStatus,
+  VoiceRecordingState,
+} from './use-voice-recording';
 
 // Mock MediaRecorder class for testing
 class MockMediaRecorder {
@@ -18,7 +21,10 @@ class MockMediaRecorder {
   onstop: (() => void) | null = null;
   onerror: ((event: Event) => void) | null = null;
 
-  constructor(public stream: MediaStream, public options?: MediaRecorderOptions) {}
+  constructor(
+    public stream: MediaStream,
+    public options?: MediaRecorderOptions
+  ) {}
 
   start(_timeslice?: number) {
     this.state = 'recording';
@@ -40,7 +46,9 @@ class MockMediaRecorder {
   }
 
   static isTypeSupported(type: string): boolean {
-    return type.includes('webm') || type.includes('mp4') || type.includes('ogg');
+    return (
+      type.includes('webm') || type.includes('mp4') || type.includes('ogg')
+    );
   }
 }
 
@@ -85,7 +93,12 @@ class MockAudioContext {
 describe('useVoiceRecording', () => {
   describe('Type definitions', () => {
     it('should have correct PermissionStatus type values', () => {
-      const statuses: PermissionStatus[] = ['prompt', 'granted', 'denied', 'unknown'];
+      const statuses: PermissionStatus[] = [
+        'prompt',
+        'granted',
+        'denied',
+        'unknown',
+      ];
       expect(statuses).toHaveLength(4);
       expect(statuses).toContain('prompt');
       expect(statuses).toContain('granted');
@@ -120,7 +133,9 @@ describe('useVoiceRecording', () => {
 
   describe('MockMediaRecorder', () => {
     it('should support webm MIME type', () => {
-      expect(MockMediaRecorder.isTypeSupported('audio/webm;codecs=opus')).toBe(true);
+      expect(MockMediaRecorder.isTypeSupported('audio/webm;codecs=opus')).toBe(
+        true
+      );
       expect(MockMediaRecorder.isTypeSupported('audio/webm')).toBe(true);
     });
 
@@ -129,7 +144,9 @@ describe('useVoiceRecording', () => {
     });
 
     it('should support ogg MIME type', () => {
-      expect(MockMediaRecorder.isTypeSupported('audio/ogg;codecs=opus')).toBe(true);
+      expect(MockMediaRecorder.isTypeSupported('audio/ogg;codecs=opus')).toBe(
+        true
+      );
       expect(MockMediaRecorder.isTypeSupported('audio/ogg')).toBe(true);
     });
 
@@ -259,7 +276,9 @@ describe('useVoiceRecording', () => {
       ];
 
       // Find first supported type
-      const supported = mimeTypes.find((type) => MockMediaRecorder.isTypeSupported(type));
+      const supported = mimeTypes.find((type) =>
+        MockMediaRecorder.isTypeSupported(type)
+      );
       expect(supported).toBe('audio/webm;codecs=opus');
     });
   });
@@ -294,7 +313,10 @@ describe('useVoiceRecording', () => {
   });
 
   describe('Audio level normalization', () => {
-    function normalizeAudioLevels(data: Uint8Array, barCount: number): number[] {
+    function normalizeAudioLevels(
+      data: Uint8Array,
+      barCount: number
+    ): number[] {
       const barsPerSegment = Math.floor(data.length / barCount);
       const levels: number[] = [];
 
@@ -342,9 +364,10 @@ describe('useVoiceRecording', () => {
   describe('Error messages', () => {
     it('should have user-friendly permission denied message', () => {
       const error = new DOMException('Permission denied', 'NotAllowedError');
-      const message = error.name === 'NotAllowedError'
-        ? 'Microphone permission was denied. Please allow access in your browser settings.'
-        : error.message;
+      const message =
+        error.name === 'NotAllowedError'
+          ? 'Microphone permission was denied. Please allow access in your browser settings.'
+          : error.message;
 
       expect(message).toContain('denied');
       expect(message).toContain('browser settings');
@@ -352,9 +375,10 @@ describe('useVoiceRecording', () => {
 
     it('should have user-friendly no microphone message', () => {
       const error = new DOMException('No microphone', 'NotFoundError');
-      const message = error.name === 'NotFoundError'
-        ? 'No microphone found. Please connect a microphone and try again.'
-        : error.message;
+      const message =
+        error.name === 'NotFoundError'
+          ? 'No microphone found. Please connect a microphone and try again.'
+          : error.message;
 
       expect(message).toContain('No microphone');
       expect(message).toContain('connect');

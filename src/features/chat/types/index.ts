@@ -43,7 +43,10 @@ export interface ChatAIEmployee extends AIEmployeeBasic {
   role: string;
   capabilities: string[];
   tools: string[];
-  performance?: Pick<AIEmployeePerformance, 'tasksCompleted' | 'successRate' | 'avgResponseTime'>;
+  performance?: Pick<
+    AIEmployeePerformance,
+    'tasksCompleted' | 'successRate' | 'avgResponseTime'
+  >;
 }
 
 /**

@@ -180,7 +180,7 @@ const BlogPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <Particles
         className="absolute inset-0 -z-10"
         quantity={50}
@@ -188,7 +188,7 @@ const BlogPage: React.FC = () => {
       />
 
       {/* Hero Section */}
-      <section className="px-4 pb-16 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-16 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -196,10 +196,10 @@ const BlogPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mx-auto mb-12 max-w-3xl text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+            <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
               The AI Automation Blog
             </h1>
-            <p className="mb-8 text-xl text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-xl">
               Insights, strategies, and stories about the future of work with AI
               employees
             </p>
@@ -207,7 +207,7 @@ const BlogPage: React.FC = () => {
             {/* Search Bar */}
             <div className="relative mx-auto max-w-xl">
               <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="text-muted-foreground absolute top-1/2 left-4 -translate-y-1/2"
                 size={20}
                 aria-hidden="true"
               />
@@ -216,7 +216,7 @@ const BlogPage: React.FC = () => {
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-12 w-full border-border/40 bg-background/60 pl-12 backdrop-blur-xl"
+                className="border-border/40 bg-background/60 h-12 w-full pl-12 backdrop-blur-xl"
                 aria-label="Search blog articles"
               />
             </div>
@@ -236,8 +236,8 @@ const BlogPage: React.FC = () => {
               onClick={() => setSelectedCategory('All')}
               className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                 selectedCategory === 'All'
-                  ? 'scale-105 bg-gradient-to-r from-primary to-accent text-white shadow-lg'
-                  : 'border border-border/40 bg-background/60 text-foreground/80 backdrop-blur-xl hover:border-primary/50'
+                  ? 'from-primary to-accent scale-105 bg-gradient-to-r text-white shadow-lg'
+                  : 'border-border/40 bg-background/60 text-foreground/80 hover:border-primary/50 border backdrop-blur-xl'
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -259,8 +259,8 @@ const BlogPage: React.FC = () => {
                   onClick={() => setSelectedCategory(category.slug)}
                   className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                     selectedCategory === category.slug
-                      ? 'scale-105 bg-gradient-to-r from-primary to-accent text-white shadow-lg'
-                      : 'border border-border/40 bg-background/60 text-foreground/80 backdrop-blur-xl hover:border-primary/50'
+                      ? 'from-primary to-accent scale-105 bg-gradient-to-r text-white shadow-lg'
+                      : 'border-border/40 bg-background/60 text-foreground/80 hover:border-primary/50 border backdrop-blur-xl'
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -297,11 +297,14 @@ const BlogPage: React.FC = () => {
               className="py-16 text-center"
               role="alert"
             >
-              <AlertCircle className="mx-auto mb-4 h-16 w-16 text-red-500" aria-hidden="true" />
+              <AlertCircle
+                className="mx-auto mb-4 h-16 w-16 text-red-500"
+                aria-hidden="true"
+              />
               <p className="mb-4 text-xl text-red-500">
                 Failed to load blog posts
               </p>
-              <p className="mb-6 text-muted-foreground">{error}</p>
+              <p className="text-muted-foreground mb-6">{error}</p>
               <Button
                 onClick={() => fetchBlogPosts(0, selectedCategory, searchQuery)}
               >
@@ -316,8 +319,11 @@ const BlogPage: React.FC = () => {
               role="status"
               aria-live="polite"
             >
-              <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-primary" aria-hidden="true" />
-              <p className="text-xl text-muted-foreground">
+              <Loader2
+                className="text-primary mx-auto mb-4 h-16 w-16 animate-spin"
+                aria-hidden="true"
+              />
+              <p className="text-muted-foreground text-xl">
                 Loading blog posts...
               </p>
             </motion.div>
@@ -344,7 +350,10 @@ const BlogPage: React.FC = () => {
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                        <Loader2
+                          className="mr-2 h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        />
                         Loading...
                       </>
                     ) : (
@@ -360,7 +369,7 @@ const BlogPage: React.FC = () => {
               animate={{ opacity: 1 }}
               className="py-16 text-center"
             >
-              <p className="text-xl text-muted-foreground">
+              <p className="text-muted-foreground text-xl">
                 No articles found matching your criteria.
               </p>
             </motion.div>
@@ -375,24 +384,30 @@ const BlogPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6 backdrop-blur-xl sm:p-8 md:p-12"
+            className="border-border/40 from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden rounded-3xl border bg-gradient-to-r p-6 backdrop-blur-xl sm:p-8 md:p-12"
           >
             <div className="text-center">
               <h2 className="mb-4 text-2xl font-bold sm:text-3xl">
                 Never Miss an Update
               </h2>
-              <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
+              <p className="text-muted-foreground mx-auto mb-8 max-w-2xl">
                 Get the latest insights on AI automation, productivity tips, and
                 case studies delivered to your inbox every week.
               </p>
-              <form className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row" onSubmit={(e) => e.preventDefault()}>
+              <form
+                className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
+                onSubmit={(e) => e.preventDefault()}
+              >
                 <Input
                   type="email"
                   placeholder="Enter your email"
-                  className="h-12 border-border/40 bg-background/60 backdrop-blur-xl"
+                  className="border-border/40 bg-background/60 h-12 backdrop-blur-xl"
                   aria-label="Email address for newsletter"
                 />
-                <Button type="submit" className="h-12 bg-gradient-to-r from-primary to-accent">
+                <Button
+                  type="submit"
+                  className="from-primary to-accent h-12 bg-gradient-to-r"
+                >
                   Subscribe
                 </Button>
               </form>
@@ -432,7 +447,7 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}
-      className="group relative cursor-pointer overflow-hidden rounded-3xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      className="group border-border/40 bg-background/60 hover:border-primary/50 focus-visible:ring-primary relative cursor-pointer overflow-hidden rounded-3xl border backdrop-blur-xl transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="link"
@@ -450,15 +465,15 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
             className="h-full w-full max-w-full object-cover transition-transform duration-700 group-hover:scale-110"
             aria-hidden="true"
           />
-          <div className="absolute left-4 top-4">
-            <span className="rounded-full bg-gradient-to-r from-primary to-accent px-3 py-1 text-xs font-medium text-white">
+          <div className="absolute top-4 left-4">
+            <span className="from-primary to-accent rounded-full bg-gradient-to-r px-3 py-1 text-xs font-medium text-white">
               Featured
             </span>
           </div>
         </div>
         <div className="flex flex-col justify-center p-4 sm:p-6 md:p-8 lg:p-12">
-          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground sm:gap-4">
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          <div className="text-muted-foreground mb-4 flex items-center gap-2 text-sm sm:gap-4">
+            <span className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium">
               {post.category.name}
             </span>
             <div className="flex items-center gap-1">
@@ -472,26 +487,28 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
               </time>
             </div>
           </div>
-          <h2 className="mb-4 text-3xl font-bold transition-colors group-hover:text-primary">
+          <h2 className="group-hover:text-primary mb-4 text-3xl font-bold transition-colors">
             {post.title}
           </h2>
-          <p className="mb-6 line-clamp-3 text-muted-foreground">
+          <p className="text-muted-foreground mb-6 line-clamp-3">
             {post.excerpt}
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">{post.author.avatar_emoji}</span>
+              <span className="text-2xl" aria-hidden="true">
+                {post.author.avatar_emoji}
+              </span>
               <div>
                 <div className="text-sm font-medium">
                   {post.author.display_name}
                 </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <Clock size={12} aria-hidden="true" />
                   {calculateReadTime(post.content)}
                 </div>
               </div>
             </div>
-            <span className="inline-flex items-center text-sm font-medium text-primary group-hover:bg-primary/10 rounded-md px-3 py-1.5">
+            <span className="text-primary group-hover:bg-primary/10 inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium">
               Read More
               <ArrowRight
                 size={16}
@@ -537,7 +554,7 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      className="group border-border/40 bg-background/60 hover:border-primary/50 focus-visible:ring-primary relative cursor-pointer overflow-hidden rounded-2xl border backdrop-blur-xl transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
       whileHover={{ y: -8 }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -555,14 +572,14 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
           className="h-full w-full max-w-full object-cover transition-transform duration-700 group-hover:scale-110"
           aria-hidden="true"
         />
-        <div className="absolute left-3 top-3">
-          <span className="rounded-full bg-background/80 px-2 py-1 text-xs font-medium text-foreground backdrop-blur-xl">
+        <div className="absolute top-3 left-3">
+          <span className="bg-background/80 text-foreground rounded-full px-2 py-1 text-xs font-medium backdrop-blur-xl">
             {post.category.name}
           </span>
         </div>
       </div>
       <div className="p-4 sm:p-6">
-        <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
           <Calendar size={12} aria-hidden="true" />
           <time dateTime={post.published_at}>
             {new Date(post.published_at).toLocaleDateString('en-US', {
@@ -574,15 +591,17 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
           <Clock size={12} aria-hidden="true" />
           {calculateReadTime(post.content)}
         </div>
-        <h3 className="mb-3 line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
+        <h3 className="group-hover:text-primary mb-3 line-clamp-2 text-xl font-bold transition-colors">
           {post.title}
         </h3>
-        <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm">
           {post.excerpt}
         </p>
-        <div className="flex items-center justify-between border-t border-border/40 pt-4">
+        <div className="border-border/40 flex items-center justify-between border-t pt-4">
           <div className="flex items-center gap-2">
-            <span className="text-xl" aria-hidden="true">{post.author.avatar_emoji}</span>
+            <span className="text-xl" aria-hidden="true">
+              {post.author.avatar_emoji}
+            </span>
             <span className="text-sm font-medium">
               {post.author.display_name}
             </span>

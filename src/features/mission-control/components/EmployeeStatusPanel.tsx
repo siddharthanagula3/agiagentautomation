@@ -105,21 +105,21 @@ export const AgentStatusPanel: React.FC = () => {
   const assignedAgents = useAssignedAgents();
 
   return (
-    <Card className="h-full border-border bg-card">
-      <CardHeader className="border-b border-border p-3 sm:p-4 sm:pb-4">
-        <CardTitle className="flex items-center gap-2 text-sm text-foreground sm:text-base">
-          <Zap className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+    <Card className="border-border bg-card h-full">
+      <CardHeader className="border-border border-b p-3 sm:p-4 sm:pb-4">
+        <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
+          <Zap className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
           AI Team ({assignedAgents.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 sm:p-4">
         {assignedAgents.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center sm:py-12">
-            <Bot className="mb-3 h-10 w-10 text-muted-foreground sm:mb-4 sm:h-12 sm:w-12" />
-            <p className="text-xs text-muted-foreground sm:text-sm">
+            <Bot className="text-muted-foreground mb-3 h-10 w-10 sm:mb-4 sm:h-12 sm:w-12" />
+            <p className="text-muted-foreground text-xs sm:text-sm">
               No AI employees assigned yet
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-xs">
               Start a task to assemble your team
             </p>
           </div>
@@ -155,10 +155,10 @@ export const AgentStatusPanel: React.FC = () => {
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-semibold text-foreground sm:text-sm">
+                        <p className="text-foreground truncate text-xs font-semibold sm:text-sm">
                           {agent.agentName}
                         </p>
-                        <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
+                        <p className="text-muted-foreground truncate text-[10px] sm:text-xs">
                           {agent.role}
                         </p>
                       </div>
@@ -190,7 +190,7 @@ export const AgentStatusPanel: React.FC = () => {
 
                   {/* Current Task */}
                   {agent.currentTask && (
-                    <p className="mb-2 line-clamp-2 text-[10px] text-muted-foreground sm:text-xs">
+                    <p className="text-muted-foreground mb-2 line-clamp-2 text-[10px] sm:text-xs">
                       {agent.currentTask}
                     </p>
                   )}
@@ -199,7 +199,7 @@ export const AgentStatusPanel: React.FC = () => {
                   {agent.status === 'working' && (
                     <div className="space-y-1">
                       <Progress value={agent.progress} className="h-1" />
-                      <p className="text-right text-[10px] text-muted-foreground sm:text-xs">
+                      <p className="text-muted-foreground text-right text-[10px] sm:text-xs">
                         {agent.progress}%
                       </p>
                     </div>

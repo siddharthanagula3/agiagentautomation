@@ -652,7 +652,14 @@ test.describe('State Management - Critical Tests', () => {
   test('No Immer frozen state errors on page transitions', async ({ page }) => {
     const report = setupPageMonitoring(page, 'state-transitions');
 
-    const routes = ['/', '/auth/login', '/auth/register', '/pricing', '/about', '/help'];
+    const routes = [
+      '/',
+      '/auth/login',
+      '/auth/register',
+      '/pricing',
+      '/about',
+      '/help',
+    ];
 
     for (const route of routes) {
       await page.goto(`${BASE_URL}${route}`);

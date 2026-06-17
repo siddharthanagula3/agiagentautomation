@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { SecurityManager } from '@shared/lib/security';
 import {
   VibeFileSystem,
   FileSystemException,
@@ -421,7 +422,12 @@ describe('VibeFileSystem', () => {
       const stored = localStorage.getItem('vibe-file-system');
       expect(stored).toBeTruthy();
 
-      const state = JSON.parse(stored!);
+      let decrypted = stored!;
+      if (!stored!.trim().startsWith('{')) {
+        const security = new SecurityManager();
+        decrypted = security.decrypt(stored!);
+      }
+      const state = JSON.parse(decrypted);
       expect(state.files).toBeDefined();
     });
 

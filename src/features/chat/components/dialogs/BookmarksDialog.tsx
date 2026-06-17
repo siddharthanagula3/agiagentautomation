@@ -143,7 +143,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[80vh] max-w-4xl">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
           </div>
         </DialogContent>
       </Dialog>
@@ -153,7 +153,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] max-w-4xl p-0">
-        <DialogHeader className="border-b px-6 pb-4 pt-6">
+        <DialogHeader className="border-b px-6 pt-6 pb-4">
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
         {/* Search and Filters */}
         <div className="space-y-3 border-b px-6 py-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="Search bookmarks..."
               value={searchQuery}
@@ -182,7 +182,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
 
           {allTags.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <Tag className="h-3.5 w-3.5 text-muted-foreground" />
+              <Tag className="text-muted-foreground h-3.5 w-3.5" />
               <Button
                 variant={selectedTag === null ? 'default' : 'outline'}
                 size="sm"
@@ -210,13 +210,13 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
         <ScrollArea className="flex-1 px-6 py-4" style={{ maxHeight: '500px' }}>
           {filteredBookmarks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Bookmark className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-              <p className="text-sm text-muted-foreground">
+              <Bookmark className="text-muted-foreground mb-3 h-12 w-12 opacity-30" />
+              <p className="text-muted-foreground text-sm">
                 {bookmarks.length === 0
                   ? 'No bookmarks yet'
                   : 'No bookmarks match your filters'}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground/70">
+              <p className="text-muted-foreground/70 mt-1 text-xs">
                 {bookmarks.length === 0
                   ? 'Bookmark important messages to save them here'
                   : 'Try adjusting your search or filters'}
@@ -227,12 +227,12 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
               {filteredBookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
-                  className="rounded-lg border p-4 transition-colors hover:bg-accent"
+                  className="hover:bg-accent rounded-lg border p-4 transition-colors"
                 >
                   {/* Header */}
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div className="flex min-w-0 flex-1 items-center gap-2">
-                      <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <MessageSquare className="text-muted-foreground h-4 w-4 shrink-0" />
                       <button
                         onClick={() =>
                           handleNavigateToMessage(bookmark.sessionId)
@@ -241,7 +241,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
                       >
                         {bookmark.sessionTitle}
                       </button>
-                      <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />
+                      <ExternalLink className="text-muted-foreground h-3 w-3 shrink-0" />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <Button
@@ -259,7 +259,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive h-7 w-7"
                         onClick={() => handleRemoveBookmark(bookmark.messageId)}
                         title="Remove bookmark"
                       >
@@ -270,7 +270,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
 
                   {/* Message Content */}
                   <div className="space-y-3 pl-6">
-                    <div className="line-clamp-3 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground line-clamp-3 text-sm">
                       {bookmark.messageContent}
                     </div>
 
@@ -304,13 +304,13 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
                         </div>
                       </div>
                     ) : bookmark.note ? (
-                      <div className="rounded bg-muted p-2 text-xs italic">
+                      <div className="bg-muted rounded p-2 text-xs italic">
                         {bookmark.note}
                       </div>
                     ) : null}
 
                     {/* Metadata */}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center gap-4 text-xs">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {format(bookmark.createdAt, 'MMM d, yyyy')}

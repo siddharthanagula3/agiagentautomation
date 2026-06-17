@@ -355,7 +355,7 @@ export class SecurityManager {
       'style',
     ],
     ALLOWED_URI_REGEXP:
-      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+\.\-]+(?:[^a-z+\.\-:]|$))/i,
+      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
     FORBID_TAGS: ['script', 'object', 'embed', 'form', 'input', 'textarea'],
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
     KEEP_CONTENT: true,
@@ -553,7 +553,9 @@ export class SecurityManager {
     crypto.getRandomValues(fallbackArray);
     return Array.from(fallbackArray, (byte) =>
       byte.toString(16).padStart(2, '0')
-    ).join('').slice(0, length);
+    )
+      .join('')
+      .slice(0, length);
   }
 
   // Hash sensitive data (client-side hashing for non-security-critical use)

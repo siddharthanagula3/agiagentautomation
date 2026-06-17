@@ -131,7 +131,7 @@ export const AudioVisualizer = React.memo(function AudioVisualizer({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-2',
+        'bg-muted/50 flex items-center gap-3 rounded-lg px-3 py-2',
         className
       )}
     >
@@ -141,7 +141,7 @@ export const AudioVisualizer = React.memo(function AudioVisualizer({
           className={cn(
             'flex items-center justify-center rounded-full',
             isRecording && !isPaused
-              ? 'animate-pulse bg-destructive'
+              ? 'bg-destructive animate-pulse'
               : 'bg-muted-foreground/30',
             size === 'sm' && 'h-5 w-5',
             size === 'md' && 'h-6 w-6',

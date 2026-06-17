@@ -269,7 +269,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
           role="list"
           aria-label="Assigned employees"
         >
-          <span className="text-xs text-muted-foreground">Assigned to:</span>
+          <span className="text-muted-foreground text-xs">Assigned to:</span>
           {selectedEmployees.map((empId) => {
             const emp = availableEmployees.find((e) => e.id === empId);
             if (!emp) return null;
@@ -288,7 +288,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
                 {emp.name}
                 <button
                   onClick={() => removeEmployee(empId)}
-                  className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                  className="hover:bg-muted ml-1 rounded-full p-0.5"
                   aria-label={`Remove ${emp.name}`}
                 >
                   <X className="h-2.5 w-2.5" aria-hidden="true" />
@@ -314,7 +314,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
               <Badge
                 key={toolId}
                 variant="outline"
-                className="gap-1.5 border-primary/30 bg-primary/5 pr-1 text-xs"
+                className="border-primary/30 bg-primary/5 gap-1.5 pr-1 text-xs"
                 role="listitem"
               >
                 <Icon
@@ -324,7 +324,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
                 {tool.label}
                 <button
                   onClick={() => toggleTool(toolId)}
-                  className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                  className="hover:bg-muted ml-1 rounded-full p-0.5"
                   aria-label={`Remove ${tool.label}`}
                 >
                   <X className="h-2.5 w-2.5" aria-hidden="true" />
@@ -345,11 +345,11 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
           {attachments.map((file, fileIndex) => (
             <div
               key={`attachment-${file.name}-${file.size}`}
-              className="group relative flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-1.5"
+              className="group border-border bg-muted/50 relative flex items-center gap-2 rounded-lg border px-3 py-1.5"
               role="listitem"
             >
               <Paperclip
-                className="h-3.5 w-3.5 text-muted-foreground"
+                className="text-muted-foreground h-3.5 w-3.5"
                 aria-hidden="true"
               />
               <span className="max-w-[150px] truncate text-xs">
@@ -357,7 +357,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
               </span>
               <button
                 onClick={() => removeAttachment(fileIndex)}
-                className="rounded-full p-0.5 hover:bg-background"
+                className="hover:bg-background rounded-full p-0.5"
                 aria-label={`Remove attachment ${file.name}`}
               >
                 <X className="h-3 w-3" aria-hidden="true" />
@@ -368,11 +368,11 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
       )}
 
       {/* Main Input Container */}
-      <div className="relative rounded-2xl border border-border bg-background shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-1 focus-within:ring-ring">
+      <div className="border-border bg-background focus-within:ring-ring relative rounded-2xl border shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-1">
         {/* @Mention Dropdown */}
         {showMentions && filteredEmployees.length > 0 && (
           <div
-            className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-border bg-popover shadow-lg"
+            className="border-border bg-popover absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border shadow-lg"
             role="listbox"
             aria-label="Select employee to mention"
           >
@@ -381,7 +381,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
                 <button
                   key={emp.id}
                   onClick={() => handleMentionSelect(emp)}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted"
+                  className="hover:bg-muted flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors"
                   role="option"
                   aria-selected="false"
                 >
@@ -400,7 +400,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
                     <div className="truncate text-sm font-medium">
                       {emp.name}
                     </div>
-                    <div className="truncate text-xs text-muted-foreground">
+                    <div className="text-muted-foreground truncate text-xs">
                       {emp.description}
                     </div>
                   </div>
@@ -463,7 +463,7 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
                         <span className="flex-1 text-left">{tool.label}</span>
                         {isSelected && (
                           <div
-                            className="h-2 w-2 rounded-full bg-primary"
+                            className="bg-primary h-2 w-2 rounded-full"
                             aria-hidden="true"
                           />
                         )}
@@ -555,13 +555,13 @@ const ChatComposerContent: React.FC<ChatComposerProps> = ({
       </div>
 
       {/* Helper text */}
-      <div className="mt-2 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+      <div className="text-muted-foreground mt-2 flex items-center justify-center gap-4 text-xs">
         <span>
-          Type <kbd className="rounded border bg-muted px-1 font-mono">@</kbd>{' '}
+          Type <kbd className="bg-muted rounded border px-1 font-mono">@</kbd>{' '}
           to mention an employee
         </span>
         <span className="hidden sm:inline">
-          <kbd className="rounded border bg-muted px-1 font-mono">Enter</kbd> to
+          <kbd className="bg-muted rounded border px-1 font-mono">Enter</kbd> to
           send
         </span>
       </div>

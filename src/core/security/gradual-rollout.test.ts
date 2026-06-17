@@ -72,9 +72,15 @@ describe('Gradual Rollout System', () => {
     it('should exclude specific users', () => {
       disableForUsers('prompt_injection_detection', ['user-123', 'user-456']);
 
-      expect(isFeatureEnabled('prompt_injection_detection', 'user-123')).toBe(false);
-      expect(isFeatureEnabled('prompt_injection_detection', 'user-456')).toBe(false);
-      expect(isFeatureEnabled('prompt_injection_detection', 'user-789')).toBe(true);
+      expect(isFeatureEnabled('prompt_injection_detection', 'user-123')).toBe(
+        false
+      );
+      expect(isFeatureEnabled('prompt_injection_detection', 'user-456')).toBe(
+        false
+      );
+      expect(isFeatureEnabled('prompt_injection_detection', 'user-789')).toBe(
+        true
+      );
     });
 
     it('should include specific target users', () => {
@@ -154,7 +160,9 @@ describe('Gradual Rollout System', () => {
 
       const statuses = getRolloutStatuses();
       expect(statuses.api_abuse_prevention.config.percentage).toBe(75);
-      expect(statuses.api_abuse_prevention.config.targetUsers).toContain('user-1');
+      expect(statuses.api_abuse_prevention.config.targetUsers).toContain(
+        'user-1'
+      );
     });
   });
 
@@ -413,12 +421,19 @@ describe('Gradual Rollout System', () => {
     });
 
     it('should apply beta strategy correctly', () => {
-      ROLLOUT_STRATEGIES.beta('employee_input_sanitization', ['beta-1', 'beta-2']);
+      ROLLOUT_STRATEGIES.beta('employee_input_sanitization', [
+        'beta-1',
+        'beta-2',
+      ]);
 
       const statuses = getRolloutStatuses();
       expect(statuses.employee_input_sanitization.config.percentage).toBe(0);
-      expect(statuses.employee_input_sanitization.config.targetUsers).toContain('beta-1');
-      expect(statuses.employee_input_sanitization.config.targetUsers).toContain('beta-2');
+      expect(statuses.employee_input_sanitization.config.targetUsers).toContain(
+        'beta-1'
+      );
+      expect(statuses.employee_input_sanitization.config.targetUsers).toContain(
+        'beta-2'
+      );
     });
 
     it('should apply canary strategy correctly', () => {
@@ -431,11 +446,15 @@ describe('Gradual Rollout System', () => {
 
   describe('Edge Cases', () => {
     it('should handle undefined userId', () => {
-      expect(() => isFeatureEnabled('prompt_injection_detection', undefined)).not.toThrow();
+      expect(() =>
+        isFeatureEnabled('prompt_injection_detection', undefined)
+      ).not.toThrow();
     });
 
     it('should handle empty userId', () => {
-      expect(() => isFeatureEnabled('prompt_injection_detection', '')).not.toThrow();
+      expect(() =>
+        isFeatureEnabled('prompt_injection_detection', '')
+      ).not.toThrow();
     });
 
     it('should handle hash collisions gracefully', () => {

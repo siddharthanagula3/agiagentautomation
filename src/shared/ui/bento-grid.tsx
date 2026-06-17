@@ -76,13 +76,14 @@ export const BentoCard: React.FC<BentoCardProps> = ({
   return (
     <motion.div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-border/50 p-6',
+        'border-border/50 relative overflow-hidden rounded-2xl border p-6',
         gradient
-          ? 'bg-gradient-to-br from-primary/5 via-background to-accent/5'
+          ? 'from-primary/5 via-background to-accent/5 bg-gradient-to-br'
           : 'bg-card',
         colSpanClass,
         rowSpanClass,
-        isClickable && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        isClickable &&
+          'focus-visible:ring-primary cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
         className
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -96,20 +97,27 @@ export const BentoCard: React.FC<BentoCardProps> = ({
       onKeyDown={isClickable ? handleKeyDown : undefined}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      aria-label={ariaLabel || (isClickable && title ? (description ? title + '. ' + description : title) : undefined)}
+      aria-label={
+        ariaLabel ||
+        (isClickable && title
+          ? description
+            ? title + '. ' + description
+            : title
+          : undefined)
+      }
     >
       {/* Gradient mesh background */}
       {gradient && (
         <div className="absolute inset-0 opacity-30" aria-hidden="true">
-          <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
+          <div className="bg-primary/20 absolute top-0 right-0 h-40 w-40 rounded-full blur-3xl" />
+          <div className="bg-accent/20 absolute bottom-0 left-0 h-40 w-40 rounded-full blur-3xl" />
         </div>
       )}
 
       <div className="relative z-10">
         {icon && (
           <motion.div
-            className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10"
+            className="bg-primary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.6 }}
             aria-hidden="true"
@@ -121,7 +129,7 @@ export const BentoCard: React.FC<BentoCardProps> = ({
         {title && <h3 className="mb-2 text-xl font-semibold">{title}</h3>}
 
         {description && (
-          <p className="mb-4 text-muted-foreground">{description}</p>
+          <p className="text-muted-foreground mb-4">{description}</p>
         )}
 
         {children}

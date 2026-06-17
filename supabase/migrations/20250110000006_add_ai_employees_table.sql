@@ -7,7 +7,7 @@
 
 -- Create AI Employees table
 CREATE TABLE IF NOT EXISTS public.ai_employees (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    id text PRIMARY KEY DEFAULT gen_random_uuid()::text,
     name text NOT NULL,
     role text NOT NULL,
     category text NOT NULL,

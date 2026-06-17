@@ -90,7 +90,7 @@ const ResetPasswordPage: React.FC = () => {
             scale: [1, 1.1, 1],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-20 top-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl"
+          className="bg-primary/20 absolute top-20 left-20 h-96 w-96 rounded-full blur-3xl"
         />
         <motion.div
           animate={{
@@ -99,7 +99,7 @@ const ResetPasswordPage: React.FC = () => {
             scale: [1, 1.15, 1],
           }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-accent/20 blur-3xl"
+          className="bg-accent/20 absolute right-20 bottom-20 h-96 w-96 rounded-full blur-3xl"
         />
       </div>
 
@@ -109,7 +109,7 @@ const ResetPasswordPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="border border-border/50 bg-background/60 shadow-2xl backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/60 border shadow-2xl backdrop-blur-xl">
           <CardHeader className="space-y-1 pb-8 text-center">
             <motion.div
               className="mb-4 flex justify-center"
@@ -118,11 +118,11 @@ const ResetPasswordPage: React.FC = () => {
               transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             >
               <motion.div
-                className="rounded-full bg-primary/10 p-3"
+                className="bg-primary/10 rounded-full p-3"
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
-                <Bot className="h-8 w-8 text-primary" />
+                <Bot className="text-primary h-8 w-8" />
               </motion.div>
             </motion.div>
             <CardTitle className="text-2xl font-bold">
@@ -134,7 +134,7 @@ const ResetPasswordPage: React.FC = () => {
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="flex items-center space-x-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive">
+                <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-center space-x-2 rounded-lg border p-3">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-sm">{error}</span>
                 </div>
@@ -143,7 +143,7 @@ const ResetPasswordPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="password">New Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="password"
                     name="password"
@@ -151,7 +151,7 @@ const ResetPasswordPage: React.FC = () => {
                     placeholder="Enter new password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="pl-10 pr-10"
+                    className="pr-10 pl-10"
                     required
                     minLength={8}
                     disabled={isLoading}
@@ -159,7 +159,7 @@ const ResetPasswordPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground absolute top-3 right-3 h-4 w-4"
                     disabled={isLoading}
                   >
                     {showPassword ? (
@@ -169,7 +169,7 @@ const ResetPasswordPage: React.FC = () => {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Password must be at least 8 characters long
                 </p>
               </div>
@@ -177,7 +177,7 @@ const ResetPasswordPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -185,14 +185,14 @@ const ResetPasswordPage: React.FC = () => {
                     placeholder="Confirm new password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="pl-10 pr-10"
+                    className="pr-10 pl-10"
                     required
                     disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground absolute top-3 right-3 h-4 w-4"
                     disabled={isLoading}
                   >
                     {showConfirmPassword ? (

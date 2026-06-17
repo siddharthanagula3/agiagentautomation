@@ -112,15 +112,15 @@ export const StandardChat: React.FC<StandardChatProps> = ({
   return (
     <div className="flex h-full flex-col">
       {/* Messages Area */}
-      <Card className="mb-3 flex flex-1 flex-col border-border bg-card sm:mb-4">
+      <Card className="border-border bg-card mb-3 flex flex-1 flex-col sm:mb-4">
         <CardContent className="flex-1 space-y-3 overflow-y-auto p-3 sm:space-y-4 sm:p-4 md:p-6">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <Bot className="mb-3 h-12 w-12 text-muted-foreground opacity-50 sm:mb-4 sm:h-16 sm:w-16" />
-              <h3 className="mb-2 text-base font-semibold text-foreground sm:text-lg">
+              <Bot className="text-muted-foreground mb-3 h-12 w-12 opacity-50 sm:mb-4 sm:h-16 sm:w-16" />
+              <h3 className="text-foreground mb-2 text-base font-semibold sm:text-lg">
                 Start a Conversation
               </h3>
-              <p className="max-w-sm px-4 text-xs text-muted-foreground sm:px-0 sm:text-sm">
+              <p className="text-muted-foreground max-w-sm px-4 text-xs sm:px-0 sm:text-sm">
                 Ask me anything. I'm here to help with your questions and tasks.
               </p>
             </div>
@@ -151,7 +151,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
                       'max-w-[90%] rounded-lg p-3 sm:max-w-[80%] sm:p-4',
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground'
-                        : 'border border-border bg-card'
+                        : 'border-border bg-card border'
                     )}
                   >
                     {message.role === 'user' ? (
@@ -171,7 +171,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
                   {message.role === 'user' && (
                     <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarFallback className="bg-primary">
-                        <User className="h-4 w-4 text-primary-foreground" />
+                        <User className="text-primary-foreground h-4 w-4" />
                       </AvatarFallback>
                     </Avatar>
                   )}
@@ -190,9 +190,9 @@ export const StandardChat: React.FC<StandardChatProps> = ({
                       <Bot className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-4">
+                  <div className="border-border bg-card flex items-center gap-2 rounded-lg border p-4">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       Thinking...
                     </span>
                   </div>
@@ -217,7 +217,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
               disabled={isLoading}
             />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {isLoading
                   ? 'Waiting for response...'
                   : 'Press Cmd/Ctrl + Enter to send'}

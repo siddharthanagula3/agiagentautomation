@@ -6,13 +6,7 @@
  */
 
 import jsPDF from 'jspdf';
-import {
-  Document,
-  Packer,
-  Paragraph,
-  TextRun,
-  HeadingLevel,
-} from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import type { DocumentFormat } from './document-generation-service';
 
 export interface ExportOptions {

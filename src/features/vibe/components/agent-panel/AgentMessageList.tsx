@@ -46,11 +46,11 @@ export function AgentMessageList({
     return (
       <div className="flex flex-1 items-center justify-center p-8 text-center">
         <div>
-          <Bot className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
-          <p className="text-sm text-muted-foreground">
+          <Bot className="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
+          <p className="text-muted-foreground text-sm">
             Start a conversation with your AI employees
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-xs">
             Type @ to mention an agent
           </p>
         </div>
@@ -101,7 +101,7 @@ export function AgentMessageList({
                     {message.agentName}
                   </span>
                   {message.agentRole && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {message.agentRole}
                     </span>
                   )}
@@ -111,10 +111,10 @@ export function AgentMessageList({
               {/* Message Bubble */}
               <div
                 className={cn(
-                  'break-words rounded-lg p-3 text-sm',
+                  'rounded-lg p-3 text-sm break-words',
                   message.role === 'user'
-                    ? 'ml-12 bg-primary text-primary-foreground'
-                    : 'mr-12 bg-muted'
+                    ? 'bg-primary text-primary-foreground ml-12'
+                    : 'bg-muted mr-12'
                 )}
               >
                 {message.isStreaming ? (
@@ -134,12 +134,12 @@ export function AgentMessageList({
                         <p className="mb-2 last:mb-0">{children}</p>
                       ),
                       code: ({ children }) => (
-                        <code className="rounded bg-background/50 px-1 py-0.5 text-xs">
+                        <code className="bg-background/50 rounded px-1 py-0.5 text-xs">
                           {children}
                         </code>
                       ),
                       pre: ({ children }) => (
-                        <pre className="my-2 overflow-x-auto rounded bg-background/50 p-2 text-xs">
+                        <pre className="bg-background/50 my-2 overflow-x-auto rounded p-2 text-xs">
                           {children}
                         </pre>
                       ),
@@ -151,7 +151,7 @@ export function AgentMessageList({
               </div>
 
               {/* Timestamp */}
-              <span className="mt-1 block text-xs text-muted-foreground">
+              <span className="text-muted-foreground mt-1 block text-xs">
                 {message.timestamp.toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',

@@ -161,9 +161,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               onClick={() => toggleGroup(item.name)}
               className={cn(
                 'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300',
-                'hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10',
+                'hover:from-primary/5 hover:to-primary/10 hover:bg-gradient-to-r',
                 isActive
-                  ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary shadow-sm'
+                  ? 'from-primary/10 to-primary/5 text-primary bg-gradient-to-r shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -186,7 +186,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               <div className="flex-1 text-left">
                 <div className="font-semibold">{item.name}</div>
                 {item.description && !collapsed && (
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="text-muted-foreground text-[10px]">
                     {item.description}
                   </div>
                 )}
@@ -218,7 +218,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="ml-12 mt-1 space-y-0.5 border-l-2 border-primary/20 pl-4">
+                  <div className="border-primary/20 mt-1 ml-12 space-y-0.5 border-l-2 pl-4">
                     {item.children!.map((child, i) => (
                       <NavLink
                         key={child.name}
@@ -226,9 +226,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                         className={({ isActive }) =>
                           cn(
                             'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300',
-                            'hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent',
+                            'hover:from-primary/5 hover:bg-gradient-to-r hover:to-transparent',
                             isActive
-                              ? 'bg-gradient-to-r from-primary/10 to-transparent font-medium text-primary'
+                              ? 'from-primary/10 text-primary bg-gradient-to-r to-transparent font-medium'
                               : 'text-muted-foreground hover:text-foreground'
                           )
                         }
@@ -242,7 +242,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                         <div className="flex-1">
                           <div className="font-medium">{child.name}</div>
                           {child.description && (
-                            <div className="text-[10px] text-muted-foreground">
+                            <div className="text-muted-foreground text-[10px]">
                               {child.description}
                             </div>
                           )}
@@ -260,10 +260,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             className={({ isActive: linkActive }) =>
               cn(
                 'group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300',
-                'hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10',
+                'hover:from-primary/5 hover:to-primary/10 hover:bg-gradient-to-r',
                 collapsed ? 'justify-center' : '',
                 linkActive || isActive
-                  ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary shadow-sm'
+                  ? 'from-primary/10 to-primary/5 text-primary bg-gradient-to-r shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )
             }
@@ -273,7 +273,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             {isActive && !collapsed && (
               <motion.div
                 layoutId={`active-indicator-${section}`}
-                className="absolute left-0 top-1/2 h-10 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-primary to-primary/50"
+                className="from-primary to-primary/50 absolute top-1/2 left-0 h-10 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b"
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />
             )}
@@ -283,8 +283,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               className={cn(
                 'rounded-lg p-2 transition-all duration-300',
                 isActive
-                  ? 'scale-110 bg-primary/10'
-                  : 'bg-muted/50 group-hover:scale-105 group-hover:bg-muted'
+                  ? 'bg-primary/10 scale-110'
+                  : 'bg-muted/50 group-hover:bg-muted group-hover:scale-105'
               )}
             >
               <item.icon
@@ -300,7 +300,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               <div className="flex-1">
                 <div className="font-semibold">{item.name}</div>
                 {item.description && (
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="text-muted-foreground text-[10px]">
                     {item.description}
                   </div>
                 )}
@@ -323,9 +323,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 <motion.div
                   animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 rounded-full bg-primary"
+                  className="bg-primary absolute inset-0 rounded-full"
                 />
-                <div className="absolute inset-0 rounded-full bg-primary" />
+                <div className="bg-primary absolute inset-0 rounded-full" />
               </motion.div>
             )}
 
@@ -333,14 +333,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             {collapsed && (
               <div
                 className={cn(
-                  'absolute left-full z-50 ml-3 rounded-lg border bg-popover/95 px-3 py-2 shadow-lg backdrop-blur-sm',
+                  'bg-popover/95 absolute left-full z-50 ml-3 rounded-lg border px-3 py-2 shadow-lg backdrop-blur-sm',
                   'pointer-events-none opacity-0 transition-all duration-300 group-hover:opacity-100',
                   'whitespace-nowrap'
                 )}
               >
                 <p className="text-sm font-medium">{item.name}</p>
                 {item.description && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-0.5 text-xs">
                     {item.description}
                   </p>
                 )}
@@ -355,7 +355,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   return (
     <div
       className={cn(
-        'glass-strong flex h-full flex-col border-r border-border/50 backdrop-blur-xl',
+        'glass-strong border-border/50 flex h-full flex-col border-r backdrop-blur-xl',
         'overflow-hidden', // Ensure proper overflow handling
         className
       )}
@@ -363,7 +363,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       {/* Logo Section with gradient background */}
       <div
         className={cn(
-          'flex items-center gap-3 border-b border-border/50 bg-gradient-to-r from-primary/5 to-transparent px-4 py-5',
+          'border-border/50 from-primary/5 flex items-center gap-3 border-b bg-gradient-to-r to-transparent px-4 py-5',
           collapsed && 'justify-center px-2'
         )}
       >
@@ -385,10 +385,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               <Sparkles className="h-5 w-5 text-white" />
             </motion.div>
             <div className="flex flex-col">
-              <h1 className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-base font-bold text-transparent">
+              <h1 className="from-primary to-primary/60 bg-gradient-to-r bg-clip-text text-base font-bold text-transparent">
                 AI Workforce
               </h1>
-              <p className="text-xs text-muted-foreground">Powered by AGI</p>
+              <p className="text-muted-foreground text-xs">Powered by AGI</p>
             </div>
           </>
         )}
@@ -396,20 +396,20 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
       {/* Search Bar - Modern 2025 trend */}
       {!collapsed && (
-        <div className="border-b border-border/50 px-4 py-3">
+        <div className="border-border/50 border-b px-4 py-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search navigation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
-                'min-h-11 w-full rounded-lg py-2.5 pl-10 pr-3',
+                'min-h-11 w-full rounded-lg py-2.5 pr-3 pl-10',
                 'bg-muted/50 hover:bg-muted/70 focus:bg-muted',
-                'border border-border/50 focus:border-primary/50',
-                'text-sm placeholder:text-muted-foreground',
-                'outline-none transition-all duration-300'
+                'border-border/50 focus:border-primary/50 border',
+                'placeholder:text-muted-foreground text-sm',
+                'transition-all duration-300 outline-none'
               )}
             />
           </div>
@@ -418,7 +418,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
       {/* Quick Action Button with modern gradient */}
       {!collapsed && (
-        <div className="border-b border-border/50 px-4 py-4">
+        <div className="border-border/50 border-b px-4 py-4">
           <Button
             className={cn(
               'btn-glow gradient-primary w-full text-white shadow-lg',
@@ -444,10 +444,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               animate={{ opacity: 1 }}
               className="mb-3 flex items-center justify-between px-3"
             >
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 Main Menu
               </p>
-              <div className="ml-3 h-px flex-1 bg-gradient-to-r from-border/50 to-transparent" />
+              <div className="from-border/50 ml-3 h-px flex-1 bg-gradient-to-r to-transparent" />
             </motion.div>
           )}
           {filteredNavigation.map((item, index) =>
@@ -459,7 +459,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         {!collapsed && (
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent"></div>
+              <div className="via-border h-px w-full bg-gradient-to-r from-transparent to-transparent"></div>
             </div>
           </div>
         )}
@@ -472,10 +472,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               animate={{ opacity: 1 }}
               className="mb-3 flex items-center justify-between px-3"
             >
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 Settings
               </p>
-              <div className="ml-3 h-px flex-1 bg-gradient-to-r from-border/50 to-transparent" />
+              <div className="from-border/50 ml-3 h-px flex-1 bg-gradient-to-r to-transparent" />
             </motion.div>
           )}
           {settingsNavigation.map((item, index) =>
@@ -485,7 +485,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       </div>
 
       {/* Footer with dark mode toggle */}
-      <div className="space-y-3 border-t border-border/50 bg-gradient-to-t from-muted/20 to-transparent p-4"></div>
+      <div className="border-border/50 from-muted/20 space-y-3 border-t bg-gradient-to-t to-transparent p-4"></div>
     </div>
   );
 };

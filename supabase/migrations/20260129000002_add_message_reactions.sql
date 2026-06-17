@@ -3,6 +3,7 @@
 -- Allows users to react to chat messages with emojis
 
 -- Create message_reactions table
+DROP TABLE IF EXISTS public.message_reactions CASCADE;
 CREATE TABLE IF NOT EXISTS public.message_reactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   message_id UUID NOT NULL REFERENCES public.chat_messages(id) ON DELETE CASCADE,

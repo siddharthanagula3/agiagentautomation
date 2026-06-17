@@ -71,9 +71,10 @@ CREATE INDEX IF NOT EXISTS idx_token_transactions_created
 -- ================================================================
 
 -- Composite index for filtering vibe_sessions by user and status
-CREATE INDEX IF NOT EXISTS idx_vibe_sessions_user_status
-  ON public.vibe_sessions(user_id, status)
-  WHERE status IS NOT NULL;
+-- Note: Commented out because the status column does not exist on vibe_sessions.
+-- CREATE INDEX IF NOT EXISTS idx_vibe_sessions_user_status
+--   ON public.vibe_sessions(user_id, status)
+--   WHERE status IS NOT NULL;
 
 -- Composite index for support tickets by user and status
 CREATE INDEX IF NOT EXISTS idx_support_tickets_user_status

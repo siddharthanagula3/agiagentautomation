@@ -55,7 +55,7 @@ async function getAuthToken(): Promise<string | null> {
 
 class ClaudeService {
   // SECURITY: API keys are managed by Netlify proxy functions
-  private proxyUrl = '/.netlify/functions/llm-proxies/anthropic-proxy';
+  private proxyUrl = '/api/llm-proxies/anthropic-proxy';
 
   async executeTask(task: Task): Promise<AIResponse> {
     const authToken = await getAuthToken();
@@ -143,7 +143,7 @@ Response:`;
 
 class GeminiService {
   // SECURITY: API keys are managed by Netlify proxy functions
-  private proxyUrl = '/.netlify/functions/llm-proxies/google-proxy';
+  private proxyUrl = '/api/llm-proxies/google-proxy';
 
   async executeTask(task: Task): Promise<AIResponse> {
     const authToken = await getAuthToken();
@@ -229,7 +229,7 @@ Complete this task with high quality output. Be thorough, accurate, and provide 
 
 class OpenAIService {
   // SECURITY: API keys are managed by Netlify proxy functions
-  private proxyUrl = '/.netlify/functions/llm-proxies/openai-proxy';
+  private proxyUrl = '/api/llm-proxies/openai-proxy';
 
   async executeTask(task: Task): Promise<AIResponse> {
     const authToken = await getAuthToken();
@@ -388,7 +388,10 @@ class AIServiceRouter {
           return await this.mockService.executeTask(task);
       }
     } catch (error) {
-      logger.error(`[Employee Coordinator] Error executing task with ${agentType}:`, error);
+      logger.error(
+        `[Employee Coordinator] Error executing task with ${agentType}:`,
+        error
+      );
       // Fallback to mock service on error
       return await this.mockService.executeTask(task);
     }
@@ -401,7 +404,10 @@ class AIServiceRouter {
     try {
       return await primary();
     } catch (error) {
-      logger.warn('[Employee Coordinator] Primary service failed, using fallback:', error);
+      logger.warn(
+        '[Employee Coordinator] Primary service failed, using fallback:',
+        error
+      );
       return await fallback();
     }
   }

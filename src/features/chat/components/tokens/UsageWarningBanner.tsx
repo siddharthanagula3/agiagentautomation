@@ -102,7 +102,7 @@ export function UsageWarningBanner({
     >
       <div className="flex items-start gap-3">
         {isOverLimit ? (
-          <AlertCircle className="h-5 w-5 text-destructive" />
+          <AlertCircle className="text-destructive h-5 w-5" />
         ) : (
           <AlertTriangle
             className={cn(
@@ -133,7 +133,7 @@ export function UsageWarningBanner({
                 isWarning && 'bg-yellow-600'
               )}
             />
-            <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+            <div className="text-muted-foreground flex items-center justify-between text-[10px]">
               <span>{used.toLocaleString()} used</span>
               <span>{limit.toLocaleString()} limit</span>
             </div>

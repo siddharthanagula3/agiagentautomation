@@ -25,7 +25,7 @@ export function AgentPanel({ agent, workingSteps, messages }: AgentPanelProps) {
         <div className="flex flex-1 items-center justify-center p-8 text-center">
           <div>
             <h3 className="mb-2 text-lg font-semibold">No Active Agent</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Send a message to start working with AI agents
             </p>
           </div>

@@ -247,7 +247,9 @@ export class ConversationBranchingService {
 
     if (error) {
       console.error('Failed to get branch history:', error);
-      return [{ sessionId, branchName: null, branchPointMessageId: null, depth: 0 }];
+      return [
+        { sessionId, branchName: null, branchPointMessageId: null, depth: 0 },
+      ];
     }
 
     return (data || []).map(
@@ -409,7 +411,9 @@ export class ConversationBranchingService {
   /**
    * Map database row to ConversationBranch
    */
-  private mapDBBranchToBranch(dbBranch: DBConversationBranch): ConversationBranch {
+  private mapDBBranchToBranch(
+    dbBranch: DBConversationBranch
+  ): ConversationBranch {
     return {
       id: dbBranch.id,
       parentSessionId: dbBranch.parent_session_id,
@@ -511,7 +515,8 @@ export class ConversationBranchingService {
 
       // Combine messages sorted by timestamp
       const combinedMessages = [...messages1, ...messages2].sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
 
       // Copy combined messages to the merge session
@@ -544,7 +549,10 @@ export class ConversationBranchingService {
       return null;
     }
 
-    return chatPersistenceService.getSession(branchInfo.parentSessionId, userId);
+    return chatPersistenceService.getSession(
+      branchInfo.parentSessionId,
+      userId
+    );
   }
 
   /**

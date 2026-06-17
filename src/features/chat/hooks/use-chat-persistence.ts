@@ -53,7 +53,9 @@ export function useChatPersistence(
   const messages = useMissionStore((state) => state.messages);
   const activeEmployees = useMissionStore((state) => state.activeEmployees);
   const mode = useMissionStore((state) => state.mode);
-  const _activeChatSession = useMissionStore((state) => state.activeChatSession);
+  const _activeChatSession = useMissionStore(
+    (state) => state.activeChatSession
+  );
 
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(
     null

@@ -14,7 +14,10 @@ import type { SelectionAgentCapability } from '@shared/types';
 /**
  * Extended AgentCapability for employee selection with typed domain/intent support
  */
-export interface AgentCapability extends Omit<SelectionAgentCapability, 'supportedDomains' | 'supportedIntents' | 'maxComplexity' | 'agentType'> {
+export interface AgentCapability extends Omit<
+  SelectionAgentCapability,
+  'supportedDomains' | 'supportedIntents' | 'maxComplexity' | 'agentType'
+> {
   agentType: AgentType;
   supportedDomains: DomainType[];
   supportedIntents: IntentType[];

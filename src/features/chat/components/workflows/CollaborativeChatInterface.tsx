@@ -320,11 +320,11 @@ export const CollaborativeChatInterface: React.FC<
       <CardHeader className="border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="text-primary h-5 w-5" />
             <CardTitle className="text-lg">
               Collaborative Chat
               {activeAgents.length > 0 && (
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                <span className="text-muted-foreground ml-2 text-sm font-normal">
                   with {activeAgents.length} AI{' '}
                   {activeAgents.length === 1 ? 'employee' : 'employees'}
                 </span>
@@ -357,7 +357,7 @@ export const CollaborativeChatInterface: React.FC<
 
         {/* Active Agents */}
         <div className="mt-3 flex items-center space-x-2">
-          <span className="text-sm text-muted-foreground">Active:</span>
+          <span className="text-muted-foreground text-sm">Active:</span>
           <div className="flex flex-wrap gap-2">
             <AnimatePresence>
               {activeAgents.map((agent) => (
@@ -384,7 +384,7 @@ export const CollaborativeChatInterface: React.FC<
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-4 w-4 p-0 hover:bg-destructive/20"
+                      className="hover:bg-destructive/20 h-4 w-4 p-0"
                       onClick={() => removeAgent(agent.agentId)}
                     >
                       ×
@@ -433,7 +433,7 @@ export const CollaborativeChatInterface: React.FC<
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex items-center space-x-2 p-4 text-muted-foreground"
+                className="text-muted-foreground flex items-center space-x-2 p-4"
               >
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">AI employees are thinking...</span>
@@ -498,7 +498,7 @@ export const CollaborativeChatInterface: React.FC<
               </Button>
             </div>
 
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="text-muted-foreground mt-2 text-xs">
               <span>
                 Tip: Use @AgentName to mention specific agents in team mode
               </span>

@@ -238,15 +238,15 @@ export function PromptShortcuts({
   return (
     <div
       className={cn(
-        'rounded-xl border border-border bg-card p-4 shadow-lg',
+        'border-border bg-card rounded-xl border p-4 shadow-lg',
         className
       )}
     >
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">
+        <h3 className="text-foreground text-sm font-semibold">
           ⚡ Quick Prompts
         </h3>
-        <p className="text-xs text-muted-foreground">Click to insert</p>
+        <p className="text-muted-foreground text-xs">Click to insert</p>
       </div>
 
       {/* Category Filters */}
@@ -282,12 +282,12 @@ export function PromptShortcuts({
                 <Button
                   variant="ghost"
                   onClick={() => onSelectPrompt(shortcut.prompt)}
-                  className="h-auto flex-1 justify-start gap-3 px-3 py-2 text-left hover:bg-accent"
+                  className="hover:bg-accent h-auto flex-1 justify-start gap-3 px-3 py-2 text-left"
                 >
-                  <Icon className="h-4 w-4 flex-shrink-0 text-primary" />
+                  <Icon className="text-primary h-4 w-4 flex-shrink-0" />
                   <span className="text-sm font-medium">{shortcut.label}</span>
                   {shortcut.isCustom && (
-                    <span className="ml-auto text-xs text-muted-foreground">
+                    <span className="text-muted-foreground ml-auto text-xs">
                       Custom
                     </span>
                   )}
@@ -300,7 +300,7 @@ export function PromptShortcuts({
                     className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
                     title="Delete shortcut"
                   >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    <Trash2 className="text-destructive h-3.5 w-3.5" />
                   </Button>
                 )}
               </div>
@@ -308,13 +308,13 @@ export function PromptShortcuts({
           })}
 
           {isLoadingCustom && (
-            <div className="py-4 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground py-4 text-center text-sm">
               Loading your custom shortcuts...
             </div>
           )}
 
           {filteredShortcuts.length === 0 && !isLoadingCustom && (
-            <div className="py-8 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground py-8 text-center text-sm">
               No shortcuts in this category.
               {user && ' Create your first custom shortcut below!'}
             </div>
@@ -324,7 +324,7 @@ export function PromptShortcuts({
 
       {/* Create Custom Shortcut Button */}
       {user && (
-        <div className="mt-4 border-t border-border pt-4">
+        <div className="border-border mt-4 border-t pt-4">
           <Button
             variant="outline"
             size="sm"
@@ -337,7 +337,7 @@ export function PromptShortcuts({
         </div>
       )}
 
-      <div className="mt-3 rounded-lg bg-muted/50 p-2 text-xs text-muted-foreground">
+      <div className="bg-muted/50 text-muted-foreground mt-3 rounded-lg p-2 text-xs">
         💡 <span className="font-medium">Tip:</span>{' '}
         {user
           ? 'Create custom shortcuts for your frequently used prompts!'

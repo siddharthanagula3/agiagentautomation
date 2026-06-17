@@ -13,16 +13,16 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
   return (
     <div
       className={cn(
-        'flex items-center gap-2 rounded-lg bg-muted/50 px-4 py-3',
+        'bg-muted/50 flex items-center gap-2 rounded-lg px-4 py-3',
         className
       )}
     >
       <div className="flex items-center gap-1.5">
-        <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-        <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-        <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+        <div className="bg-primary h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
+        <div className="bg-primary h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
+        <div className="bg-primary h-2 w-2 animate-bounce rounded-full" />
       </div>
-      <span className="text-sm text-muted-foreground">
+      <span className="text-muted-foreground text-sm">
         {agentName} is typing...
       </span>
     </div>

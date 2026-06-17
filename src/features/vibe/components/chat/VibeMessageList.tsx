@@ -77,16 +77,16 @@ export const VibeMessageList = memo(function VibeMessageList({
       <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
         <div className="space-y-2 py-4">
           {messages.length === 0 && !isLoading ? (
-            <div className="flex h-64 items-center justify-center text-muted-foreground">
+            <div className="text-muted-foreground flex h-64 items-center justify-center">
               <div className="text-center">
                 <p className="mb-2 text-lg font-medium">Welcome to VIBE</p>
                 <p className="text-sm">
                   Start a conversation with your AI workforce
                 </p>
                 <p className="mt-2 text-xs">
-                  Use <code className="rounded bg-muted px-1 py-0.5">#</code> to
+                  Use <code className="bg-muted rounded px-1 py-0.5">#</code> to
                   mention agents or{' '}
-                  <code className="rounded bg-muted px-1 py-0.5">@</code> to
+                  <code className="bg-muted rounded px-1 py-0.5">@</code> to
                   reference files
                 </p>
               </div>

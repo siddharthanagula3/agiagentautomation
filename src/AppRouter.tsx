@@ -32,13 +32,13 @@ const AppRouter = () => {
   // While the auth state is being determined, show a full-screen loader.
   if (isLoading || !initialized) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="bg-background flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
-          <p className="text-sm text-muted-foreground">
+          <div className="border-primary mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-t-2 border-b-2"></div>
+          <p className="text-muted-foreground text-sm">
             {!initialized ? 'Initializing...' : 'Loading...'}
           </p>
-          {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+          {error && <p className="text-destructive mt-2 text-sm">{error}</p>}
         </div>
       </div>
     );

@@ -20,10 +20,12 @@ vi.mock('./providers/anthropic-claude', () => ({
     isConfigured: vi.fn().mockReturnValue(true),
   },
   AnthropicProvider: {
-    getAvailableModels: vi.fn().mockReturnValue([
-      'claude-opus-4-5-20251101',
-      'claude-sonnet-4-5-20250929',
-    ]),
+    getAvailableModels: vi
+      .fn()
+      .mockReturnValue([
+        'claude-opus-4-5-20251101',
+        'claude-sonnet-4-5-20250929',
+      ]),
   },
 }));
 
@@ -47,7 +49,9 @@ vi.mock('./providers/google-gemini', () => ({
     isConfigured: vi.fn().mockReturnValue(true),
   },
   GoogleProvider: {
-    getAvailableModels: vi.fn().mockReturnValue(['gemini-2.0-flash', 'gemini-3-pro-preview']),
+    getAvailableModels: vi
+      .fn()
+      .mockReturnValue(['gemini-2.0-flash', 'gemini-3-pro-preview']),
   },
 }));
 
@@ -83,7 +87,9 @@ vi.mock('./providers/deepseek-ai', () => ({
     isConfigured: vi.fn().mockReturnValue(true),
   },
   DeepSeekProvider: {
-    getAvailableModels: vi.fn().mockReturnValue(['deepseek-chat', 'deepseek-reasoner']),
+    getAvailableModels: vi
+      .fn()
+      .mockReturnValue(['deepseek-chat', 'deepseek-reasoner']),
   },
 }));
 
@@ -140,15 +146,12 @@ const { perplexityProvider } = await import('./providers/perplexity-ai');
 const { grokProvider } = await import('./providers/grok-ai');
 const { deepseekProvider } = await import('./providers/deepseek-ai');
 const { qwenProvider } = await import('./providers/qwen-ai');
-const { canUserMakeRequest, deductTokens } = await import(
-  '@core/billing/token-enforcement-service'
-);
-const { checkUserInput, logInjectionAttempt } = await import(
-  '@core/security/prompt-injection-detector'
-);
-const { checkApiAbuse, REQUEST_LIMITS } = await import(
-  '@core/security/api-abuse-prevention'
-);
+const { canUserMakeRequest, deductTokens } =
+  await import('@core/billing/token-enforcement-service');
+const { checkUserInput, logInjectionAttempt } =
+  await import('@core/security/prompt-injection-detector');
+const { checkApiAbuse, REQUEST_LIMITS } =
+  await import('@core/security/api-abuse-prevention');
 const { isFeatureEnabled } = await import('@core/security/gradual-rollout');
 
 describe('UnifiedLLMService', () => {
@@ -254,9 +257,7 @@ describe('UnifiedLLMService', () => {
   });
 
   describe('sendMessage - Array API', () => {
-    const mockMessages: UnifiedMessage[] = [
-      { role: 'user', content: 'Hello' },
-    ];
+    const mockMessages: UnifiedMessage[] = [{ role: 'user', content: 'Hello' }];
 
     it('should send message to default provider (OpenAI)', async () => {
       vi.mocked(openaiProvider.sendMessage).mockResolvedValueOnce({
@@ -368,9 +369,7 @@ describe('UnifiedLLMService', () => {
   });
 
   describe('Security Layers', () => {
-    const mockMessages: UnifiedMessage[] = [
-      { role: 'user', content: 'Hello' },
-    ];
+    const mockMessages: UnifiedMessage[] = [{ role: 'user', content: 'Hello' }];
 
     it('should enforce token balance check', async () => {
       // Mock twice because we call sendMessage twice (toThrow + toMatchObject)
@@ -474,7 +473,10 @@ describe('UnifiedLLMService', () => {
 
     it('should reject requests that are too long', async () => {
       const longMessage: UnifiedMessage[] = [
-        { role: 'user', content: 'x'.repeat(REQUEST_LIMITS.maxTotalConversationLength + 1) },
+        {
+          role: 'user',
+          content: 'x'.repeat(REQUEST_LIMITS.maxTotalConversationLength + 1),
+        },
       ];
 
       await expect(
@@ -511,7 +513,12 @@ describe('UnifiedLLMService', () => {
         model: 'gpt-4o',
       });
 
-      await service.sendMessage(mockMessages, 'session-123', 'user-456', 'openai');
+      await service.sendMessage(
+        mockMessages,
+        'session-123',
+        'user-456',
+        'openai'
+      );
 
       expect(deductTokens).toHaveBeenCalledWith(
         'user-456',
@@ -526,20 +533,26 @@ describe('UnifiedLLMService', () => {
   });
 
   describe('streamMessage', () => {
-    const mockMessages: UnifiedMessage[] = [
-      { role: 'user', content: 'Hello' },
-    ];
+    const mockMessages: UnifiedMessage[] = [{ role: 'user', content: 'Hello' }];
 
     it('should stream message from provider', async () => {
       const mockStream = (async function* () {
         yield { content: 'Hello', done: false };
         yield { content: ' world', done: false };
-        yield { content: '', done: true, usage: { prompt_tokens: 5, completion_tokens: 2 } };
+        yield {
+          content: '',
+          done: true,
+          usage: { prompt_tokens: 5, completion_tokens: 2 },
+        };
       })();
 
       vi.mocked(openaiProvider.streamMessage).mockReturnValue(mockStream);
 
-      const chunks: Array<{ content: string; done: boolean; provider: string }> = [];
+      const chunks: Array<{
+        content: string;
+        done: boolean;
+        provider: string;
+      }> = [];
       for await (const chunk of service.streamMessage(mockMessages)) {
         chunks.push(chunk);
       }
@@ -583,10 +596,12 @@ describe('UnifiedLLMService', () => {
     });
 
     it('should handle stream errors', async () => {
-      vi.mocked(openaiProvider.streamMessage).mockImplementation(async function* () {
-        yield { content: '', done: false }; // Initial yield to satisfy require-yield
-        throw new Error('Stream failed');
-      });
+      vi.mocked(openaiProvider.streamMessage).mockImplementation(
+        async function* () {
+          yield { content: '', done: false }; // Initial yield to satisfy require-yield
+          throw new Error('Stream failed');
+        }
+      );
 
       const stream = service.streamMessage(mockMessages);
 
@@ -598,9 +613,7 @@ describe('UnifiedLLMService', () => {
   });
 
   describe('Error Handling', () => {
-    const mockMessages: UnifiedMessage[] = [
-      { role: 'user', content: 'Hello' },
-    ];
+    const mockMessages: UnifiedMessage[] = [{ role: 'user', content: 'Hello' }];
 
     it('should throw PROVIDER_NOT_FOUND for invalid provider', async () => {
       const customService = new UnifiedLLMService();
@@ -632,9 +645,13 @@ describe('UnifiedLLMService', () => {
         'openai',
         false
       );
-      vi.mocked(openaiProvider.sendMessage).mockRejectedValueOnce(originalError);
+      vi.mocked(openaiProvider.sendMessage).mockRejectedValueOnce(
+        originalError
+      );
 
-      await expect(service.sendMessage(mockMessages)).rejects.toBe(originalError);
+      await expect(service.sendMessage(mockMessages)).rejects.toBe(
+        originalError
+      );
     });
   });
 
@@ -667,9 +684,7 @@ describe('UnifiedLLMService', () => {
   });
 
   describe('Response Normalization', () => {
-    const mockMessages: UnifiedMessage[] = [
-      { role: 'user', content: 'Hello' },
-    ];
+    const mockMessages: UnifiedMessage[] = [{ role: 'user', content: 'Hello' }];
 
     it('should normalize Anthropic usage format', async () => {
       vi.mocked(anthropicProvider.sendMessage).mockResolvedValueOnce({

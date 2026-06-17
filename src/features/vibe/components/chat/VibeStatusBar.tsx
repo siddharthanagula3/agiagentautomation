@@ -62,7 +62,7 @@ const VibeStatusBar: React.FC<VibeStatusBarProps> = ({ agents }) => {
 
   if (activeAgents.length === 0) {
     return (
-      <div className="text-xs text-muted-foreground">No active agents</div>
+      <div className="text-muted-foreground text-xs">No active agents</div>
     );
   }
 
@@ -72,7 +72,7 @@ const VibeStatusBar: React.FC<VibeStatusBarProps> = ({ agents }) => {
         {activeAgents.map((agent) => (
           <Tooltip key={agent.employee.name}>
             <TooltipTrigger asChild>
-              <div className="flex cursor-default items-center gap-2 rounded-md bg-muted/50 px-3 py-1.5 transition-colors hover:bg-muted">
+              <div className="bg-muted/50 hover:bg-muted flex cursor-default items-center gap-2 rounded-md px-3 py-1.5 transition-colors">
                 {/* Agent Avatar with Status Indicator */}
                 <div className="relative">
                   <Avatar className="h-6 w-6">
@@ -80,16 +80,16 @@ const VibeStatusBar: React.FC<VibeStatusBarProps> = ({ agents }) => {
                       src={agent.employee.avatar_url}
                       alt={agent.employee.name}
                     />
-                    <AvatarFallback className="bg-primary text-xs text-primary-foreground">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                       {agent.employee.name[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
 
                   {/* Status Indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5">
+                  <div className="absolute -right-0.5 -bottom-0.5">
                     <div
                       className={cn(
-                        'h-2.5 w-2.5 rounded-full border-2 border-background',
+                        'border-background h-2.5 w-2.5 rounded-full border-2',
                         getStatusColor(agent.status),
                         getStatusAnimation(agent.status)
                       )}

@@ -5,7 +5,7 @@
  * - Sandbox deployment with preview URLs
  * - Command execution history tracking
  * - Screenshot capture for preview
- * - Deployment to production (Cloudflare Pages/Netlify)
+ * - Deployment to production (Cloudflare Pages/Vercel)
  */
 
 import { create } from 'zustand';
@@ -24,7 +24,7 @@ export type DeploymentStatus =
   | 'deployed'
   | 'failed';
 
-export type DeploymentTarget = 'preview' | 'netlify' | 'vercel' | 'cloudflare';
+export type DeploymentTarget = 'preview' | 'vercel' | 'cloudflare';
 
 export interface CommandHistoryEntry {
   id: string;
@@ -398,50 +398,6 @@ export async function deployToPreview(options: DeployOptions): Promise<string> {
 }
 
 /**
- * Deploy to Netlify
- */
-export async function deployToNetlify(options: DeployOptions): Promise<string> {
-  const deploymentManager = useDeploymentManager.getState();
-  const deploymentId = deploymentManager.startDeployment(
-    options.sessionId,
-    'netlify'
-  );
-
-  try {
-    deploymentManager.addBuildLog(
-      deploymentId,
-      'Preparing Netlify deployment...'
-    );
-    deploymentManager.updateDeploymentStatus(deploymentId, 'building');
-
-    // Build steps
-    deploymentManager.addBuildLog(
-      deploymentId,
-      `Running: ${options.buildCommand || 'npm run build'}`
-    );
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    deploymentManager.addBuildLog(deploymentId, 'Build completed successfully');
-    deploymentManager.updateDeploymentStatus(deploymentId, 'deploying');
-
-    deploymentManager.addBuildLog(deploymentId, 'Uploading to Netlify...');
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Generate deployment URL
-    const siteName = options.projectName || `vibe-${Date.now().toString(36)}`;
-    const deployUrl = `https://${siteName}.netlify.app`;
-
-    deploymentManager.addBuildLog(deploymentId, `Deployed to: ${deployUrl}`);
-    deploymentManager.completeDeployment(deploymentId, deployUrl);
-
-    return deployUrl;
-  } catch (error) {
-    deploymentManager.failDeployment(deploymentId, (error as Error).message);
-    throw error;
-  }
-}
-
-/**
  * Deploy to Vercel
  */
 export async function deployToVercel(options: DeployOptions): Promise<string> {
@@ -547,8 +503,7 @@ export async function deploy(options: DeployOptions): Promise<string> {
   switch (options.target) {
     case 'preview':
       return deployToPreview(options);
-    case 'netlify':
-      return deployToNetlify(options);
+
     case 'vercel':
       return deployToVercel(options);
     case 'cloudflare':

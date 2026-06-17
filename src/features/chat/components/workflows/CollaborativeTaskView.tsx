@@ -108,7 +108,7 @@ export function CollaborativeTaskView({
         </div>
 
         {/* Overall Progress */}
-        <div className="space-y-2 rounded-lg border border-border bg-card p-3">
+        <div className="border-border bg-card space-y-2 rounded-lg border p-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-medium">Overall Progress</span>
             <span className="font-semibold">{overallProgress}%</span>
@@ -150,8 +150,8 @@ export function CollaborativeTaskView({
         <div className="space-y-2">
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <List className="mb-2 h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">No tasks yet</p>
+              <List className="text-muted-foreground mb-2 h-8 w-8" />
+              <p className="text-muted-foreground text-sm">No tasks yet</p>
             </div>
           ) : (
             tasks.map((task) => (
@@ -252,13 +252,13 @@ function TaskCard({
             {/* Task Info */}
             <div className="flex-1 overflow-hidden">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium leading-snug">
+                <p className="text-sm leading-snug font-medium">
                   {task.description}
                 </p>
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  <ChevronDown className="text-muted-foreground h-4 w-4 flex-shrink-0" />
                 ) : (
-                  <ChevronRight className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  <ChevronRight className="text-muted-foreground h-4 w-4 flex-shrink-0" />
                 )}
               </div>
 
@@ -298,16 +298,16 @@ function TaskCard({
 
         {/* Expanded Content */}
         <CollapsibleContent>
-          <div className="border-t border-border bg-muted/30 px-3 py-3">
+          <div className="border-border bg-muted/30 border-t px-3 py-3">
             <div className="space-y-3 text-xs">
               {/* Assigned Agent */}
               {agent && (
                 <div>
-                  <div className="mb-1 flex items-center gap-1.5 font-medium text-muted-foreground">
+                  <div className="text-muted-foreground mb-1 flex items-center gap-1.5 font-medium">
                     <User className="h-3 w-3" />
                     <span>Assigned To</span>
                   </div>
-                  <div className="flex items-center gap-2 rounded-md bg-background px-2 py-1.5">
+                  <div className="bg-background flex items-center gap-2 rounded-md px-2 py-1.5">
                     <div
                       className="h-6 w-6 rounded-full"
                       style={{ backgroundColor: agent.color }}
@@ -332,11 +332,11 @@ function TaskCard({
               {/* Timeline */}
               {(task.startedAt || task.completedAt) && (
                 <div>
-                  <div className="mb-1 flex items-center gap-1.5 font-medium text-muted-foreground">
+                  <div className="text-muted-foreground mb-1 flex items-center gap-1.5 font-medium">
                     <Calendar className="h-3 w-3" />
                     <span>Timeline</span>
                   </div>
-                  <div className="space-y-1 rounded-md bg-background px-2 py-1.5">
+                  <div className="bg-background space-y-1 rounded-md px-2 py-1.5">
                     {task.startedAt && (
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Started</span>
@@ -354,7 +354,7 @@ function TaskCard({
                       </div>
                     )}
                     {duration !== null && (
-                      <div className="flex items-center justify-between border-t border-border pt-1">
+                      <div className="border-border flex items-center justify-between border-t pt-1">
                         <span className="text-muted-foreground">Duration</span>
                         <span className="font-medium">
                           {formatDuration(duration)}
@@ -368,12 +368,12 @@ function TaskCard({
               {/* Result */}
               {task.result && (
                 <div>
-                  <div className="mb-1 flex items-center gap-1.5 font-medium text-muted-foreground">
+                  <div className="text-muted-foreground mb-1 flex items-center gap-1.5 font-medium">
                     <Target className="h-3 w-3" />
                     <span>Result</span>
                   </div>
-                  <div className="rounded-md bg-background px-2 py-1.5">
-                    <p className="whitespace-pre-wrap break-words">
+                  <div className="bg-background rounded-md px-2 py-1.5">
+                    <p className="break-words whitespace-pre-wrap">
                       {task.result}
                     </p>
                   </div>
@@ -383,12 +383,12 @@ function TaskCard({
               {/* Error */}
               {task.error && (
                 <div>
-                  <div className="mb-1 flex items-center gap-1.5 font-medium text-destructive">
+                  <div className="text-destructive mb-1 flex items-center gap-1.5 font-medium">
                     <AlertCircle className="h-3 w-3" />
                     <span>Error</span>
                   </div>
-                  <div className="rounded-md bg-destructive/10 px-2 py-1.5 text-destructive">
-                    <p className="whitespace-pre-wrap break-words">
+                  <div className="bg-destructive/10 text-destructive rounded-md px-2 py-1.5">
+                    <p className="break-words whitespace-pre-wrap">
                       {task.error}
                     </p>
                   </div>
@@ -398,7 +398,7 @@ function TaskCard({
               {/* Tool Required */}
               {task.toolRequired && (
                 <div>
-                  <div className="mb-1 flex items-center gap-1.5 font-medium text-muted-foreground">
+                  <div className="text-muted-foreground mb-1 flex items-center gap-1.5 font-medium">
                     <Zap className="h-3 w-3" />
                     <span>Tool Required</span>
                   </div>

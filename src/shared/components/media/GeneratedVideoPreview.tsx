@@ -186,7 +186,7 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
               {/* Play/Pause Overlay */}
               {!isPlaying && (
                 <div
-                  className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                  className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:outline-none"
                   onClick={handlePlayPause}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -198,14 +198,17 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
                   tabIndex={0}
                   aria-label="Play video"
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg" aria-hidden="true">
+                  <div
+                    className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg"
+                    aria-hidden="true"
+                  >
                     <Play className="ml-1 h-8 w-8 text-gray-900" />
                   </div>
                 </div>
               )}
 
               {/* Controls Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                 {/* Progress Bar */}
                 <Slider
                   value={[currentTime]}
@@ -330,7 +333,7 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
       {/* Fullscreen Modal */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-modal flex items-center justify-center bg-black focus-visible:outline-none"
+          className="z-modal fixed inset-0 flex items-center justify-center bg-black focus-visible:outline-none"
           onClick={handleCloseFullscreen}
           onKeyDown={(e) => {
             if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
@@ -347,7 +350,7 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
             size="sm"
             variant="ghost"
             onClick={handleCloseFullscreen}
-            className="absolute right-4 top-4 text-white hover:bg-white/10"
+            className="absolute top-4 right-4 text-white hover:bg-white/10"
           >
             <X className="h-6 w-6" />
           </Button>

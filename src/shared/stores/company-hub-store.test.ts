@@ -10,7 +10,8 @@ import type { AgentAssignment, UpsellRequest } from './company-hub-store';
 
 // Mock crypto.randomUUID
 vi.stubGlobal('crypto', {
-  randomUUID: () => `test-uuid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+  randomUUID: () =>
+    `test-uuid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
 });
 
 describe('Company Hub Store', () => {
@@ -56,7 +57,9 @@ describe('Company Hub Store', () => {
       expect(state.activeSessionId).toBe(sessionId);
       expect(state.sessions[sessionId]).toBeDefined();
       expect(state.sessions[sessionId].userId).toBe('user-123');
-      expect(state.sessions[sessionId].taskDescription).toBe('Build a login system');
+      expect(state.sessions[sessionId].taskDescription).toBe(
+        'Build a login system'
+      );
       expect(state.sessions[sessionId].status).toBe('planning');
     });
 

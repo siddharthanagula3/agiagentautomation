@@ -65,12 +65,12 @@ export const ToolProgressIndicator: React.FC<ToolProgressIndicatorProps> = ({
   return (
     <div
       className={cn(
-        'rounded-lg border border-border bg-card p-4 shadow-sm',
+        'border-border bg-card rounded-lg border p-4 shadow-sm',
         className
       )}
     >
       <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+        <Loader2 className="text-primary h-4 w-4 animate-spin" />
         <span>Active Tools</span>
       </div>
       <div className="space-y-3">
@@ -88,22 +88,22 @@ export const ToolProgressIndicator: React.FC<ToolProgressIndicatorProps> = ({
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">{name}</span>
                     {progress?.progress !== undefined && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         {Math.round(progress.progress)}%
                       </span>
                     )}
                   </div>
                   {progress?.status && (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-muted-foreground text-xs">
                       {progress.status}
                     </div>
                   )}
                 </div>
               </div>
               {progress?.progress !== undefined && (
-                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div className="bg-muted h-1.5 overflow-hidden rounded-full">
                   <div
-                    className="h-full bg-primary transition-all duration-300"
+                    className="bg-primary h-full transition-all duration-300"
                     style={{ width: `${progress.progress}%` }}
                   />
                 </div>

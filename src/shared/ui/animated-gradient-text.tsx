@@ -16,7 +16,7 @@ export const AnimatedGradientText: React.FC<AnimatedGradientTextProps> = ({
   return (
     <motion.span
       className={cn(
-        'bg-300% animate-gradient bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent',
+        'bg-300% animate-gradient from-primary via-accent to-secondary bg-gradient-to-r bg-clip-text text-transparent',
         className
       )}
       initial={animate ? { backgroundPosition: '0% 50%' } : undefined}

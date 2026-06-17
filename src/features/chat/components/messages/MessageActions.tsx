@@ -81,7 +81,7 @@ function ReactionBadge({
             onClick={onToggle}
             disabled={disabled}
             className={cn(
-              'h-6 px-1.5 py-0 text-xs gap-1 rounded-full',
+              'h-6 gap-1 rounded-full px-1.5 py-0 text-xs',
               reaction.userReacted
                 ? 'bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20'
                 : 'bg-muted/50 hover:bg-muted'
@@ -148,7 +148,7 @@ function ReactionPicker({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 text-lg hover:bg-muted hover:scale-110 transition-transform"
+                    className="hover:bg-muted h-8 w-8 p-0 text-lg transition-transform hover:scale-110"
                     onClick={() => {
                       onSelect(emoji);
                       setOpen(false);
@@ -184,7 +184,7 @@ function ReactionsDisplay({
   if (reactions.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-1 mt-1">
+    <div className="mt-1 flex flex-wrap gap-1">
       {reactions.map((reaction) => (
         <ReactionBadge
           key={reaction.emoji}
@@ -329,7 +329,7 @@ export function MessageActions({
                 <Pin
                   className={cn(
                     'mr-2 h-4 w-4',
-                    isPinned && 'fill-current text-primary'
+                    isPinned && 'text-primary fill-current'
                   )}
                 />
                 {isPinned ? 'Unpin message' : 'Pin message'}

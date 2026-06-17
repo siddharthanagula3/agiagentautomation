@@ -131,9 +131,9 @@ const BlogPostPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <div className="border-primary mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-t-transparent"></div>
           <p className="text-muted-foreground">Loading blog post...</p>
         </div>
       </div>
@@ -142,10 +142,10 @@ const BlogPostPage: React.FC = () => {
 
   if (error || !post) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <div className="max-w-md text-center">
           <h1 className="mb-4 text-2xl font-bold">Post Not Found</h1>
-          <p className="mb-6 text-muted-foreground">
+          <p className="text-muted-foreground mb-6">
             {error ||
               "The blog post you're looking for doesn't exist or has been removed."}
           </p>
@@ -167,9 +167,9 @@ const BlogPostPage: React.FC = () => {
         url={`/blog/${post.slug}`}
       />
 
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         {/* Header */}
-        <div className="sticky top-0 z-50 border-b border-border/40 bg-background/60 backdrop-blur-xl">
+        <div className="border-border/40 bg-background/60 sticky top-0 z-50 border-b backdrop-blur-xl">
           <div className="container mx-auto max-w-4xl px-4 py-4">
             <Button
               variant="ghost"
@@ -183,7 +183,7 @@ const BlogPostPage: React.FC = () => {
         </div>
 
         {/* Hero Section */}
-        <section className="px-4 pb-12 pt-8">
+        <section className="px-4 pt-8 pb-12">
           <div className="container mx-auto max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -191,7 +191,7 @@ const BlogPostPage: React.FC = () => {
               transition={{ duration: 0.6 }}
             >
               {/* Category and Meta */}
-              <div className="mb-6 flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="text-muted-foreground mb-6 flex items-center gap-4 text-sm">
                 <Badge
                   variant="secondary"
                   className="bg-primary/10 text-primary"
@@ -222,17 +222,17 @@ const BlogPostPage: React.FC = () => {
               </div>
 
               {/* Title */}
-              <h1 className="mb-6 text-4xl font-bold leading-tight md:text-5xl">
+              <h1 className="mb-6 text-4xl leading-tight font-bold md:text-5xl">
                 {post.title}
               </h1>
 
               {/* Excerpt */}
-              <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground mb-8 text-xl leading-relaxed">
                 {post.excerpt}
               </p>
 
               {/* Author */}
-              <div className="flex items-center gap-4 border-b border-border/40 pb-8">
+              <div className="border-border/40 flex items-center gap-4 border-b pb-8">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{post.author.avatar_emoji}</span>
                   <div>
@@ -240,7 +240,7 @@ const BlogPostPage: React.FC = () => {
                       {post.author.display_name}
                     </div>
                     {post.author.bio && (
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-muted-foreground text-sm">
                         {post.author.bio}
                       </div>
                     )}
@@ -285,15 +285,15 @@ const BlogPostPage: React.FC = () => {
                 rehypePlugins={[rehypeKatex, rehypeHighlight]}
                 components={{
                   h1: ({ children }) => (
-                    <h1 className="mb-6 mt-8 text-3xl font-bold first:mt-0">
+                    <h1 className="mt-8 mb-6 text-3xl font-bold first:mt-0">
                       {children}
                     </h1>
                   ),
                   h2: ({ children }) => (
-                    <h2 className="mb-4 mt-8 text-2xl font-bold">{children}</h2>
+                    <h2 className="mt-8 mb-4 text-2xl font-bold">{children}</h2>
                   ),
                   h3: ({ children }) => (
-                    <h3 className="mb-3 mt-6 text-xl font-bold">{children}</h3>
+                    <h3 className="mt-6 mb-3 text-xl font-bold">{children}</h3>
                   ),
                   p: ({ children }) => (
                     <p className="mb-4 leading-relaxed">{children}</p>
@@ -308,14 +308,14 @@ const BlogPostPage: React.FC = () => {
                     <li className="leading-relaxed">{children}</li>
                   ),
                   blockquote: ({ children }) => (
-                    <blockquote className="my-6 rounded-r border-l-4 border-primary bg-muted/50 py-2 pl-4 italic">
+                    <blockquote className="border-primary bg-muted/50 my-6 rounded-r border-l-4 py-2 pl-4 italic">
                       {children}
                     </blockquote>
                   ),
                   code: ({ children, className }) => {
                     const isInline = !className;
                     return isInline ? (
-                      <code className="rounded bg-muted px-2 py-1 font-mono text-sm">
+                      <code className="bg-muted rounded px-2 py-1 font-mono text-sm">
                         {children}
                       </code>
                     ) : (
@@ -323,7 +323,7 @@ const BlogPostPage: React.FC = () => {
                     );
                   },
                   pre: ({ children }) => (
-                    <pre className="my-6 overflow-x-auto rounded-lg bg-muted p-4">
+                    <pre className="bg-muted my-6 overflow-x-auto rounded-lg p-4">
                       {children}
                     </pre>
                   ),
@@ -346,7 +346,7 @@ const BlogPostPage: React.FC = () => {
               <h2 className="mb-4 text-3xl font-bold">
                 Ready to Transform Your Workflow?
               </h2>
-              <p className="mb-8 text-xl text-muted-foreground">
+              <p className="text-muted-foreground mb-8 text-xl">
                 Start building your AI workforce today and experience the future
                 of productivity.
               </p>

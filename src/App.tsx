@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
 import SkipLink from '@shared/components/accessibility/SkipLink';
 import { CookieConsent } from '@shared/components/CookieConsent';
+import { DemoModeBanner } from '@shared/components/DemoModeBanner';
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
@@ -130,10 +131,10 @@ const VibeDashboard = lazyWithRetry(
 
 // Loading component for Suspense fallback
 const RouteLoadingSpinner = () => (
-  <div className="flex h-screen items-center justify-center bg-background">
+  <div className="bg-background flex h-screen items-center justify-center">
     <div className="text-center">
-      <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-primary" />
-      <p className="text-sm text-muted-foreground">Loading page...</p>
+      <Loader2 className="text-primary mx-auto mb-4 h-8 w-8 animate-spin" />
+      <p className="text-muted-foreground text-sm">Loading page...</p>
     </div>
   </div>
 );
@@ -149,7 +150,8 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <TooltipProvider>
-          <div className="min-h-screen bg-background">
+          <DemoModeBanner />
+          <div className="bg-background min-h-screen">
             <ScrollToTop />
             <SkipLink href="#main-content">Skip to main content</SkipLink>
             <Suspense fallback={<RouteLoadingSpinner />}>
@@ -225,7 +227,10 @@ function App() {
                   <Route path="resources" element={<ResourcesPage />} />
 
                   {/* Demo - Redirect to Contact Sales */}
-                  <Route path="demo" element={<Navigate to="/contact-sales" replace />} />
+                  <Route
+                    path="demo"
+                    element={<Navigate to="/contact-sales" replace />}
+                  />
                 </Route>
 
                 {/* ===== AUTH ROUTES ===== */}

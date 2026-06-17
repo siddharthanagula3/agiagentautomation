@@ -15,9 +15,7 @@ import {
 } from '@tanstack/react-query';
 import { queryKeys } from '@shared/stores/query-client';
 import { supabase } from '@shared/lib/supabase-client';
-import {
-  chatPersistenceService,
-} from '../services/conversation-storage';
+import { chatPersistenceService } from '../services/conversation-storage';
 import type { ChatSession, ChatMessage } from '../types';
 import { toast } from 'sonner';
 import { logger } from '@shared/lib/logger';
@@ -235,7 +233,12 @@ export function useCreateChatSession(): UseMutationResult<
 > {
   const queryClient: QueryClient = useQueryClient();
 
-  return useMutation<ChatSession, Error, CreateSessionParams, SessionMutationContext>({
+  return useMutation<
+    ChatSession,
+    Error,
+    CreateSessionParams,
+    SessionMutationContext
+  >({
     mutationFn: async ({
       title = 'New Chat',
       metadata,
@@ -257,7 +260,9 @@ export function useCreateChatSession(): UseMutationResult<
       }
 
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.chat.sessions(user.id),
+      });
 
       // Snapshot previous value
       const previousSessions = queryClient.getQueryData<ChatSession[]>(
@@ -315,7 +320,9 @@ export function useCreateChatSession(): UseMutationResult<
     onSettled: async (_data, _error, _variables, context): Promise<void> => {
       // Invalidate to ensure consistency
       if (context?.userId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.chat.sessions(context.userId),
+        });
       }
     },
   });
@@ -343,7 +350,9 @@ export function useRenameChatSession(): UseMutationResult<
     mutationFn: async ({
       sessionId,
       newTitle,
-    }: RenameSessionParams): Promise<SessionMutationResult & { newTitle: string }> => {
+    }: RenameSessionParams): Promise<
+      SessionMutationResult & { newTitle: string }
+    > => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in to rename a chat');
@@ -359,15 +368,27 @@ export function useRenameChatSession(): UseMutationResult<
     onMutate: async ({
       sessionId,
       newTitle,
-    }: RenameSessionParams): Promise<SessionMutationContext & { previousSession: ChatSession | null | undefined }> => {
+    }: RenameSessionParams): Promise<
+      SessionMutationContext & {
+        previousSession: ChatSession | null | undefined;
+      }
+    > => {
       const user = await getCurrentUser();
       if (!user) {
-        return { previousSessions: undefined, previousSession: undefined, userId: '' };
+        return {
+          previousSessions: undefined,
+          previousSession: undefined,
+          userId: '',
+        };
       }
 
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
-      await queryClient.cancelQueries({ queryKey: queryKeys.chat.session(sessionId) });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.chat.sessions(user.id),
+      });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.chat.session(sessionId),
+      });
 
       // Snapshot previous values
       const previousSessions = queryClient.getQueryData<ChatSession[]>(
@@ -400,11 +421,7 @@ export function useRenameChatSession(): UseMutationResult<
     onSuccess: (): void => {
       toast.success('Chat renamed');
     },
-    onError: (
-      error: Error,
-      { sessionId },
-      context
-    ): void => {
+    onError: (error: Error, { sessionId }, context): void => {
       // Rollback on error
       if (context?.previousSessions !== undefined && context.userId) {
         queryClient.setQueryData(
@@ -423,9 +440,13 @@ export function useRenameChatSession(): UseMutationResult<
     },
     onSettled: async (_data, _error, { sessionId }, context): Promise<void> => {
       if (context?.userId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.chat.sessions(context.userId),
+        });
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.chat.session(sessionId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.chat.session(sessionId),
+      });
     },
   });
 }
@@ -443,7 +464,12 @@ export function useDeleteChatSession(): UseMutationResult<
 > {
   const queryClient: QueryClient = useQueryClient();
 
-  return useMutation<SessionMutationResult, Error, string, SessionMutationContext & { deletedSessionId: string }>({
+  return useMutation<
+    SessionMutationResult,
+    Error,
+    string,
+    SessionMutationContext & { deletedSessionId: string }
+  >({
     mutationFn: async (sessionId: string): Promise<SessionMutationResult> => {
       const user = await getCurrentUser();
       if (!user) {
@@ -453,14 +479,22 @@ export function useDeleteChatSession(): UseMutationResult<
       await chatPersistenceService.deleteSession(sessionId, user.id);
       return { sessionId, userId: user.id };
     },
-    onMutate: async (sessionId: string): Promise<SessionMutationContext & { deletedSessionId: string }> => {
+    onMutate: async (
+      sessionId: string
+    ): Promise<SessionMutationContext & { deletedSessionId: string }> => {
       const user = await getCurrentUser();
       if (!user) {
-        return { previousSessions: undefined, userId: '', deletedSessionId: sessionId };
+        return {
+          previousSessions: undefined,
+          userId: '',
+          deletedSessionId: sessionId,
+        };
       }
 
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.chat.sessions(user.id),
+      });
 
       // Snapshot previous value
       const previousSessions = queryClient.getQueryData<ChatSession[]>(
@@ -499,7 +533,9 @@ export function useDeleteChatSession(): UseMutationResult<
     },
     onSettled: async (_data, _error, _sessionId, context): Promise<void> => {
       if (context?.userId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.chat.sessions(context.userId),
+        });
       }
     },
   });
@@ -556,7 +592,9 @@ export function useToggleStarSession(): UseMutationResult<
       }
 
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.chat.sessions(user.id),
+      });
 
       // Snapshot previous value
       const previousSessions = queryClient.getQueryData<ChatSession[]>(
@@ -592,7 +630,9 @@ export function useToggleStarSession(): UseMutationResult<
     },
     onSettled: async (_data, _error, _variables, context): Promise<void> => {
       if (context?.userId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.chat.sessions(context.userId),
+        });
       }
     },
   });
@@ -649,7 +689,9 @@ export function useTogglePinSession(): UseMutationResult<
       }
 
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.chat.sessions(user.id),
+      });
 
       // Snapshot previous value
       const previousSessions = queryClient.getQueryData<ChatSession[]>(
@@ -685,7 +727,9 @@ export function useTogglePinSession(): UseMutationResult<
     },
     onSettled: async (_data, _error, _variables, context): Promise<void> => {
       if (context?.userId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.chat.sessions(context.userId),
+        });
       }
     },
   });

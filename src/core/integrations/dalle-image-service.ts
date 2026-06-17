@@ -61,8 +61,7 @@ async function getAuthToken(): Promise<string | null> {
 export class DallEImageService {
   private static instance: DallEImageService;
   // SECURITY: API keys are managed by Netlify proxy functions
-  private readonly proxyUrl =
-    '/.netlify/functions/media-proxies/openai-image-proxy';
+  private readonly proxyUrl = '/api/media-proxies/openai-image-proxy';
 
   private constructor() {
     // SECURITY: API keys removed from client-side code

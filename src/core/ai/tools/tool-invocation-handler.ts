@@ -262,13 +262,15 @@ class ToolInvocationService {
     const { model, temperature, maxTokens } = tool.config;
 
     // Get auth token for proxy authentication
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session?.access_token) {
       throw new Error('Authentication required for OpenAI API calls');
     }
 
     // Route through Netlify proxy - API key is handled server-side
-    const response = await fetch('/.netlify/functions/llm-proxies/openai-proxy', {
+    const response = await fetch('/api/llm-proxies/openai-proxy', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${session.access_token}`,
@@ -285,7 +287,9 @@ class ToolInvocationService {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(`OpenAI API call failed: ${errorData.error || response.statusText}`);
+      throw new Error(
+        `OpenAI API call failed: ${errorData.error || response.statusText}`
+      );
     }
 
     return await response.json();
@@ -301,13 +305,15 @@ class ToolInvocationService {
     const { model, maxTokens } = tool.config;
 
     // Get auth token for proxy authentication
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session?.access_token) {
       throw new Error('Authentication required for Anthropic API calls');
     }
 
     // Route through Netlify proxy - API key is handled server-side
-    const response = await fetch('/.netlify/functions/llm-proxies/anthropic-proxy', {
+    const response = await fetch('/api/llm-proxies/anthropic-proxy', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${session.access_token}`,
@@ -322,7 +328,9 @@ class ToolInvocationService {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Anthropic API call failed: ${errorData.error || response.statusText}`);
+      throw new Error(
+        `Anthropic API call failed: ${errorData.error || response.statusText}`
+      );
     }
 
     return await response.json();
@@ -656,7 +664,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
@@ -672,7 +683,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
@@ -689,7 +703,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
@@ -706,7 +723,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 }

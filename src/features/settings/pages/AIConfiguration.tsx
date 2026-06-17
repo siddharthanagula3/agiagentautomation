@@ -402,7 +402,7 @@ const AIConfigurationPageContent: React.FC = () => {
                 <Badge variant={config.isConfigured ? 'default' : 'secondary'}>
                   {config.isConfigured ? 'Configured' : 'Not Configured'}
                 </Badge>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   ${config.costPerToken.toFixed(6)}/token
                 </span>
               </div>
@@ -532,7 +532,7 @@ const AIConfigurationPageContent: React.FC = () => {
         </div>
         <div>
           <h1 className="text-2xl font-bold md:text-3xl">AI Configuration</h1>
-          <p className="text-sm text-muted-foreground md:text-base">
+          <p className="text-muted-foreground text-sm md:text-base">
             Configure your AI providers and advanced settings
           </p>
         </div>
@@ -571,7 +571,7 @@ const AIConfigurationPageContent: React.FC = () => {
                 <div className="text-2xl font-bold">
                   {configuredProviders.length}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   out of {Object.keys(configs).length} available
                 </p>
               </CardContent>
@@ -587,7 +587,7 @@ const AIConfigurationPageContent: React.FC = () => {
                 <div className="text-2xl font-bold">
                   ${totalCost.toFixed(4)}
                 </div>
-                <p className="text-xs text-muted-foreground">per 1000 tokens</p>
+                <p className="text-muted-foreground text-xs">per 1000 tokens</p>
               </CardContent>
             </Card>
 
@@ -604,7 +604,7 @@ const AIConfigurationPageContent: React.FC = () => {
                     0
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   across all providers
                 </p>
               </CardContent>
@@ -734,7 +734,7 @@ const AIConfigurationPageContent: React.FC = () => {
                       <SelectItem value="qwen">Qwen (Alibaba)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Provider for general chat conversations
                   </p>
                 </div>
@@ -753,7 +753,7 @@ const AIConfigurationPageContent: React.FC = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Model to use for the selected provider
                   </p>
                 </div>
@@ -773,7 +773,7 @@ const AIConfigurationPageContent: React.FC = () => {
                       setAiTemperature(parseFloat(e.target.value))
                     }
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Controls randomness (0 = focused, 2 = creative)
                   </p>
                 </div>
@@ -789,7 +789,7 @@ const AIConfigurationPageContent: React.FC = () => {
                     value={aiMaxTokens}
                     onChange={(e) => setAiMaxTokens(parseInt(e.target.value))}
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Maximum response length
                   </p>
                 </div>
@@ -798,7 +798,7 @@ const AIConfigurationPageContent: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Enable Streaming</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Stream responses in real-time as they're generated
                   </p>
                 </div>
@@ -843,7 +843,7 @@ const AIConfigurationPageContent: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Enable Streaming</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Enable real-time response streaming
                   </p>
                 </div>
@@ -853,7 +853,7 @@ const AIConfigurationPageContent: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Auto Fallback</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Automatically try other providers if one fails
                   </p>
                 </div>
@@ -863,7 +863,7 @@ const AIConfigurationPageContent: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Rate Limiting</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Enable automatic rate limiting
                   </p>
                 </div>
@@ -881,7 +881,7 @@ const AIConfigurationPageContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="py-8 text-center">
-                <Clock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <Clock className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
                 <h3 className="mb-2 text-lg font-medium">
                   Usage tracking coming soon
                 </h3>

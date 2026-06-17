@@ -338,7 +338,9 @@ describe('User Profile Store', () => {
       updateProfile({ company: undefined });
 
       // undefined should still be set
-      expect(useUserProfileStore.getState().user?.profile.company).toBeUndefined();
+      expect(
+        useUserProfileStore.getState().user?.profile.company
+      ).toBeUndefined();
     });
   });
 
@@ -397,7 +399,9 @@ describe('User Profile Store', () => {
           billing: { subscriptionStatus: 'active' },
         })
       );
-      expect(useUserProfileStore.getState().user?.billing.subscriptionStatus).toBe('active');
+      expect(
+        useUserProfileStore.getState().user?.billing.subscriptionStatus
+      ).toBe('active');
     });
 
     it('should handle canceled subscription', () => {
@@ -408,7 +412,9 @@ describe('User Profile Store', () => {
           billing: { subscriptionStatus: 'canceled' },
         })
       );
-      expect(useUserProfileStore.getState().user?.billing.subscriptionStatus).toBe('canceled');
+      expect(
+        useUserProfileStore.getState().user?.billing.subscriptionStatus
+      ).toBe('canceled');
     });
 
     it('should handle past_due subscription', () => {
@@ -419,7 +425,9 @@ describe('User Profile Store', () => {
           billing: { subscriptionStatus: 'past_due' },
         })
       );
-      expect(useUserProfileStore.getState().user?.billing.subscriptionStatus).toBe('past_due');
+      expect(
+        useUserProfileStore.getState().user?.billing.subscriptionStatus
+      ).toBe('past_due');
     });
 
     it('should handle trialing subscription', () => {

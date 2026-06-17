@@ -70,11 +70,11 @@ export function ImageAttachmentPreview({
           {imageAttachments.map((attachment) => (
             <div
               key={attachment.id}
-              className="group relative overflow-hidden rounded-lg border border-border bg-muted/30 transition-all hover:border-primary/50"
+              className="group border-border bg-muted/30 hover:border-primary/50 relative overflow-hidden rounded-lg border transition-all"
             >
               {/* Image */}
               <div
-                className="relative cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="focus-visible:ring-primary relative cursor-pointer overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 onClick={() => setSelectedImage(attachment)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -108,7 +108,7 @@ export function ImageAttachmentPreview({
                   >
                     {attachment.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {formatFileSize(attachment.size)}
                   </p>
                 </div>
@@ -168,7 +168,7 @@ export function ImageAttachmentPreview({
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
                   <h3 className="truncate font-medium">{selectedImage.name}</h3>
-                  <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
                     <Badge variant="secondary" className="text-xs">
                       {selectedImage.type}
                     </Badge>

@@ -76,11 +76,11 @@ export function TokenBalanceDisplay({
     return (
       <div
         className={cn(
-          'flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2 text-sm',
+          'bg-muted/50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm',
           className
         )}
       >
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
         <span className="text-muted-foreground">Loading balance...</span>
       </div>
     );
@@ -137,7 +137,7 @@ export function TokenBalanceDisplay({
       <div className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
               {isCritical ? (
                 <>
                   <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -167,10 +167,10 @@ export function TokenBalanceDisplay({
               >
                 {balanceInMillions.toFixed(2)}M
               </span>
-              <span className="text-sm text-muted-foreground">tokens</span>
+              <span className="text-muted-foreground text-sm">tokens</span>
             </div>
 
-            <div className="mt-1 text-xs text-muted-foreground">
+            <div className="text-muted-foreground mt-1 text-xs">
               {balance !== null && balance.toLocaleString()} total tokens
             </div>
 
@@ -215,7 +215,7 @@ export function TokenBalanceDisplay({
 
         {/* Progress bar */}
         <div className="mt-4">
-          <div className="h-2 overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted h-2 overflow-hidden rounded-full">
             <div
               className={cn(
                 'h-full transition-all duration-500',
@@ -228,14 +228,14 @@ export function TokenBalanceDisplay({
               }}
             />
           </div>
-          <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-1 flex justify-between text-xs">
             <span>0M</span>
             <span>5M</span>
             <span>10M+</span>
           </div>
         </div>
 
-        <div className="mt-3 text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-3 text-xs">
           Last updated: {lastUpdate.toLocaleTimeString()}
         </div>
       </div>

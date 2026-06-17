@@ -17,7 +17,14 @@ import {
   CardTitle,
 } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
-import { Loader2, Monitor, CheckCircle, XCircle, Shield, LogIn } from 'lucide-react';
+import {
+  Loader2,
+  Monitor,
+  CheckCircle,
+  XCircle,
+  Shield,
+  LogIn,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
@@ -82,8 +89,8 @@ const DeviceAuthPage: React.FC = () => {
   // Show loading while auth state initializes
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="bg-background flex min-h-screen items-center justify-center">
+        <Loader2 className="text-primary h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -96,10 +103,10 @@ const DeviceAuthPage: React.FC = () => {
   // Missing user_code param
   if (!userCode.trim()) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="bg-background flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <XCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
+            <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
             <CardTitle>Invalid Request</CardTitle>
             <CardDescription>
               No authorization code provided. Please start the device
@@ -117,7 +124,7 @@ const DeviceAuthPage: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="bg-background flex min-h-screen items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -126,8 +133,8 @@ const DeviceAuthPage: React.FC = () => {
       >
         <Card className="border-border/50 shadow-xl">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Monitor className="h-8 w-8 text-primary" />
+            <div className="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+              <Monitor className="text-primary h-8 w-8" />
             </div>
             <CardTitle className="text-xl">Authorize Desktop App</CardTitle>
             <CardDescription>
@@ -137,18 +144,18 @@ const DeviceAuthPage: React.FC = () => {
 
           <CardContent className="space-y-6">
             {/* User code display */}
-            <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <div className="border-border bg-muted/50 rounded-lg border p-4 text-center">
+              <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wider uppercase">
                 Authorization Code
               </p>
-              <p className="font-mono text-2xl font-bold tracking-widest text-foreground">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-widest">
                 {userCode.toUpperCase()}
               </p>
             </div>
 
             {/* Logged in as */}
-            <div className="flex items-center gap-3 rounded-lg border border-border p-3">
-              <Shield className="h-5 w-5 text-muted-foreground" />
+            <div className="border-border flex items-center gap-3 rounded-lg border p-3">
+              <Shield className="text-muted-foreground h-5 w-5" />
               <div className="flex-1 text-sm">
                 <p className="text-muted-foreground">Signed in as</p>
                 <p className="font-medium">{user?.email}</p>
@@ -159,7 +166,7 @@ const DeviceAuthPage: React.FC = () => {
             {/* Status-specific content */}
             {status === 'idle' && (
               <div className="space-y-3">
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-center text-sm">
                   Confirm that this code matches what is shown on your desktop
                   application, then click Approve.
                 </p>
@@ -181,8 +188,8 @@ const DeviceAuthPage: React.FC = () => {
 
             {status === 'approving' && (
               <div className="py-4 text-center">
-                <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
+                <Loader2 className="text-primary mx-auto mb-3 h-8 w-8 animate-spin" />
+                <p className="text-muted-foreground text-sm">
                   Authorizing desktop app...
                 </p>
               </div>
@@ -196,10 +203,10 @@ const DeviceAuthPage: React.FC = () => {
               >
                 <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
                 <div>
-                  <p className="font-semibold text-foreground">
+                  <p className="text-foreground font-semibold">
                     Authorization Successful
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-sm">
                     You can now return to the desktop app. It will sign you in
                     automatically.
                   </p>
@@ -219,12 +226,12 @@ const DeviceAuthPage: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-4 text-center"
               >
-                <XCircle className="mx-auto h-12 w-12 text-destructive" />
+                <XCircle className="text-destructive mx-auto h-12 w-12" />
                 <div>
-                  <p className="font-semibold text-foreground">
+                  <p className="text-foreground font-semibold">
                     Authorization Failed
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-sm">
                     {errorMessage}
                   </p>
                 </div>

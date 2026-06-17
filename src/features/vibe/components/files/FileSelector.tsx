@@ -122,9 +122,9 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
       <CommandList className="max-h-[300px]">
         <CommandEmpty>
           <div className="flex flex-col items-center justify-center py-6 text-center">
-            <Search className="mb-2 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">No files found</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <Search className="text-muted-foreground mb-2 h-8 w-8" />
+            <p className="text-muted-foreground text-sm">No files found</p>
+            <p className="text-muted-foreground mt-1 text-xs">
               Try a different search term
             </p>
           </div>
@@ -167,19 +167,19 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
                         {file.name}
                       </span>
                       {selected && (
-                        <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />
+                        <CheckCircle2 className="text-primary h-4 w-4 flex-shrink-0" />
                       )}
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">
-                      <p className="truncate text-xs text-muted-foreground">
+                      <p className="text-muted-foreground truncate text-xs">
                         {formatPath(file.path)}
                       </p>
                       {file.size && (
                         <>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             •
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             {formatFileSize(file.size)}
                           </span>
                         </>
@@ -206,7 +206,7 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
       {/* Footer with selection count */}
       {multiSelect && selectedFiles.length > 0 && (
         <div className="border-t px-3 py-2">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {selectedFiles.length}{' '}
             {selectedFiles.length === 1 ? 'file' : 'files'} selected
           </p>

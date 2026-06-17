@@ -128,10 +128,7 @@ export function usePopularSearches(limit: number = 10, days: number = 7) {
  * const { data: suggestions } = useSearchSuggestions(query, 5);
  * ```
  */
-export function useSearchSuggestions(
-  partialQuery: string,
-  limit: number = 5
-) {
+export function useSearchSuggestions(partialQuery: string, limit: number = 5) {
   return useQuery({
     queryKey: [...queryKeys.search.suggestions('', partialQuery), limit],
     queryFn: async (): Promise<SearchSuggestion[]> => {
@@ -170,7 +167,11 @@ export function useUserSearchSuggestions(
     queryKey: queryKeys.search.suggestions(userId ?? '', partialQuery),
     queryFn: async (): Promise<SearchSuggestion[]> => {
       if (!userId) return [];
-      return searchHistoryService.getSearchSuggestions(userId, partialQuery, limit);
+      return searchHistoryService.getSearchSuggestions(
+        userId,
+        partialQuery,
+        limit
+      );
     },
     enabled: !!userId && partialQuery.trim().length >= 2,
     staleTime: 30 * 1000, // 30 seconds
@@ -290,12 +291,16 @@ export function useClearSearchHistory() {
           queryKey: queryKeys.search.all(),
         });
       }
-      toast.success(`Cleared ${deletedCount} search${deletedCount !== 1 ? 'es' : ''} from history`);
+      toast.success(
+        `Cleared ${deletedCount} search${deletedCount !== 1 ? 'es' : ''} from history`
+      );
     },
     onError: (error) => {
       logger.error('[useClearSearchHistory] Failed to clear history:', error);
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to clear search history';
+        error instanceof Error
+          ? error.message
+          : 'Failed to clear search history';
       toast.error(errorMessage);
     },
   });

@@ -384,7 +384,7 @@ const BillingPage: React.FC = () => {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <Loader2 className="text-primary h-6 w-6 animate-spin" />
           <span className="text-muted-foreground">
             Loading billing information...
           </span>
@@ -397,7 +397,7 @@ const BillingPage: React.FC = () => {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
-          <p className="mb-2 text-sm text-muted-foreground">{error}</p>
+          <p className="text-muted-foreground mb-2 text-sm">{error}</p>
           <Button variant="outline" onClick={() => refetchBilling()}>
             Retry
           </Button>
@@ -412,7 +412,7 @@ const BillingPage: React.FC = () => {
         <div className="flex min-h-[400px] items-center justify-center p-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Billing dashboard error</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="text-muted-foreground mt-2">
               Unable to load billing information. Please refresh the page.
             </p>
             <Button onClick={() => window.location.reload()} className="mt-4">
@@ -427,7 +427,7 @@ const BillingPage: React.FC = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold md:text-3xl">Billing</h1>
-            <p className="mt-2 text-sm text-muted-foreground md:text-base">
+            <p className="text-muted-foreground mt-2 text-sm md:text-base">
               Manage your subscription and billing information.
             </p>
           </div>
@@ -493,7 +493,7 @@ const BillingPage: React.FC = () => {
           <CardContent>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
               <div>
-                <p className="text-sm text-muted-foreground">Plan Price</p>
+                <p className="text-muted-foreground text-sm">Plan Price</p>
                 <p className="text-2xl font-bold">
                   {billing?.price === 0
                     ? 'Free'
@@ -502,23 +502,23 @@ const BillingPage: React.FC = () => {
                         billing?.currency || 'USD'
                       )}
                   {billing?.price > 0 && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       /month
                     </span>
                   )}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Status</p>
+                <p className="text-muted-foreground text-sm">Status</p>
                 <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-success" />
+                  <CheckCircle className="text-success h-4 w-4" />
                   <span className="text-sm font-medium capitalize">
                     {billing?.status || 'Active'}
                   </span>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Next Billing Date
                 </p>
                 <p className="text-sm font-medium">
@@ -528,7 +528,7 @@ const BillingPage: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Billing Period</p>
+                <p className="text-muted-foreground text-sm">Billing Period</p>
                 <p className="text-sm font-medium">
                   {billing?.plan === 'free' ? 'N/A' : 'Monthly'}
                 </p>
@@ -536,11 +536,11 @@ const BillingPage: React.FC = () => {
             </div>
 
             {billing?.plan !== 'free' && (
-              <div className="mt-6 rounded-lg border bg-muted/50 p-4">
+              <div className="bg-muted/50 mt-6 rounded-lg border p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Subscription Management</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Update payment methods, view invoices, and manage your
                       subscription
                     </p>
@@ -576,7 +576,7 @@ const BillingPage: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Used</span>
+                  <span className="text-muted-foreground text-sm">Used</span>
                   <span className="text-2xl font-bold">
                     {billing?.usage.totalTokens.toLocaleString() || 0}
                   </span>
@@ -640,7 +640,7 @@ const BillingPage: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     Would be
                   </span>
                   <span className="text-2xl font-bold">
@@ -709,7 +709,7 @@ const BillingPage: React.FC = () => {
                           <h3 className="text-base font-semibold">
                             {llm.provider}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {llm.tokens.toLocaleString()} /{' '}
                             {llm.limit.toLocaleString()} tokens
                           </p>
@@ -721,7 +721,7 @@ const BillingPage: React.FC = () => {
                         >
                           {percentage.toFixed(1)}%
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-muted-foreground text-sm">
                           {formatCurrency(llm.cost, 'USD')}
                         </div>
                       </div>
@@ -732,7 +732,7 @@ const BillingPage: React.FC = () => {
                         value={llm.tokens > 0 ? Math.min(percentage, 100) : 0}
                         className={`h-2 ${isAtLimit ? 'bg-red-100 dark:bg-red-950/30' : isNearLimit ? 'bg-amber-100 dark:bg-amber-950/30' : ''}`}
                       />
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center justify-between text-xs">
                         <span>0</span>
                         <span>
                           {Math.max(llm.limit - llm.tokens, 0).toLocaleString()}{' '}
@@ -763,14 +763,14 @@ const BillingPage: React.FC = () => {
               })}
             </div>
 
-            <div className="mt-6 rounded-lg border border-dashed bg-muted/50 p-4">
+            <div className="bg-muted/50 mt-6 rounded-lg border border-dashed p-4">
               <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <Crown className="h-5 w-5 text-primary" />
+                <div className="bg-primary/10 rounded-lg p-2">
+                  <Crown className="text-primary h-5 w-5" />
                 </div>
                 <div className="flex-1">
                   <h4 className="mb-1 font-medium">Need more tokens?</h4>
-                  <p className="mb-3 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mb-3 text-sm">
                     {billing?.plan === 'free' &&
                       'Upgrade to Pro for 10M tokens/month (2.5M per LLM) - Only $29/month'}
                     {billing?.plan === 'pro' &&
@@ -803,7 +803,7 @@ const BillingPage: React.FC = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {billing?.features.map((feature, index) => (
                 <div key={index} className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-success" />
+                  <CheckCircle className="text-success h-5 w-5" />
                   <span className="text-sm">{feature}</span>
                 </div>
               ))}
@@ -816,12 +816,12 @@ const BillingPage: React.FC = () => {
           (billing?.usage.totalTokens > 0 &&
             billing?.usage.totalTokens >=
               billing?.usage.totalLimit * 0.85)) && (
-          <Card id="buy-tokens-section" className="border-2 border-primary/50">
+          <Card id="buy-tokens-section" className="border-primary/50 border-2">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-6 w-6 text-primary" />
+                    <Zap className="text-primary h-6 w-6" />
                     Buy More Tokens
                   </CardTitle>
                   <CardDescription>
@@ -869,7 +869,7 @@ const BillingPage: React.FC = () => {
                             ? '🚨 Critical: 95% Usage Reached'
                             : '⚠️ Warning: 85% Usage Reached'}
                         </h4>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           You've used{' '}
                           {(
                             (billing?.usage.totalTokens /
@@ -892,12 +892,12 @@ const BillingPage: React.FC = () => {
                     key={pack.id}
                     className={cn(
                       'relative transition-all hover:shadow-lg',
-                      pack.popular && 'border-2 border-primary'
+                      pack.popular && 'border-primary border-2'
                     )}
                   >
                     {pack.popular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-gradient-to-r from-primary to-accent text-white">
+                        <Badge className="from-primary to-accent bg-gradient-to-r text-white">
                           <Star className="mr-1 h-3 w-3" />
                           Most Popular
                         </Badge>
@@ -910,7 +910,7 @@ const BillingPage: React.FC = () => {
                         <span className="text-3xl font-bold">
                           ${pack.price}
                         </span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-muted-foreground text-sm">
                           one-time
                         </span>
                       </div>
@@ -944,7 +944,7 @@ const BillingPage: React.FC = () => {
                         className={cn(
                           'w-full',
                           pack.popular &&
-                            'bg-gradient-to-r from-primary to-accent'
+                            'from-primary to-accent bg-gradient-to-r'
                         )}
                         variant={pack.popular ? 'default' : 'outline'}
                       >
@@ -957,11 +957,11 @@ const BillingPage: React.FC = () => {
               </div>
 
               {/* Token Pack Benefits */}
-              <div className="mt-6 rounded-lg border border-dashed bg-muted/50 p-4">
+              <div className="bg-muted/50 mt-6 rounded-lg border border-dashed p-4">
                 <h4 className="mb-3 font-medium">✨ Token Pack Benefits</h4>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                    <CheckCircle className="text-success mt-0.5 h-4 w-4" />
                     <div>
                       <span className="font-medium">Instant Activation</span>
                       <p className="text-muted-foreground">
@@ -970,7 +970,7 @@ const BillingPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                    <CheckCircle className="text-success mt-0.5 h-4 w-4" />
                     <div>
                       <span className="font-medium">No Expiration</span>
                       <p className="text-muted-foreground">
@@ -979,7 +979,7 @@ const BillingPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                    <CheckCircle className="text-success mt-0.5 h-4 w-4" />
                     <div>
                       <span className="font-medium">Market-Rate Pricing</span>
                       <p className="text-muted-foreground">
@@ -988,7 +988,7 @@ const BillingPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                    <CheckCircle className="text-success mt-0.5 h-4 w-4" />
                     <div>
                       <span className="font-medium">All Providers</span>
                       <p className="text-muted-foreground">
@@ -1001,14 +1001,14 @@ const BillingPage: React.FC = () => {
 
               {/* Alternative: Upgrade to Pro */}
               {billing?.plan === 'free' && (
-                <div className="mt-6 rounded-lg border border-primary/30 bg-primary/5 p-4">
+                <div className="border-primary/30 bg-primary/5 mt-6 rounded-lg border p-4">
                   <div className="flex items-start gap-3">
-                    <Crown className="mt-0.5 h-5 w-5 text-primary" />
+                    <Crown className="text-primary mt-0.5 h-5 w-5" />
                     <div className="flex-1">
                       <h4 className="mb-1 font-semibold">
                         💡 Better Value: Upgrade to Pro
                       </h4>
-                      <p className="mb-3 text-sm text-muted-foreground">
+                      <p className="text-muted-foreground mb-3 text-sm">
                         Get 10M tokens/month for $29/month ($24.99/month if
                         billed yearly) - Better value than buying token packs if
                         you use AI regularly
@@ -1041,10 +1041,10 @@ const BillingPage: React.FC = () => {
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     Billing:
                   </span>
-                  <div className="flex items-center rounded-lg bg-muted p-1">
+                  <div className="bg-muted flex items-center rounded-lg p-1">
                     <button
                       onClick={() => setBillingPeriod('monthly')}
                       className={`rounded-md px-3 py-1 text-sm transition-colors ${
@@ -1075,10 +1075,10 @@ const BillingPage: React.FC = () => {
             <CardContent>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Pro Plan */}
-                <Card className="border-2 border-primary">
+                <Card className="border-primary border-2">
                   <CardHeader>
                     <div className="flex items-center space-x-2">
-                      <Crown className="h-5 w-5 text-primary" />
+                      <Crown className="text-primary h-5 w-5" />
                       <CardTitle>Pro Plan</CardTitle>
                     </div>
                     <div className="text-2xl font-bold">
@@ -1086,18 +1086,18 @@ const BillingPage: React.FC = () => {
                         <>
                           <div className="text-3xl font-bold text-white">
                             $24.99
-                            <span className="text-lg text-muted-foreground">
+                            <span className="text-muted-foreground text-lg">
                               /month
                             </span>
                           </div>
-                          <div className="mt-1 text-sm text-muted-foreground">
+                          <div className="text-muted-foreground mt-1 text-sm">
                             Billed yearly as $299.88
                           </div>
                         </>
                       ) : (
                         <>
                           $29
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-muted-foreground text-sm">
                             /month
                           </span>
                         </>
@@ -1107,27 +1107,27 @@ const BillingPage: React.FC = () => {
                   <CardContent>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>10M tokens/month</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>2.5M tokens per LLM</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>All 4 AI providers</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Advanced analytics</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Priority support</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>API access</span>
                       </li>
                     </ul>
@@ -1142,15 +1142,15 @@ const BillingPage: React.FC = () => {
                 </Card>
 
                 {/* Enterprise Plan */}
-                <Card className="border-2 border-secondary">
+                <Card className="border-secondary border-2">
                   <CardHeader>
                     <div className="flex items-center space-x-2">
-                      <Building className="h-5 w-5 text-primary" />
+                      <Building className="text-primary h-5 w-5" />
                       <CardTitle>Enterprise</CardTitle>
                     </div>
                     <div className="text-2xl font-bold">
                       Custom
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-muted-foreground text-sm">
                         {' '}
                         pricing
                       </span>
@@ -1159,27 +1159,27 @@ const BillingPage: React.FC = () => {
                   <CardContent>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Everything in Pro</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Unlimited tokens</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>White-label option</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Custom workflows</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>Dedicated account manager</span>
                       </li>
                       <li className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-success" />
+                        <CheckCircle className="text-success h-4 w-4" />
                         <span>SLA guarantee</span>
                       </li>
                     </ul>
@@ -1207,8 +1207,8 @@ const BillingPage: React.FC = () => {
           <CardContent>
             {billing?.invoices.length === 0 ? (
               <div className="py-12 text-center">
-                <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-                  <FileText className="h-12 w-12 text-muted-foreground" />
+                <div className="bg-muted mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full">
+                  <FileText className="text-muted-foreground h-12 w-12" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">No Invoices Yet</h3>
                 <p className="text-muted-foreground">
@@ -1224,12 +1224,12 @@ const BillingPage: React.FC = () => {
                     className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary">
-                        <FileText className="h-5 w-5 text-primary-foreground" />
+                      <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-full">
+                        <FileText className="text-primary-foreground h-5 w-5" />
                       </div>
                       <div>
                         <p className="font-medium">Invoice #{invoice.id}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           {formatDate(invoice.date)}
                         </p>
                       </div>

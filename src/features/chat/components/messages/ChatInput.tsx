@@ -2,15 +2,7 @@ import React, { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@shared/ui/textarea';
 import { Badge } from '@/shared/components/ui/badge';
-import {
-  Plus,
-  Send,
-  Mic,
-  MicOff,
-  Users,
-  User,
-  Loader2,
-} from 'lucide-react';
+import { Plus, Send, Mic, MicOff, Users, User, Loader2 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 
 interface ChatInputProps {
@@ -70,7 +62,7 @@ export function ChatInput({
     .map((emp) => emp.name);
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-muted/20 p-3 shadow-sm">
+    <div className="border-border/60 bg-muted/20 rounded-2xl border p-3 shadow-sm">
       {/* Employee Selection */}
       {selectedEmployees.length > 0 && (
         <div className="mb-3 flex items-center space-x-2">
@@ -96,7 +88,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+            className="text-muted-foreground hover:bg-muted rounded-md p-2"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -104,7 +96,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+            className="text-muted-foreground hover:bg-muted rounded-md p-2"
             onClick={() => setShowEmployeeSelector(!showEmployeeSelector)}
           >
             <Users className="h-4 w-4" />
@@ -114,7 +106,7 @@ export function ChatInput({
             variant="ghost"
             size="sm"
             className={cn(
-              'rounded-md p-2 hover:bg-muted',
+              'hover:bg-muted rounded-md p-2',
               isRecording ? 'text-red-500' : 'text-muted-foreground'
             )}
             onClick={() => setIsRecording(!isRecording)}
@@ -138,7 +130,7 @@ export function ChatInput({
             disabled={isStreaming}
             rows={1}
             className={cn(
-              'max-h-40 min-h-[44px] resize-y rounded-xl bg-background pr-16 ring-1 ring-border focus-visible:ring-2',
+              'bg-background ring-border max-h-40 min-h-[44px] resize-y rounded-xl pr-16 ring-1 focus-visible:ring-2',
               isStreaming && 'cursor-not-allowed opacity-50'
             )}
           />
@@ -149,7 +141,7 @@ export function ChatInput({
               onClick={onStop}
               size="sm"
               variant="secondary"
-              className="absolute right-2 top-1/2 h-8 -translate-y-1/2 transform rounded-md px-2"
+              className="absolute top-1/2 right-2 h-8 -translate-y-1/2 transform rounded-md px-2"
             >
               <Loader2 className="mr-1 h-4 w-4 animate-spin" />
               Stop
@@ -159,7 +151,7 @@ export function ChatInput({
               onClick={handleSubmit}
               disabled={!message.trim()}
               size="sm"
-              className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 transform rounded-md p-0"
+              className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 transform rounded-md p-0"
             >
               <Send className="h-4 w-4" />
             </Button>
@@ -171,7 +163,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+            className="text-muted-foreground hover:bg-muted rounded-md p-2"
           >
             <User className="h-4 w-4" />
           </Button>
@@ -180,7 +172,7 @@ export function ChatInput({
 
       {/* Employee Selector Dropdown */}
       {showEmployeeSelector && (
-        <div className="mt-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+        <div className="border-border/60 bg-muted/30 mt-3 rounded-lg border p-3">
           <div className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             Select AI Employees
           </div>

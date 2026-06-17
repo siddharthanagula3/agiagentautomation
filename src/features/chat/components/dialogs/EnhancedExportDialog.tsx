@@ -215,7 +215,7 @@ export function EnhancedExportDialog({
                   key={format.id}
                   onClick={() => setSelectedFormat(format.id)}
                   className={cn(
-                    'flex items-start gap-3 rounded-lg border-2 p-4 text-left transition-all hover:bg-accent',
+                    'hover:bg-accent flex items-start gap-3 rounded-lg border-2 p-4 text-left transition-all',
                     selectedFormat === format.id
                       ? 'border-primary bg-primary/5'
                       : 'border-transparent'
@@ -228,10 +228,10 @@ export function EnhancedExportDialog({
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{format.name}</p>
                       {selectedFormat === format.id && (
-                        <Check className="h-4 w-4 text-primary" />
+                        <Check className="text-primary h-4 w-4" />
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       {format.description}
                     </p>
                     <Badge variant="secondary" className="mt-2 text-xs">
@@ -256,7 +256,7 @@ export function EnhancedExportDialog({
                 onChange={(e) => setCustomFilename(e.target.value)}
                 className="flex-1"
               />
-              <span className="shrink-0 text-sm text-muted-foreground">
+              <span className="text-muted-foreground shrink-0 text-sm">
                 {selectedFormatData?.extension}
               </span>
             </div>
@@ -295,9 +295,9 @@ export function EnhancedExportDialog({
 
           {/* Preview Info */}
           {session && (
-            <div className="rounded-lg bg-muted p-4 text-sm">
+            <div className="bg-muted rounded-lg p-4 text-sm">
               <p className="mb-2 font-semibold">Export Preview</p>
-              <div className="space-y-1 text-muted-foreground">
+              <div className="text-muted-foreground space-y-1">
                 <p>
                   <span className="font-medium">Session:</span> {session.title}
                 </p>

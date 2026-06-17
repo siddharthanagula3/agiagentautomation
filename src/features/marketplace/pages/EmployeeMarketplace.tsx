@@ -206,7 +206,11 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           isHired: purchasedEmployeeIds.has(dbEmp.employee_id || dbEmp.id),
           rating: firstNumberMetric([performance.rating], 0, 5),
           reviews: firstNumberMetric(
-            [performance.reviews, performance.reviewCount, performance.review_count],
+            [
+              performance.reviews,
+              performance.reviewCount,
+              performance.review_count,
+            ],
             0
           ),
           successRate: firstNumberMetric(
@@ -384,7 +388,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         <div className="flex min-h-[400px] items-center justify-center p-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Marketplace Unavailable</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="text-muted-foreground mt-2">
               Something went wrong loading the marketplace. Please refresh the
               page.
             </p>
@@ -399,10 +403,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+            <h1 className="text-foreground text-2xl font-bold tracking-tight md:text-3xl">
               AI Employee Marketplace
             </h1>
-            <p className="text-sm text-muted-foreground md:text-base">
+            <p className="text-muted-foreground text-sm md:text-base">
               Browse and hire specialized AI employees for your projects.
             </p>
           </div>
@@ -450,7 +454,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               {/* Search */}
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                   <Input
                     placeholder="Search employees..."
                     value={searchQuery}
@@ -473,7 +477,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                       }
                       size="sm"
                       onClick={() => setSelectedCategory(category.id)}
-                      className="whitespace-nowrap text-xs md:text-sm"
+                      className="text-xs whitespace-nowrap md:text-sm"
                       aria-label={`Filter by ${category.label} category`}
                       aria-pressed={selectedCategory === category.id}
                     >
@@ -506,7 +510,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="rounded-md border border-border bg-background px-2 py-2 text-xs text-foreground md:px-3 md:text-sm"
+                  className="border-border bg-background text-foreground rounded-md border px-2 py-2 text-xs md:px-3 md:text-sm"
                   aria-label="Sort employees by criteria"
                 >
                   <option value="popular">Most Popular</option>
@@ -522,7 +526,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   onClick={() =>
                     setViewMode(viewMode === 'grid' ? 'list' : 'grid')
                   }
-                  className="hidden border-border md:flex"
+                  className="border-border hidden md:flex"
                   aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
                 >
                   {viewMode === 'grid' ? 'List View' : 'Grid View'}
@@ -538,13 +542,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         ) : employees.length === 0 ? (
           <Card className="border-border bg-card">
             <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                <Bot className="h-10 w-10 text-primary" />
+              <div className="bg-primary/10 mb-6 flex h-20 w-20 items-center justify-center rounded-full">
+                <Bot className="text-primary h-10 w-10" />
               </div>
-              <h3 className="mb-2 text-2xl font-semibold text-foreground">
+              <h3 className="text-foreground mb-2 text-2xl font-semibold">
                 No AI Employees Found
               </h3>
-              <p className="mb-6 max-w-md text-center text-muted-foreground">
+              <p className="text-muted-foreground mb-6 max-w-md text-center">
                 {searchQuery || selectedCategory !== 'all'
                   ? 'Try adjusting your search or filters to find AI employees.'
                   : 'Our marketplace is currently being populated. AI employees will be available soon for hire.'}

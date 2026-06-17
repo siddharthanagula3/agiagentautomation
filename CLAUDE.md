@@ -9,36 +9,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
+
 - Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
 - If something goes sideways, STOP and re-plan immediately
 - Use plan mode for verification steps, not just building
 - Write detailed specs upfront to reduce ambiguity
 
 ### 2. Subagent Strategy
+
 - Use subagents liberally to keep main context window clean
 - Offload research, exploration, and parallel analysis to subagents
 - For complex problems, throw more compute at it via subagents
 - One task per subagent for focused execution
 
 ### 3. Self-Improvement Loop
+
 - After ANY correction from the user: update `tasks/lessons.md` with the pattern
 - Write rules for yourself that prevent the same mistake
 - Ruthlessly iterate on these lessons until mistake rate drops
 - Review lessons at session start for relevant project
 
 ### 4. Verification Before Done
+
 - Never mark a task complete without proving it works
 - Diff behavior between main and your changes when relevant
 - Ask yourself: "Would a staff engineer approve this?"
 - Run tests, check logs, demonstrate correctness
 
 ### 5. Demand Elegance (Balanced)
+
 - For non-trivial changes: pause and ask "is there a more elegant way?"
 - If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
 - Skip this for simple, obvious fixes -- don't over-engineer
 - Challenge your own work before presenting it
 
 ### 6. Autonomous Bug Fixing
+
 - When given a bug report: just fix it. Don't ask for hand-holding
 - Point at logs, errors, failing tests -- then resolve them
 - Zero context switching required from the user
@@ -82,8 +88,7 @@ npm run e2e                  # Playwright E2E tests
 
 # Local Development Stack
 supabase start               # Local Supabase (port 54321, Studio: 54323)
-netlify dev                  # Netlify functions (port 8888)
-stripe listen --forward-to localhost:8888/.netlify/functions/payments/stripe-webhook
+stripe listen --forward-to localhost:8000/api/payments/stripe-webhook
 
 # Database
 supabase db reset            # Reset and apply all migrations
@@ -147,7 +152,7 @@ React Query hooks live in feature directories (`@features/billing/hooks/`, `@fea
 
 - 7 providers: OpenAI, Anthropic, Google, Perplexity, Grok, DeepSeek, Qwen
 - Provider implementations in `src/core/ai/llm/providers/`
-- All calls proxied through Netlify Functions (API keys never on client)
+- All calls proxied through Vercel Serverless Functions (API keys never on client)
 
 ### Path Aliases (tsconfig.json)
 
@@ -178,14 +183,6 @@ src/
 │   ├── billing/            # Stripe integration
 │   └── settings/           # User preferences
 ├── shared/                  # Shared utilities, stores, hooks, types, UI components
-├── pages/                   # Top-level pages (Landing, Pricing, etc.)
-netlify/functions/           # Serverless backend
-│   ├── llm-proxies/        # 7 LLM API proxies
-│   ├── media-proxies/      # DALL-E, Imagen, Veo
-│   ├── payments/           # Stripe & billing
-│   ├── agents/             # Agent orchestration
-│   ├── utilities/          # vibe-build, fetch-page
-│   └── utils/              # auth-middleware, cors, rate-limiter, credit-system
 .agi/employees/             # 140+ AI employee markdown definitions
 ```
 
@@ -200,27 +197,20 @@ Both are protected routes requiring authentication.
 
 **Cents-based credits** via `token_credits` table (shared with desktop app):
 
-- Utility: `netlify/functions/utils/credit-system.ts`
 - RPCs: `get_credit_balance()`, `check_credits_available()`, `deduct_credits()`
-- All 7 LLM proxies + 3 media proxies call `deductCredits()` — return HTTP 402 on failure
+- All 7 LLM proxies + 3 media proxies call credit deduction — return HTTP 402 on failure
 - `token-enforcement-service.ts` checks balance before API calls
-- Pricing matrix per provider/model in `credit-system.ts`
 
-## Netlify Functions
+## API Proxies
 
-**API Paths**: `/.netlify/functions/<directory>/<function-name>`
+**API Paths**: `/api/<directory>/<function-name>`
 
-All proxies require:
-- JWT auth via `withAuth` middleware (`supabase.auth.getUser()`, not just decode)
-- CORS origin whitelist (not `*`)
-- Rate limiting via Upstash Redis (tiered: public 5/min, authenticated 10/min, payment 5/min)
-- Zod validation on inputs, request size limits (1MB, 15MB for video)
-- Credit deduction before API calls
+All proxies require JWT auth, CORS validation, Rate limiting, and Zod input validation.
 
 ## Deployment
 
 **Target**: Vercel at `agiworkforce.com` — `vercel.json` configured with:
-- `/.netlify/functions/*` → `/api/*` rewrites (backward compatibility)
+
 - SPA fallback to `/index.html`
 - 30s function timeout
 
@@ -234,7 +224,7 @@ All proxies require:
 4. **Store Imports**: Always from `@shared/stores/index.ts`, never directly
 5. **Server State**: React Query hooks, not manual `useState`/`useEffect` for async data
 6. **Supabase**: Use `.maybeSingle()` not `.single()` when row may not exist
-7. **API Keys**: Never on client — proxy through Netlify Functions
+7. **API Keys**: Never on client — proxy through Vercel Serverless Functions
 8. **Database Changes**: Always via migrations (`supabase migration new`), never direct SQL
 9. **Error Boundaries**: Wrap page components with `<ErrorBoundary>` + Sentry
 10. **Cleanup**: Always cleanup timeouts, subscriptions, and AbortControllers in useEffect
@@ -243,14 +233,14 @@ All proxies require:
 
 ```bash
 npm run type-check && npm run lint && npm run build   # Quick health check
-rm -rf node_modules/.vite dist .netlify               # Clear caches
+rm -rf node_modules/.vite dist                      # Clear caches
 open http://localhost:54323                            # Supabase Studio
 ```
 
 Common issues:
+
 - **"No AI employees"**: Check glob pattern in `prompt-management.ts` is `'/.agi/employees/*.md'`
 - **Supabase 406 "PGRST116"**: Use `.maybeSingle()` instead of `.single()`
-- **CORS errors**: LLM calls must go through Netlify Function proxies
+- **CORS errors**: LLM calls must go through Vercel Function proxies
 - **Rate limit 503**: Upstash Redis unavailable — rate limiter fails closed
 - **Credit balance errors**: Check `token_credits` table, use `get_credit_balance()` RPC
-- **Netlify function 500**: Check `netlify dev` console for actual error

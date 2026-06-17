@@ -231,7 +231,7 @@ CREATE POLICY "Admins can view all audit logs"
   FOR SELECT
   USING (
     auth.uid() IN (
-      SELECT id FROM public.user_profiles
+      SELECT id FROM public.users
       WHERE role = 'admin'
     )
   );

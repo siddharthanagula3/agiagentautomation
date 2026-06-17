@@ -90,7 +90,9 @@ describe('WebSocket Manager', () => {
       expect(mockSupabase.channel).toHaveBeenCalled();
       expect(mockChannel.on).toHaveBeenCalled();
       expect(mockChannel.subscribe).toHaveBeenCalled();
-      expect(manager.getState('test-connection')).toBe(WebSocketState.CONNECTED);
+      expect(manager.getState('test-connection')).toBe(
+        WebSocketState.CONNECTED
+      );
     });
 
     it('should not reconnect if already connected', async () => {
@@ -365,7 +367,9 @@ describe('WebSocket Manager', () => {
     it('should return connection state', async () => {
       await manager.connect('test-connection');
 
-      expect(manager.getState('test-connection')).toBe(WebSocketState.CONNECTED);
+      expect(manager.getState('test-connection')).toBe(
+        WebSocketState.CONNECTED
+      );
     });
 
     it('should return undefined for non-existent connection', () => {

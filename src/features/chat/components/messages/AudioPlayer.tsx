@@ -11,7 +11,13 @@
  * - Send as attachment option
  */
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 import { cn } from '@shared/lib/utils';
 import { Button } from '@shared/components/ui/button';
 import { Play, Pause, Trash2, Send, RotateCcw } from 'lucide-react';
@@ -109,8 +115,9 @@ export const AudioPlayer = React.memo(function AudioPlayer({
   useEffect(() => {
     if (!audioBlob) {
       // Generate random waveform for demo/fallback
-      const randomWaveform = Array.from({ length: barCount }, () =>
-        0.2 + Math.random() * 0.8
+      const randomWaveform = Array.from(
+        { length: barCount },
+        () => 0.2 + Math.random() * 0.8
       );
       // Use queueMicrotask to avoid cascading renders
       queueMicrotask(() => setWaveformData(randomWaveform));
@@ -148,8 +155,9 @@ export const AudioPlayer = React.memo(function AudioPlayer({
       } catch (error) {
         console.error('Error analyzing audio:', error);
         // Fallback to random waveform
-        const randomWaveform = Array.from({ length: barCount }, () =>
-          0.2 + Math.random() * 0.8
+        const randomWaveform = Array.from(
+          { length: barCount },
+          () => 0.2 + Math.random() * 0.8
         );
         setWaveformData(randomWaveform);
       }
@@ -242,10 +250,7 @@ export const AudioPlayer = React.memo(function AudioPlayer({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only handle space if no other element is focused
-      if (
-        e.code === 'Space' &&
-        document.activeElement === document.body
-      ) {
+      if (e.code === 'Space' && document.activeElement === document.body) {
         e.preventDefault();
         togglePlayPause();
       }
@@ -261,7 +266,7 @@ export const AudioPlayer = React.memo(function AudioPlayer({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg border border-border bg-card p-3',
+        'border-border bg-card flex items-center gap-3 rounded-lg border p-3',
         compact && 'p-2',
         className
       )}
@@ -320,7 +325,7 @@ export const AudioPlayer = React.memo(function AudioPlayer({
 
         {/* Progress overlay (alternative to bar coloring) */}
         <div
-          className="pointer-events-none absolute inset-y-0 left-0 bg-primary/10"
+          className="bg-primary/10 pointer-events-none absolute inset-y-0 left-0"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -328,7 +333,7 @@ export const AudioPlayer = React.memo(function AudioPlayer({
       {/* Duration / Current Time */}
       <div
         className={cn(
-          'shrink-0 font-mono tabular-nums text-muted-foreground',
+          'text-muted-foreground shrink-0 font-mono tabular-nums',
           config.textSize
         )}
       >
@@ -342,7 +347,10 @@ export const AudioPlayer = React.memo(function AudioPlayer({
             <Button
               variant="ghost"
               size="icon"
-              className={cn(config.buttonSize, 'text-muted-foreground hover:text-foreground')}
+              className={cn(
+                config.buttonSize,
+                'text-muted-foreground hover:text-foreground'
+              )}
               onClick={onReRecord}
               title="Re-record"
             >
@@ -354,7 +362,10 @@ export const AudioPlayer = React.memo(function AudioPlayer({
             <Button
               variant="ghost"
               size="icon"
-              className={cn(config.buttonSize, 'text-destructive hover:text-destructive')}
+              className={cn(
+                config.buttonSize,
+                'text-destructive hover:text-destructive'
+              )}
               onClick={onDiscard}
               title="Discard recording"
             >

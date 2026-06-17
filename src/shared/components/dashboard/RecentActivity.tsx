@@ -90,7 +90,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       <CardContent>
         <div className="space-y-4">
           {activities.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="text-muted-foreground py-8 text-center">
               <Clock className="mx-auto mb-2 h-8 w-8" />
               <p>No recent activity</p>
             </div>
@@ -112,17 +112,17 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                       </Badge>
                     </div>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-sm">
                     {activity.description}
                   </p>
                   <div className="mt-2 flex items-center space-x-2">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {new Date(activity.timestamp).toLocaleString()}
                     </span>
                     {activity.user && (
                       <>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">•</span>
+                        <span className="text-muted-foreground text-xs">
                           {activity.user}
                         </span>
                       </>

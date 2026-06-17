@@ -150,26 +150,26 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
   };
 
   return (
-    <div className="flex h-full flex-col rounded-lg border bg-background">
+    <div className="bg-background flex h-full flex-col rounded-lg border">
       {/* Header */}
-      <div className="flex flex-col gap-3 border-b bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="bg-muted/50 flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+          <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-full font-semibold">
             {employee.name
               .split(' ')
               .map((n) => n[0])
               .join('')}
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">{employee.name}</h3>
-            <p className="text-sm text-muted-foreground">{employee.role}</p>
+            <h3 className="text-foreground font-semibold">{employee.name}</h3>
+            <p className="text-muted-foreground text-sm">{employee.role}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <div
             className={`h-2 w-2 rounded-full ${employee.status === 'available' ? 'bg-green-500' : 'bg-yellow-500'}`}
           ></div>
-          <span className="text-xs capitalize text-muted-foreground">
+          <span className="text-muted-foreground text-xs capitalize">
             {employee.status}
           </span>
         </div>
@@ -215,7 +215,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
 
         {isTyping && (
           <div className="flex justify-start">
-            <div className="rounded-lg bg-muted px-4 py-2 text-foreground">
+            <div className="bg-muted text-foreground rounded-lg px-4 py-2">
               <div className="flex items-center space-x-1">
                 <div className="h-2 w-2 animate-bounce rounded-full bg-current"></div>
                 <div
@@ -236,7 +236,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
       </div>
 
       {/* Input */}
-      <div className="border-t bg-muted/25 p-4">
+      <div className="bg-muted/25 border-t p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2">
           <input
             type="text"
@@ -244,20 +244,20 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={`Ask ${employee.name} to help you with something...`}
-            className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring flex-1 rounded-md border px-3 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
             disabled={isLoading}
           />
           <button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isLoading}
-            className="h-11 min-w-[80px] rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 min-w-[80px] rounded-md px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Sending...' : 'Send'}
           </button>
         </div>
 
         {/* Available Tools */}
-        <div className="mt-2 text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-2 text-xs">
           <span className="font-medium">Available tools:</span>{' '}
           {employee.tools.map((tool) => tool.name).join(', ')}
         </div>

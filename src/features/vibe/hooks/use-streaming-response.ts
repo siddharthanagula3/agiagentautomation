@@ -180,7 +180,8 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
       progressTimerRef.current = null;
     }
 
-    const { streamingMessageId: _streamingMessageId, streamingAgentId } = streamingState;
+    const { streamingMessageId: _streamingMessageId, streamingAgentId } =
+      streamingState;
 
     // Finish the streaming message in the store
     finishStreamingMessage();
@@ -337,7 +338,8 @@ export function useAgentStreamingStatus(agentId: string) {
       if (streamingMessageId) {
         const message = messages.find((m) => m.id === streamingMessageId);
         const isAgentStreaming =
-          message?.employee_id === agentId || message?.employee_name === agentId;
+          message?.employee_id === agentId ||
+          message?.employee_name === agentId;
 
         setStatus({
           isStreaming: isAgentStreaming && (message?.is_streaming ?? false),

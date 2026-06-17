@@ -31,13 +31,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     });
     // Navigate to login with the current location as return path
     navigate('/auth/login', {
-      state: { from: { pathname: location.pathname }, reason: 'session_timeout' },
+      state: {
+        from: { pathname: location.pathname },
+        reason: 'session_timeout',
+      },
       replace: true,
     });
   }, [navigate, location.pathname]);
 
   const handleSessionWarning = useCallback((secondsRemaining: number) => {
-    logger.debug(`[ProtectedRoute] Session timeout warning: ${secondsRemaining}s remaining`);
+    logger.debug(
+      `[ProtectedRoute] Session timeout warning: ${secondsRemaining}s remaining`
+    );
   }, []);
 
   const handleSessionExtended = useCallback(() => {
@@ -45,17 +50,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     toast.success('Session extended', { duration: 2000 });
   }, []);
 
-  const {
-    isWarningActive,
-    secondsUntilTimeout,
-    extendSession,
-    forceLogout,
-  } = useSessionTimeout({
-    enabled: enforceSessionTimeout && !!user,
-    onTimeout: handleSessionTimeout,
-    onWarning: handleSessionWarning,
-    onSessionExtended: handleSessionExtended,
-  });
+  const { isWarningActive, secondsUntilTimeout, extendSession, forceLogout } =
+    useSessionTimeout({
+      enabled: enforceSessionTimeout && !!user,
+      onTimeout: handleSessionTimeout,
+      onWarning: handleSessionWarning,
+      onSessionExtended: handleSessionExtended,
+    });
 
   // Set up timeout to prevent infinite loading
   useEffect(() => {
@@ -114,7 +115,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Redirect to login if timeout reached or loading finished without user
   // Pass the current location as state so login can redirect back after auth
-  return <Navigate to="/auth/login" state={{ from: { pathname: location.pathname } }} replace />;
+  return (
+    <Navigate
+      to="/auth/login"
+      state={{ from: { pathname: location.pathname } }}
+      replace
+    />
+  );
 };
 
 export { ProtectedRoute };

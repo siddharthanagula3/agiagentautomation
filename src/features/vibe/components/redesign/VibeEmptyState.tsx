@@ -160,29 +160,29 @@ export function VibeEmptyState({
     <div className="relative flex h-full flex-col items-center justify-center overflow-hidden px-6 py-12">
       {/* Animated background gradient */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-1/4 top-0 h-96 w-96 rounded-full bg-gradient-to-br from-purple-500/20 to-transparent blur-3xl" />
+        <div className="absolute top-0 -left-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-purple-500/20 to-transparent blur-3xl" />
         <div className="absolute -right-1/4 bottom-0 h-96 w-96 rounded-full bg-gradient-to-br from-blue-500/20 to-transparent blur-3xl" />
-        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-cyan-500/10 to-transparent blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-cyan-500/10 to-transparent blur-3xl" />
       </div>
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-4xl space-y-8">
         {/* Hero Section */}
         <div className="text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/50 px-4 py-2 backdrop-blur-sm">
-            <Sparkles className="h-4 w-4 text-primary" />
+          <div className="border-border/50 bg-background/50 mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
+            <Sparkles className="text-primary h-4 w-4" />
             <span className="text-sm font-medium">AI-Powered Development</span>
           </div>
 
-          <h1 className="mb-4 bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
+          <h1 className="from-foreground via-foreground to-muted-foreground mb-4 bg-gradient-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
             What will you{' '}
-            <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text">
+            <span className="from-primary bg-gradient-to-r via-purple-500 to-pink-500 bg-clip-text">
               build
             </span>{' '}
             today?
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
             Describe your idea and let AI transform it into working code. Build
             stunning apps, websites, and tools in minutes.
           </p>
@@ -197,7 +197,7 @@ export function VibeEmptyState({
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all',
                 selectedCategory === category.id
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                  ? 'bg-primary text-primary-foreground shadow-primary/25 shadow-lg'
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
               )}
             >
@@ -216,8 +216,8 @@ export function VibeEmptyState({
               onMouseEnter={() => setHoveredTemplate(template.id)}
               onMouseLeave={() => setHoveredTemplate(null)}
               className={cn(
-                'group relative overflow-hidden rounded-xl border border-border/50 bg-card/50 p-5 text-left backdrop-blur-sm transition-all duration-300',
-                'hover:border-primary/50 hover:bg-card hover:shadow-lg hover:shadow-primary/5',
+                'group border-border/50 bg-card/50 relative overflow-hidden rounded-xl border p-5 text-left backdrop-blur-sm transition-all duration-300',
+                'hover:border-primary/50 hover:bg-card hover:shadow-primary/5 hover:shadow-lg',
                 hoveredTemplate === template.id && 'scale-[1.02]'
               )}
             >
@@ -240,15 +240,15 @@ export function VibeEmptyState({
                   {template.icon}
                 </div>
 
-                <h3 className="mb-1.5 font-semibold text-foreground">
+                <h3 className="text-foreground mb-1.5 font-semibold">
                   {template.title}
                 </h3>
 
-                <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
                   {template.description}
                 </p>
 
-                <div className="flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="text-primary flex items-center gap-1 text-sm font-medium opacity-0 transition-opacity group-hover:opacity-100">
                   <span>Start building</span>
                   <ArrowRight className="h-4 w-4" />
                 </div>
@@ -259,7 +259,7 @@ export function VibeEmptyState({
 
         {/* Quick Prompts */}
         <div className="space-y-3 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Or try a quick prompt:
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
@@ -267,7 +267,7 @@ export function VibeEmptyState({
               <Badge
                 key={`quick-prompt-${prompt.slice(0, 20)}`}
                 variant="outline"
-                className="cursor-pointer px-3 py-1.5 transition-colors hover:bg-primary hover:text-primary-foreground"
+                className="hover:bg-primary hover:text-primary-foreground cursor-pointer px-3 py-1.5 transition-colors"
                 onClick={() => onPromptSelect(prompt)}
               >
                 <Zap className="mr-1.5 h-3 w-3" />
@@ -278,7 +278,7 @@ export function VibeEmptyState({
         </div>
 
         {/* Footer hint */}
-        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex items-center justify-center gap-6 text-sm">
           <div className="flex items-center gap-2">
             <Code2 className="h-4 w-4" />
             <span>Real-time preview</span>

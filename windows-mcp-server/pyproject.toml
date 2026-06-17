@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
-    { name = "AGI Agent Automation", email = "dev@agiagentautomation.com" }
+    { name = "AGI Agent Automation", email = "dev@agiagentautomation.vercel.app" }
 ]
 keywords = ["mcp", "windows", "ai", "automation", "model-context-protocol"]
 classifiers = [

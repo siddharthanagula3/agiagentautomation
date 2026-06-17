@@ -109,7 +109,7 @@ const Careers: React.FC = () => {
             <h1 className="mx-auto mb-4 max-w-3xl text-4xl font-bold tracking-tight md:text-6xl">
               Build the Future of AI Employees
             </h1>
-            <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
+            <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
               Join a product-led, remote-first team shipping delightful AI
               experiences at scale.
             </p>
@@ -152,12 +152,12 @@ const Careers: React.FC = () => {
             {roles.map((role) => (
               <Card
                 key={role.title}
-                className="group h-full border-2 border-border/50 p-6 transition-colors hover:border-primary/40"
+                className="group border-border/50 hover:border-primary/40 h-full border-2 p-6 transition-colors"
               >
                 <div className="mb-4 flex items-start justify-between">
                   <div>
                     <h3 className="text-lg font-semibold">{role.title}</h3>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {role.location} • {role.type}
                     </p>
                   </div>
@@ -167,14 +167,14 @@ const Careers: React.FC = () => {
                   {role.highlights.map((h) => (
                     <span
                       key={h}
-                      className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground"
+                      className="bg-muted text-muted-foreground rounded-full px-2 py-1 text-xs"
                     >
                       {h}
                     </span>
                   ))}
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
                     <Brain className="h-4 w-4" />
                     Impact-focused
                   </div>
@@ -200,13 +200,13 @@ const Careers: React.FC = () => {
             {benefits.map((b) => (
               <Card
                 key={b.title}
-                className="h-full border-2 border-border/50 p-6"
+                className="border-border/50 h-full border-2 p-6"
               >
-                <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="bg-primary/10 text-primary mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg">
                   {b.icon}
                 </div>
                 <h3 className="mb-1 text-base font-semibold">{b.title}</h3>
-                <p className="text-sm text-muted-foreground">{b.text}</p>
+                <p className="text-muted-foreground text-sm">{b.text}</p>
               </Card>
             ))}
           </div>
@@ -221,15 +221,15 @@ const Careers: React.FC = () => {
             {steps.map((s, idx) => (
               <Card
                 key={s.title}
-                className="h-full border-2 border-border/50 p-6"
+                className="border-border/50 h-full border-2 p-6"
               >
                 <div className="mb-2 flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                  <span className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
                     {idx + 1}
                   </span>
                   <span className="text-sm font-semibold">{s.title}</span>
                 </div>
-                <p className="text-sm text-muted-foreground">{s.text}</p>
+                <p className="text-muted-foreground text-sm">{s.text}</p>
               </Card>
             ))}
           </div>

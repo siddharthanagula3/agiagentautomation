@@ -792,7 +792,9 @@ export class WebSocketManager {
   private generateMessageId(): string {
     const array = new Uint8Array(5);
     crypto.getRandomValues(array);
-    const hex = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+    const hex = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join(
+      ''
+    );
     return `msg-${Date.now()}-${hex}`;
   }
 

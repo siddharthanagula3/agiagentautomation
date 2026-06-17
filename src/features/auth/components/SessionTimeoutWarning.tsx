@@ -86,7 +86,7 @@ export const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="mb-2 flex items-center gap-3">
             <div
               className={cn(
                 'flex h-12 w-12 items-center justify-center rounded-full',
@@ -115,8 +115,8 @@ export const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
             </div>
           </div>
           <AlertDialogDescription className="text-base">
-            Your session will expire due to inactivity. You will be automatically
-            logged out in:
+            Your session will expire due to inactivity. You will be
+            automatically logged out in:
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -124,9 +124,9 @@ export const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
         <div className="py-6">
           <div
             className={cn(
-              'text-center text-5xl font-bold font-mono tabular-nums',
+              'text-center font-mono text-5xl font-bold tabular-nums',
               isCritical
-                ? 'text-red-600 dark:text-red-400 animate-pulse'
+                ? 'animate-pulse text-red-600 dark:text-red-400'
                 : isUrgent
                   ? 'text-orange-600 dark:text-orange-400'
                   : 'text-yellow-600 dark:text-yellow-400'
@@ -137,7 +137,7 @@ export const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
           >
             {formatTimeRemaining(secondsRemaining)}
           </div>
-          <p className="text-center text-sm text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 text-center text-sm">
             {isCritical
               ? 'Session ending very soon!'
               : isUrgent
@@ -147,7 +147,7 @@ export const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
         </div>
 
         {/* Progress indicator */}
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4 overflow-hidden">
+        <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
           <div
             className={cn(
               'h-2 rounded-full transition-all duration-1000 ease-linear',
@@ -169,7 +169,7 @@ export const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
           />
         </div>
 
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+        <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
           <AlertDialogCancel
             onClick={onLogout}
             className="flex items-center gap-2"
@@ -190,8 +190,12 @@ export const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
         </AlertDialogFooter>
 
         {/* Keyboard shortcut hint */}
-        <p className="text-xs text-center text-muted-foreground mt-2">
-          Press <kbd className="px-1 py-0.5 rounded bg-muted font-mono text-xs">Enter</kbd> to stay logged in
+        <p className="text-muted-foreground mt-2 text-center text-xs">
+          Press{' '}
+          <kbd className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+            Enter
+          </kbd>{' '}
+          to stay logged in
         </p>
       </AlertDialogContent>
     </AlertDialog>

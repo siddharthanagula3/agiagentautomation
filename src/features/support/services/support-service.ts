@@ -354,12 +354,14 @@ class SupportService {
       } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
-        console.warn('[Support Service] No session for email notification, skipping');
+        console.warn(
+          '[Support Service] No session for email notification, skipping'
+        );
         return { success: false, error: 'Not authenticated' };
       }
 
       // Call the Netlify function
-      const response = await fetch('/.netlify/functions/notifications/send-email', {
+      const response = await fetch('/api/notifications/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -370,7 +372,11 @@ class SupportService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('[Support Service] Email notification failed:', response.status, errorData);
+        console.error(
+          '[Support Service] Email notification failed:',
+          response.status,
+          errorData
+        );
         return {
           success: false,
           error: errorData.error || `HTTP ${response.status}`,
@@ -378,14 +384,20 @@ class SupportService {
       }
 
       const result = await response.json();
-      console.log('[Support Service] Email notification sent:', result.messageId);
+      console.log(
+        '[Support Service] Email notification sent:',
+        result.messageId
+      );
 
       return {
         success: true,
         messageId: result.messageId,
       };
     } catch (error) {
-      console.error('[Support Service] Error sending email notification:', error);
+      console.error(
+        '[Support Service] Error sending email notification:',
+        error
+      );
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',

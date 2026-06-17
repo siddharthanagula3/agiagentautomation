@@ -29,9 +29,8 @@ describe('Chat Completion Handler', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { unifiedLLMService } = await import(
-      '@core/ai/llm/unified-language-model'
-    );
+    const { unifiedLLMService } =
+      await import('@core/ai/llm/unified-language-model');
     mockUnifiedLLMService = unifiedLLMService as unknown as {
       sendMessage: ReturnType<typeof vi.fn>;
     };

@@ -117,7 +117,7 @@ export class QwenProvider {
   ): Promise<QwenResponse> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/qwen-proxy';
+      const proxyUrl = '/api/llm-proxies/qwen-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -224,7 +224,7 @@ export class QwenProvider {
   }> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/qwen-proxy';
+      const proxyUrl = '/api/llm-proxies/qwen-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();

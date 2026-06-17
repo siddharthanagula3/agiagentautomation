@@ -234,7 +234,7 @@ describe('DALL-E Image Service', () => {
       await dallEImageService.generateImage(mockRequest);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/media-proxies/openai-image-proxy',
+        '/api/media-proxies/openai-image-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {

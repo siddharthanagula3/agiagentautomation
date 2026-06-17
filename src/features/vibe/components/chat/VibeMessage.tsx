@@ -46,9 +46,9 @@ const agentMarkdownComponents: Components = {
   ol: ({ children }) => <ol className="mb-2 ml-4 last:mb-0">{children}</ol>,
   code: ({ inline, children }) =>
     inline ? (
-      <code className="rounded bg-muted px-1 py-0.5 text-sm">{children}</code>
+      <code className="bg-muted rounded px-1 py-0.5 text-sm">{children}</code>
     ) : (
-      <code className="my-2 block overflow-x-auto rounded bg-muted p-2">
+      <code className="bg-muted my-2 block overflow-x-auto rounded p-2">
         {children}
       </code>
     ),
@@ -101,7 +101,7 @@ export const VibeMessage = memo(function VibeMessage({
         transition={messageTransition}
       >
         <div className="max-w-[70%]">
-          <div className="rounded-2xl rounded-tr-sm bg-primary px-5 py-3 text-primary-foreground shadow-sm">
+          <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-5 py-3 shadow-sm">
             <ReactMarkdown
               className="prose prose-sm dark:prose-invert max-w-none"
               components={userMarkdownComponents}
@@ -110,13 +110,13 @@ export const VibeMessage = memo(function VibeMessage({
             </ReactMarkdown>
             {message.is_streaming && (
               <motion.span
-                className="ml-1 inline-block h-4 w-2 bg-primary-foreground"
+                className="bg-primary-foreground ml-1 inline-block h-4 w-2"
                 animate={cursorAnimation}
                 transition={cursorTransition}
               />
             )}
           </div>
-          <div className="mt-1 text-right text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-1 text-right text-xs">
             {formattedTimestamp}
           </div>
         </div>
@@ -135,10 +135,10 @@ export const VibeMessage = memo(function VibeMessage({
         transition={messageTransition}
       >
         <div className="max-w-[80%] text-center">
-          <div className="rounded-xl bg-muted/50 px-4 py-2 text-sm text-muted-foreground">
+          <div className="bg-muted/50 text-muted-foreground rounded-xl px-4 py-2 text-sm">
             {message.content}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-1 text-xs">
             {formattedTimestamp}
           </div>
         </div>
@@ -178,7 +178,7 @@ export const VibeMessage = memo(function VibeMessage({
         )}
 
         {/* Message Content */}
-        <div className="rounded-2xl rounded-tl-sm border bg-card px-5 py-3 shadow-sm">
+        <div className="bg-card rounded-2xl rounded-tl-sm border px-5 py-3 shadow-sm">
           <ReactMarkdown
             className="prose prose-sm dark:prose-invert max-w-none"
             components={agentMarkdownComponents}
@@ -187,7 +187,7 @@ export const VibeMessage = memo(function VibeMessage({
           </ReactMarkdown>
           {message.is_streaming && (
             <motion.span
-              className="ml-1 inline-block h-4 w-2 bg-primary"
+              className="bg-primary ml-1 inline-block h-4 w-2"
               animate={cursorAnimation}
               transition={cursorTransition}
             />
@@ -195,7 +195,7 @@ export const VibeMessage = memo(function VibeMessage({
         </div>
 
         {/* Timestamp */}
-        <div className="mt-1 text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-1 text-xs">
           {formattedTimestamp}
         </div>
       </div>

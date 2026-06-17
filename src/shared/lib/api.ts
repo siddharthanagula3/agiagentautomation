@@ -677,7 +677,6 @@ export class APIClient {
 
     return { ws, sendAuth };
   }
-
 }
 
 // ========================================

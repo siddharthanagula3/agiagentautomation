@@ -22,7 +22,7 @@ const AuthLayout: React.FC = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+          <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2"></div>
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -33,7 +33,7 @@ const AuthLayout: React.FC = () => {
   if (isAuthenticated && user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
       </div>
     );
   }

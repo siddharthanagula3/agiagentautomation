@@ -73,7 +73,7 @@ export function TokenUsageDisplay({
           <TooltipContent className="max-w-xs">
             <div className="space-y-1 text-xs">
               {model && (
-                <div className="font-medium text-foreground">{model}</div>
+                <div className="text-foreground font-medium">{model}</div>
               )}
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted-foreground">Input tokens:</span>
@@ -87,7 +87,7 @@ export function TokenUsageDisplay({
                   {outputTokens ? formatTokens(outputTokens) : 'N/A'}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-4 border-t border-border pt-1">
+              <div className="border-border flex items-center justify-between gap-4 border-t pt-1">
                 <span className="font-medium">Total:</span>
                 <span className="font-mono font-medium">
                   {formatTokens(tokensUsed)}
@@ -110,12 +110,12 @@ export function TokenUsageDisplay({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-3 text-xs',
+        'border-border bg-muted/30 flex items-center gap-4 rounded-lg border p-3 text-xs',
         className
       )}
     >
       {model && (
-        <div className="flex items-center gap-1.5 text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-1.5">
           <TrendingUp className="h-3.5 w-3.5" />
           <span className="font-medium">{model}</span>
         </div>

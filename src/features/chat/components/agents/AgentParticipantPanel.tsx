@@ -112,7 +112,11 @@ export function AgentParticipantPanel({
   const hasInitializedGroups = React.useRef(false);
   React.useEffect(() => {
     // Only initialize once when groupedAgents first becomes available
-    if (groupedAgents && !hasInitializedGroups.current && expandedGroups.size === 0) {
+    if (
+      groupedAgents &&
+      !hasInitializedGroups.current &&
+      expandedGroups.size === 0
+    ) {
       hasInitializedGroups.current = true;
       setExpandedGroups(new Set(groupedAgents.map((g) => g.role)));
     }
@@ -142,7 +146,7 @@ export function AgentParticipantPanel({
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             type="text"
             placeholder="Search agents..."
@@ -194,7 +198,7 @@ export function AgentParticipantPanel({
                 {/* Group Header */}
                 <button
                   onClick={() => toggleGroup(group.role)}
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted"
+                  className="text-muted-foreground hover:bg-muted flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium"
                 >
                   {group.expanded ? (
                     <ChevronDown className="h-4 w-4" />
@@ -240,8 +244,8 @@ export function AgentParticipantPanel({
 
         {filteredAgents.length === 0 && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <Search className="mb-2 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">No agents found</p>
+            <Search className="text-muted-foreground mb-2 h-8 w-8" />
+            <p className="text-muted-foreground text-sm">No agents found</p>
           </div>
         )}
       </ScrollArea>
@@ -282,7 +286,7 @@ function AgentCard({
         'group rounded-lg border transition-all',
         isSelected
           ? 'border-primary bg-primary/5'
-          : 'border-transparent hover:border-border hover:bg-muted/50'
+          : 'hover:border-border hover:bg-muted/50 border-transparent'
       )}
     >
       <button
@@ -302,7 +306,7 @@ function AgentCard({
           {/* Status Indicator */}
           <div
             className={cn(
-              'absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background',
+              'border-background absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2',
               status.color,
               (agent.status === 'thinking' || agent.status === 'typing') &&
                 'animate-pulse'
@@ -320,7 +324,7 @@ function AgentCard({
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <StatusIcon className="h-3 w-3" />
             <span>{status.label}</span>
             {agent.currentTask && (
@@ -361,15 +365,15 @@ function AgentCard({
 
       {/* Expanded Details */}
       {showDetails && (
-        <div className="border-t border-border bg-muted/30 px-3 py-2 text-xs">
+        <div className="border-border bg-muted/30 border-t px-3 py-2 text-xs">
           <div className="space-y-2">
             <div>
-              <span className="font-medium text-muted-foreground">Role:</span>{' '}
+              <span className="text-muted-foreground font-medium">Role:</span>{' '}
               <span>{agent.role}</span>
             </div>
             {agent.currentTask && (
               <div>
-                <span className="font-medium text-muted-foreground">
+                <span className="text-muted-foreground font-medium">
                   Current Task:
                 </span>{' '}
                 <span className="break-words">{agent.currentTask}</span>

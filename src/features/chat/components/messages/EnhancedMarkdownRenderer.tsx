@@ -81,7 +81,7 @@ const CodeBlock = ({
     return (
       <code
         className={cn(
-          'rounded bg-muted px-1.5 py-0.5 font-mono text-sm',
+          'bg-muted rounded px-1.5 py-0.5 font-mono text-sm',
           className
         )}
         {...props}
@@ -94,7 +94,7 @@ const CodeBlock = ({
   // Code block with syntax highlighting
   return (
     <div className="group relative my-4">
-      <div className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="absolute top-2 right-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
         <Button
           variant="secondary"
           size="sm"
@@ -114,7 +114,7 @@ const CodeBlock = ({
           )}
         </Button>
       </div>
-      <div className="overflow-x-auto rounded-lg border border-border bg-gray-900 dark:bg-gray-950">
+      <div className="border-border overflow-x-auto rounded-lg border bg-gray-900 dark:bg-gray-950">
         {language && (
           <div className="border-b border-gray-700 px-4 py-2">
             <span className="text-xs font-medium text-gray-400">
@@ -134,7 +134,7 @@ const CodeBlock = ({
 
 // Custom table components with enhanced styling
 const TableComponent = ({ children }: { children: React.ReactNode }) => (
-  <div className="my-4 overflow-x-auto rounded-lg border border-border">
+  <div className="border-border my-4 overflow-x-auto rounded-lg border">
     <table className="w-full border-collapse">{children}</table>
   </div>
 );
@@ -144,11 +144,11 @@ const TableHead = ({ children }: { children: React.ReactNode }) => (
 );
 
 const TableBody = ({ children }: { children: React.ReactNode }) => (
-  <tbody className="divide-y divide-border">{children}</tbody>
+  <tbody className="divide-border divide-y">{children}</tbody>
 );
 
 const TableRow = ({ children }: { children: React.ReactNode }) => (
-  <tr className="transition-colors hover:bg-muted/30">{children}</tr>
+  <tr className="hover:bg-muted/30 transition-colors">{children}</tr>
 );
 
 const TableHeader = ({ children }: { children: React.ReactNode }) => (
@@ -174,7 +174,10 @@ const LinkComponent = ({
   if (href) {
     try {
       const parsed = new URL(href, window.location.origin);
-      const isSafeProtocol = parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:';
+      const isSafeProtocol =
+        parsed.protocol === 'http:' ||
+        parsed.protocol === 'https:' ||
+        parsed.protocol === 'mailto:';
       if (!isSafeProtocol) {
         safeHref = undefined; // Strip dangerous protocols
       } else {
@@ -189,7 +192,7 @@ const LinkComponent = ({
       href={safeHref}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
-      className="text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
+      className="text-primary decoration-primary/30 hover:decoration-primary underline underline-offset-4 transition-colors"
     >
       {children}
       {isExternal && (
@@ -205,19 +208,19 @@ const ImageComponent = ({ src, alt }: { src?: string; alt?: string }) => (
     src={src}
     alt={alt}
     loading="lazy"
-    className="my-4 max-w-full rounded-lg border border-border shadow-sm"
+    className="border-border my-4 max-w-full rounded-lg border shadow-sm"
   />
 );
 
 // Custom blockquote component
 const BlockquoteComponent = ({ children }: { children: React.ReactNode }) => (
-  <blockquote className="my-4 border-l-4 border-primary/30 bg-muted/30 py-3 pl-4 pr-4 italic">
+  <blockquote className="border-primary/30 bg-muted/30 my-4 border-l-4 py-3 pr-4 pl-4 italic">
     {children}
   </blockquote>
 );
 
 // Custom horizontal rule
-const HorizontalRule = () => <hr className="my-8 border-t border-border" />;
+const HorizontalRule = () => <hr className="border-border my-8 border-t" />;
 
 // Custom list components
 const OrderedList = ({ children }: { children: React.ReactNode }) => (
@@ -241,7 +244,7 @@ const ListItem = ({ children }: { children: React.ReactNode }) => {
             type="checkbox"
             checked={checked === 'x'}
             readOnly
-            className="mt-1 h-4 w-4 rounded border-border"
+            className="border-border mt-1 h-4 w-4 rounded"
           />
           <span className={checked === 'x' ? 'line-through opacity-60' : ''}>
             {text}
@@ -259,32 +262,32 @@ const markdownComponents: Components = {
     React.HTMLAttributes<HTMLElement> & { inline?: boolean }
   >,
   h1: ({ children }) => (
-    <h1 className="mb-4 mt-8 scroll-m-20 border-b border-border pb-2 text-3xl font-bold tracking-tight first:mt-0">
+    <h1 className="border-border mt-8 mb-4 scroll-m-20 border-b pb-2 text-3xl font-bold tracking-tight first:mt-0">
       {children}
     </h1>
   ),
   h2: ({ children }) => (
-    <h2 className="mb-3 mt-6 scroll-m-20 border-b border-border pb-2 text-2xl font-semibold tracking-tight first:mt-0">
+    <h2 className="border-border mt-6 mb-3 scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight first:mt-0">
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="mb-2 mt-5 scroll-m-20 text-xl font-semibold tracking-tight">
+    <h3 className="mt-5 mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
       {children}
     </h3>
   ),
   h4: ({ children }) => (
-    <h4 className="mb-2 mt-4 scroll-m-20 text-lg font-semibold tracking-tight">
+    <h4 className="mt-4 mb-2 scroll-m-20 text-lg font-semibold tracking-tight">
       {children}
     </h4>
   ),
   h5: ({ children }) => (
-    <h5 className="mb-2 mt-3 scroll-m-20 text-base font-semibold tracking-tight">
+    <h5 className="mt-3 mb-2 scroll-m-20 text-base font-semibold tracking-tight">
       {children}
     </h5>
   ),
   h6: ({ children }) => (
-    <h6 className="mb-2 mt-3 scroll-m-20 text-sm font-semibold tracking-tight">
+    <h6 className="mt-3 mb-2 scroll-m-20 text-sm font-semibold tracking-tight">
       {children}
     </h6>
   ),

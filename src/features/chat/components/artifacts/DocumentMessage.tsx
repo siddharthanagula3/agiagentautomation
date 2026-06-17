@@ -51,18 +51,18 @@ export const DocumentMessage: React.FC<DocumentMessageProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className={cn('my-4 w-full', className)}
     >
-      <Card className="overflow-hidden border-2 border-primary/20 shadow-lg">
-        <CardHeader className="border-b border-border bg-gradient-to-r from-primary/5 to-primary/10">
+      <Card className="border-primary/20 overflow-hidden border-2 shadow-lg">
+        <CardHeader className="border-border from-primary/5 to-primary/10 border-b bg-gradient-to-r">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <FileText className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 rounded-lg p-2">
+                <FileText className="text-primary h-5 w-5" />
               </div>
               <div className="flex flex-col gap-1">
                 <CardTitle className="text-xl font-bold">
                   {document.title}
                 </CardTitle>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
                   <Badge variant="outline" className="text-xs">
                     {document.metadata.type}
                   </Badge>
@@ -129,8 +129,8 @@ export const DocumentMessage: React.FC<DocumentMessageProps> = ({
               {isEnhancing ? (
                 <div className="flex min-h-[200px] items-center justify-center">
                   <div className="text-center">
-                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                    <p className="text-sm text-muted-foreground">
+                    <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                    <p className="text-muted-foreground text-sm">
                       Enhancing document...
                     </p>
                   </div>
@@ -147,7 +147,7 @@ export const DocumentMessage: React.FC<DocumentMessageProps> = ({
 
           {/* Expand/Collapse Button */}
           {shouldBeExpandable && !isFullscreen && (
-            <div className="border-t border-border bg-muted/30">
+            <div className="border-border bg-muted/30 border-t">
               <Button
                 variant="ghost"
                 size="sm"

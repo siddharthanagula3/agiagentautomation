@@ -82,7 +82,7 @@ export function CreateBranchDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <GitFork className="h-5 w-5 text-primary" aria-hidden="true" />
+            <GitFork className="text-primary h-5 w-5" aria-hidden="true" />
             Create Branch
           </DialogTitle>
           <DialogDescription>
@@ -108,18 +108,21 @@ export function CreateBranchDialog({
                 }
               }}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Give your branch a descriptive name to help identify it later
             </p>
           </div>
 
-          <div className="rounded-lg bg-muted/50 p-3">
-            <p className="text-xs text-muted-foreground">
+          <div className="bg-muted/50 rounded-lg p-3">
+            <p className="text-muted-foreground text-xs">
               <strong>What happens next:</strong>
             </p>
-            <ul className="mt-1 list-inside list-disc text-xs text-muted-foreground">
+            <ul className="text-muted-foreground mt-1 list-inside list-disc text-xs">
               <li>A new conversation will be created</li>
-              <li>Messages up to and including message {messageIndex + 1} will be copied</li>
+              <li>
+                Messages up to and including message {messageIndex + 1} will be
+                copied
+              </li>
               <li>You can continue the conversation from that point</li>
               <li>The original conversation remains unchanged</li>
             </ul>
@@ -133,7 +136,10 @@ export function CreateBranchDialog({
           <Button onClick={handleCreate} disabled={isCreating}>
             {isCreating ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
                 Creating...
               </>
             ) : (

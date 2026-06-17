@@ -714,27 +714,24 @@ export class VibeToolOrchestrator {
       }
 
       // Attempt to use the web search via Netlify function
-      const response = await fetch(
-        '/.netlify/functions/llm-proxies/perplexity-proxy',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({
-            model: 'sonar',
-            messages: [
-              {
-                role: 'user',
-                content: allowedDomains?.length
-                  ? `Search only on ${allowedDomains.join(', ')}: ${query}`
-                  : query,
-              },
-            ],
-          }),
-        }
-      );
+      const response = await fetch('/api/llm-proxies/perplexity-proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          model: 'sonar',
+          messages: [
+            {
+              role: 'user',
+              content: allowedDomains?.length
+                ? `Search only on ${allowedDomains.join(', ')}: ${query}`
+                : query,
+            },
+          ],
+        }),
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -807,7 +804,7 @@ export class VibeToolOrchestrator {
       }
 
       // Use the fetch-page Netlify function to bypass CORS
-      const response = await fetch('/.netlify/functions/utilities/fetch-page', {
+      const response = await fetch('/api/utilities/fetch-page', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -166,7 +166,7 @@ const HelpSupportPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="text-3xl font-bold">Help & Support</h1>
-        <p className="mt-1 text-muted-foreground">
+        <p className="text-muted-foreground mt-1">
           Find answers and get the help you need
         </p>
       </motion.div>
@@ -179,7 +179,7 @@ const HelpSupportPage: React.FC = () => {
         <Card>
           <CardContent className="p-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -216,14 +216,14 @@ const HelpSupportPage: React.FC = () => {
             {isLoadingFAQs ? (
               <Card>
                 <CardContent className="p-12 text-center">
-                  <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-primary" />
+                  <Loader2 className="text-primary mx-auto mb-4 h-16 w-16 animate-spin" />
                   <p className="text-muted-foreground">Loading FAQs...</p>
                 </CardContent>
               </Card>
             ) : Object.entries(faqsByCategory).length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
-                  <HelpCircle className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+                  <HelpCircle className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
                   <h3 className="mb-2 text-xl font-semibold">
                     No results found
                   </h3>
@@ -245,22 +245,22 @@ const HelpSupportPage: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       {category === 'Getting Started' && (
-                        <Zap className="mr-2 h-5 w-5 text-primary" />
+                        <Zap className="text-primary mr-2 h-5 w-5" />
                       )}
                       {category === 'Chat' && (
-                        <MessageCircle className="mr-2 h-5 w-5 text-success" />
+                        <MessageCircle className="text-success mr-2 h-5 w-5" />
                       )}
                       {category === 'Billing' && (
-                        <CreditCard className="mr-2 h-5 w-5 text-primary" />
+                        <CreditCard className="text-primary mr-2 h-5 w-5" />
                       )}
                       {category === 'Technical' && (
-                        <Code className="mr-2 h-5 w-5 text-primary" />
+                        <Code className="text-primary mr-2 h-5 w-5" />
                       )}
                       {category === 'Automation' && (
-                        <Bot className="mr-2 h-5 w-5 text-primary" />
+                        <Bot className="text-primary mr-2 h-5 w-5" />
                       )}
                       {category === 'Account' && (
-                        <Settings className="mr-2 h-5 w-5 text-primary" />
+                        <Settings className="text-primary mr-2 h-5 w-5" />
                       )}
                       {category}
                     </CardTitle>
@@ -272,7 +272,7 @@ const HelpSupportPage: React.FC = () => {
                           key={index}
                           value={`${category}-${index}`}
                         >
-                          <AccordionTrigger className="text-left hover:text-primary">
+                          <AccordionTrigger className="hover:text-primary text-left">
                             {faq.question}
                           </AccordionTrigger>
                           <AccordionContent className="text-muted-foreground">
@@ -313,18 +313,18 @@ const HelpSupportPage: React.FC = () => {
               ].map((doc, i) => (
                 <Card
                   key={i}
-                  className="transition-colors hover:border-primary/50"
+                  className="hover:border-primary/50 transition-colors"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start space-x-4">
-                      <div className="rounded-lg bg-primary/20 p-3">
-                        <doc.icon className="h-6 w-6 text-primary" />
+                      <div className="bg-primary/20 rounded-lg p-3">
+                        <doc.icon className="text-primary h-6 w-6" />
                       </div>
                       <div className="flex-1">
                         <h3 className="mb-1 text-lg font-semibold">
                           {doc.title}
                         </h3>
-                        <p className="mb-3 text-sm text-muted-foreground">
+                        <p className="text-muted-foreground mb-3 text-sm">
                           {doc.desc}
                         </p>
                         <Button
@@ -370,11 +370,11 @@ const HelpSupportPage: React.FC = () => {
               ].map((ch, i) => (
                 <Card key={i}>
                   <CardContent className="p-6 text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
-                      <ch.icon className="h-8 w-8 text-primary" />
+                    <div className="bg-primary/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                      <ch.icon className="text-primary h-8 w-8" />
                     </div>
                     <h3 className="mb-2 text-lg font-semibold">{ch.title}</h3>
-                    <p className="mb-4 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mb-4 text-sm">
                       {ch.desc}
                     </p>
                     <Button

@@ -202,8 +202,8 @@ const FileTreeItem = memo(function FileTreeItem({
           <button
             onClick={handleClick}
             className={cn(
-              'flex w-full items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-muted',
-              isSelected && 'bg-primary/10 font-medium text-primary'
+              'hover:bg-muted flex w-full items-center gap-2 rounded px-2 py-1 text-sm transition-colors',
+              isSelected && 'bg-primary/10 text-primary font-medium'
             )}
             style={paddingStyle}
           >
@@ -228,7 +228,7 @@ const FileTreeItem = memo(function FileTreeItem({
                 onChange={(e) => setRenameValue(e.target.value)}
                 onBlur={handleRename}
                 onKeyDown={handleKeyDown}
-                className="flex-1 rounded border border-input bg-background px-1 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                className="border-input bg-background focus:ring-ring flex-1 rounded border px-1 text-xs focus:ring-1 focus:outline-none"
                 autoFocus
                 onClick={(e) => e.stopPropagation()}
               />
@@ -292,7 +292,7 @@ const FileTreeItem = memo(function FileTreeItem({
           {onFileDelete && (
             <ContextMenuItem
               onClick={handleDelete}
-              className="flex items-center gap-2 text-destructive focus:text-destructive"
+              className="text-destructive focus:text-destructive flex items-center gap-2"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Delete

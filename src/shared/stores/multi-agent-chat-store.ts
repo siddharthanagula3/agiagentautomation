@@ -341,9 +341,13 @@ function cleanupExpiredFingerprints(): void {
 
   // Also enforce max size by removing oldest entries
   if (recentMessageFingerprints.size > DEDUP_CONFIG.MAX_FINGERPRINTS) {
-    const sortedEntries = [...recentMessageFingerprints.entries()]
-      .sort((a, b) => a[1] - b[1]);
-    const toRemove = sortedEntries.slice(0, sortedEntries.length - DEDUP_CONFIG.MAX_FINGERPRINTS);
+    const sortedEntries = [...recentMessageFingerprints.entries()].sort(
+      (a, b) => a[1] - b[1]
+    );
+    const toRemove = sortedEntries.slice(
+      0,
+      sortedEntries.length - DEDUP_CONFIG.MAX_FINGERPRINTS
+    );
     for (const [key] of toRemove) {
       recentMessageFingerprints.delete(key);
     }
@@ -360,7 +364,10 @@ function isDuplicateMessage(senderId: string, content: string): boolean {
 
   // Check fingerprint cache first (fastest check)
   const existingTimestamp = recentMessageFingerprints.get(fingerprint);
-  if (existingTimestamp && now - existingTimestamp < DEDUP_CONFIG.TIME_WINDOW_MS) {
+  if (
+    existingTimestamp &&
+    now - existingTimestamp < DEDUP_CONFIG.TIME_WINDOW_MS
+  ) {
     return true;
   }
 
@@ -580,7 +587,8 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
               (m) =>
                 m.senderId === message.senderId &&
                 m.content === message.content &&
-                Date.now() - new Date(m.timestamp).getTime() < DEDUP_CONFIG.TIME_WINDOW_MS
+                Date.now() - new Date(m.timestamp).getTime() <
+                  DEDUP_CONFIG.TIME_WINDOW_MS
             );
             if (recentDuplicate) {
               return; // Skip duplicate
@@ -1011,7 +1019,10 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
                       }
 
                       // Handle tool call timestamps
-                      if (msg.metadata?.toolCalls && Array.isArray(msg.metadata.toolCalls)) {
+                      if (
+                        msg.metadata?.toolCalls &&
+                        Array.isArray(msg.metadata.toolCalls)
+                      ) {
                         for (const toolCall of msg.metadata.toolCalls) {
                           if (toolCall.timestamp) {
                             toolCall.timestamp = new Date(toolCall.timestamp);
@@ -1020,7 +1031,10 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
                       }
 
                       // Handle thinking step timestamps
-                      if (msg.metadata?.thinkingProcess && Array.isArray(msg.metadata.thinkingProcess)) {
+                      if (
+                        msg.metadata?.thinkingProcess &&
+                        Array.isArray(msg.metadata.thinkingProcess)
+                      ) {
                         for (const step of msg.metadata.thinkingProcess) {
                           if (step.timestamp) {
                             step.timestamp = new Date(step.timestamp);
@@ -1029,7 +1043,10 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
                       }
 
                       // Handle attachment uploadedAt dates
-                      if (msg.metadata?.attachments && Array.isArray(msg.metadata.attachments)) {
+                      if (
+                        msg.metadata?.attachments &&
+                        Array.isArray(msg.metadata.attachments)
+                      ) {
                         for (const att of msg.metadata.attachments) {
                           if (att.uploadedAt) {
                             att.uploadedAt = new Date(att.uploadedAt);
@@ -1052,7 +1069,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 
               // Rehydrate lastSyncTimestamp
               if (data.state?.lastSyncTimestamp) {
-                data.state.lastSyncTimestamp = new Date(data.state.lastSyncTimestamp);
+                data.state.lastSyncTimestamp = new Date(
+                  data.state.lastSyncTimestamp
+                );
               }
 
               // Rehydrate typing indicator timestamps
@@ -1080,7 +1099,10 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
               }
 
               // Rehydrate message queue timestamps
-              if (data.state?.messageQueue && Array.isArray(data.state.messageQueue)) {
+              if (
+                data.state?.messageQueue &&
+                Array.isArray(data.state.messageQueue)
+              ) {
                 for (const msg of data.state.messageQueue) {
                   if (msg.timestamp) {
                     msg.timestamp = new Date(msg.timestamp);
@@ -1089,17 +1111,24 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
               }
 
               // Rehydrate sync conflict timestamps
-              if (data.state?.syncConflicts && Array.isArray(data.state.syncConflicts)) {
+              if (
+                data.state?.syncConflicts &&
+                Array.isArray(data.state.syncConflicts)
+              ) {
                 for (const conflict of data.state.syncConflicts) {
                   if (conflict.timestamp) {
                     conflict.timestamp = new Date(conflict.timestamp);
                   }
                   // Also rehydrate nested message timestamps
                   if (conflict.localVersion?.timestamp) {
-                    conflict.localVersion.timestamp = new Date(conflict.localVersion.timestamp);
+                    conflict.localVersion.timestamp = new Date(
+                      conflict.localVersion.timestamp
+                    );
                   }
                   if (conflict.remoteVersion?.timestamp) {
-                    conflict.remoteVersion.timestamp = new Date(conflict.remoteVersion.timestamp);
+                    conflict.remoteVersion.timestamp = new Date(
+                      conflict.remoteVersion.timestamp
+                    );
                   }
                 }
               }

@@ -49,9 +49,9 @@ const PublicFooter: React.FC = () => {
   ];
 
   return (
-    <footer className="relative w-full max-w-full overflow-x-hidden border-t border-border bg-card">
+    <footer className="border-border bg-card relative w-full max-w-full overflow-x-hidden border-t">
       {/* Gradient Overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-primary/5"></div>
+      <div className="to-primary/5 pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent"></div>
 
       <div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         {/* Top Section */}
@@ -64,12 +64,12 @@ const PublicFooter: React.FC = () => {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold">AGI Workforce</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   AI Workforce Platform
                 </span>
               </div>
             </Link>
-            <p className="mb-6 leading-relaxed text-muted-foreground">
+            <p className="text-muted-foreground mb-6 leading-relaxed">
               Build your billion-dollar company with AI that thinks, plans, and
               executes. From natural language to complete results.
             </p>
@@ -79,9 +79,9 @@ const PublicFooter: React.FC = () => {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="glass group flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-primary/10"
+                  className="glass group hover:bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
                 >
-                  <span className="text-muted-foreground transition-colors group-hover:text-primary">
+                  <span className="text-muted-foreground group-hover:text-primary transition-colors">
                     {social.icon}
                   </span>
                 </a>
@@ -92,7 +92,7 @@ const PublicFooter: React.FC = () => {
           {/* Links Columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
+              <h3 className="mb-4 text-sm font-semibold tracking-wider uppercase">
                 {category}
               </h3>
               <ul className="space-y-3">
@@ -101,14 +101,14 @@ const PublicFooter: React.FC = () => {
                     {link.href.startsWith('#') ? (
                       <a
                         href={link.href}
-                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </a>
                     ) : (
                       <Link
                         to={link.href}
-                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -130,10 +130,10 @@ const PublicFooter: React.FC = () => {
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex-1">
               <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">
-                <Mail className="h-5 w-5 text-primary" />
+                <Mail className="text-primary h-5 w-5" />
                 Stay Updated
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Get the latest updates on AI workforce automation and platform
                 features.
               </p>
@@ -152,27 +152,27 @@ const PublicFooter: React.FC = () => {
         </motion.div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:pt-8 md:flex-row">
-          <p className="text-center text-sm text-muted-foreground md:text-left">
-            © {currentYear} AGI Workforce. All rights reserved. Built
-            with AI for the AI age.
+        <div className="border-border flex flex-col items-center justify-between gap-4 border-t pt-6 sm:pt-8 md:flex-row">
+          <p className="text-muted-foreground text-center text-sm md:text-left">
+            © {currentYear} AGI Workforce. All rights reserved. Built with AI
+            for the AI age.
           </p>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-6 text-sm">
             <Link
               to="/privacy-policy"
-              className="transition-colors hover:text-foreground"
+              className="hover:text-foreground transition-colors"
             >
               Privacy
             </Link>
             <Link
               to="/terms-of-service"
-              className="transition-colors hover:text-foreground"
+              className="hover:text-foreground transition-colors"
             >
               Terms
             </Link>
             <Link
               to="/help"
-              className="transition-colors hover:text-foreground"
+              className="hover:text-foreground transition-colors"
             >
               Support
             </Link>

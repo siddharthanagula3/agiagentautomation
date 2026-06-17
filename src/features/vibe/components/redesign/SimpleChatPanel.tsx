@@ -114,11 +114,11 @@ function SimpleChatPanelContent({
             !isLoading &&
             (!showEmptyState || !onPromptSelect) && (
               <div className="flex h-64 flex-col items-center justify-center text-center">
-                <div className="rounded-full bg-muted p-4">
-                  <Sparkles className="h-8 w-8 text-muted-foreground" />
+                <div className="bg-muted rounded-full p-4">
+                  <Sparkles className="text-muted-foreground h-8 w-8" />
                 </div>
                 <h3 className="mt-4 font-medium">Ready to build</h3>
-                <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 max-w-xs text-sm">
                   Describe what you want to create and I'll help you build it
                 </p>
               </div>
@@ -135,7 +135,7 @@ function SimpleChatPanelContent({
                   <Bot className="h-4 w-4 text-violet-600" />
                 </AvatarFallback>
               </Avatar>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Building...</span>
               </div>
@@ -173,7 +173,7 @@ function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div
-      className={cn('group py-3', !isUser && 'rounded-lg hover:bg-muted/30')}
+      className={cn('group py-3', !isUser && 'hover:bg-muted/30 rounded-lg')}
     >
       <div className="flex gap-3">
         <Avatar className="h-7 w-7 flex-shrink-0">
@@ -208,9 +208,9 @@ function ChatMessage({ message }: ChatMessageProps) {
                   code({ inline, className, children, ...props }) {
                     const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
-                      <div className="my-2 overflow-hidden rounded-lg border border-border">
-                        <div className="flex items-center justify-between bg-muted/50 px-3 py-1.5">
-                          <span className="text-xs text-muted-foreground">
+                      <div className="border-border my-2 overflow-hidden rounded-lg border">
+                        <div className="bg-muted/50 flex items-center justify-between px-3 py-1.5">
+                          <span className="text-muted-foreground text-xs">
                             {match[1]}
                           </span>
                         </div>
@@ -226,7 +226,7 @@ function ChatMessage({ message }: ChatMessageProps) {
                       </div>
                     ) : (
                       <code
-                        className="rounded bg-muted px-1 py-0.5 text-xs"
+                        className="bg-muted rounded px-1 py-0.5 text-xs"
                         {...props}
                       >
                         {children}

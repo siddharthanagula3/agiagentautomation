@@ -65,18 +65,21 @@ const MonacoEditor = lazy(() =>
  */
 function EditorLoadingFallback() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center bg-muted/20">
-      <div className="flex flex-col items-center gap-4 text-muted-foreground">
+    <div className="bg-muted/20 flex h-full w-full flex-col items-center justify-center">
+      <div className="text-muted-foreground flex flex-col items-center gap-4">
         <div className="relative">
-          <Code className="h-12 w-12 text-muted-foreground/40" aria-hidden="true" />
+          <Code
+            className="text-muted-foreground/40 h-12 w-12"
+            aria-hidden="true"
+          />
           <Loader2
-            className="absolute -right-1 -top-1 h-5 w-5 animate-spin text-primary"
+            className="text-primary absolute -top-1 -right-1 h-5 w-5 animate-spin"
             aria-hidden="true"
           />
         </div>
         <div className="text-center">
           <p className="text-sm font-medium">Loading Code Editor</p>
-          <p className="mt-1 text-xs text-muted-foreground/60">
+          <p className="text-muted-foreground/60 mt-1 text-xs">
             Initializing Monaco editor...
           </p>
         </div>
@@ -398,12 +401,12 @@ function CodeEditorPanelContent() {
   }, []);
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="bg-background flex h-full">
       {/* File Tree Sidebar */}
       {showFileTree && (
-        <div className="w-56 border-r border-border bg-muted/20">
-          <div className="flex items-center justify-between border-b border-border px-3 py-2">
-            <span className="text-xs font-medium text-muted-foreground">
+        <div className="border-border bg-muted/20 w-56 border-r">
+          <div className="border-border flex items-center justify-between border-b px-3 py-2">
+            <span className="text-muted-foreground text-xs font-medium">
               FILES
             </span>
             <div className="flex items-center gap-0.5">
@@ -449,11 +452,11 @@ function CodeEditorPanelContent() {
           {fileTree.length === 0 ? (
             <div className="flex h-[calc(100%-41px)] flex-col items-center justify-center p-4 text-center">
               <Folder
-                className="mb-2 h-8 w-8 text-muted-foreground/40"
+                className="text-muted-foreground/40 mb-2 h-8 w-8"
                 aria-hidden="true"
               />
-              <p className="text-xs text-muted-foreground">No files yet</p>
-              <p className="mt-1 text-[10px] text-muted-foreground/60">
+              <p className="text-muted-foreground text-xs">No files yet</p>
+              <p className="text-muted-foreground/60 mt-1 text-[10px]">
                 Create a file or use a template
               </p>
             </div>
@@ -479,7 +482,7 @@ function CodeEditorPanelContent() {
       <div className="flex flex-1 flex-col">
         {/* File Tabs */}
         {openFiles.size > 0 && (
-          <div className="flex items-center gap-1 border-b border-border bg-muted/30 px-2 py-1">
+          <div className="border-border bg-muted/30 flex items-center gap-1 border-b px-2 py-1">
             {!showFileTree && (
               <Button
                 variant="ghost"
@@ -513,14 +516,14 @@ function CodeEditorPanelContent() {
                   </span>
                   {file.isDirty && (
                     <span
-                      className="h-1.5 w-1.5 rounded-full bg-primary"
+                      className="bg-primary h-1.5 w-1.5 rounded-full"
                       aria-label="Unsaved changes"
                     />
                   )}
                 </button>
                 <button
                   onClick={() => handleCloseFile(path)}
-                  className="opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                  className="hover:text-destructive opacity-0 transition-opacity group-hover:opacity-100"
                   aria-label={`Close ${path.split('/').pop()}`}
                 >
                   <X className="h-3 w-3" aria-hidden="true" />
@@ -532,8 +535,8 @@ function CodeEditorPanelContent() {
 
         {/* Toolbar */}
         {currentFilePath && currentFile && (
-          <div className="flex items-center justify-between border-b border-border bg-background px-3 py-1.5">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="border-border bg-background flex items-center justify-between border-b px-3 py-1.5">
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
               <span className="truncate">{currentFilePath}</span>
               <span className="text-muted-foreground/50">
                 {currentFile.language}
@@ -608,14 +611,14 @@ function CodeEditorPanelContent() {
             </Suspense>
           </div>
         ) : (
-          <div className="flex flex-1 items-center justify-center bg-muted/10">
+          <div className="bg-muted/10 flex flex-1 items-center justify-center">
             <div className="text-center">
               <File
-                className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30"
+                className="text-muted-foreground/30 mx-auto mb-3 h-12 w-12"
                 aria-hidden="true"
               />
-              <p className="text-sm text-muted-foreground">No file selected</p>
-              <p className="mt-1 text-xs text-muted-foreground/60">
+              <p className="text-muted-foreground text-sm">No file selected</p>
+              <p className="text-muted-foreground/60 mt-1 text-xs">
                 Select a file from the sidebar
               </p>
             </div>

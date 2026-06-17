@@ -23,12 +23,26 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, isLoading = false, type = 'button', disabled, 'aria-label': ariaLabel, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      isLoading = false,
+      type = 'button',
+      disabled,
+      'aria-label': ariaLabel,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : 'button';
 
     // Determine if this is an icon-only button (no text children)
     const hasTextContent = React.Children.toArray(children).some(
-      child => typeof child === 'string' && child.trim() !== ''
+      (child) => typeof child === 'string' && child.trim() !== ''
     );
 
     // When asChild is true, Radix Slot expects exactly one React element child
@@ -61,9 +75,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {children}
-        {isLoading && (
-          <span className="sr-only">Loading, please wait</span>
-        )}
+        {isLoading && <span className="sr-only">Loading, please wait</span>}
         {!hasTextContent && !ariaLabel && (
           <span className="sr-only">Button</span>
         )}

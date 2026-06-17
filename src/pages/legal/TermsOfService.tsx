@@ -102,7 +102,7 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <SEOHead
         title="Terms of Service | AGI Workforce"
         description="Terms of Service for AGI Workforce platform. Read our terms and conditions for using our AI employee and automation services."
@@ -119,7 +119,7 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
       />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/5 to-transparent px-4 pb-12 pt-32 sm:px-6 lg:px-8">
+      <section className="from-primary/5 bg-gradient-to-b to-transparent px-4 pt-32 pb-12 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -134,10 +134,10 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
             <h1 className="mb-6 text-5xl font-bold md:text-6xl">
               Terms of Service
             </h1>
-            <p className="mb-4 text-lg text-muted-foreground">
+            <p className="text-muted-foreground mb-4 text-lg">
               Last updated: {lastUpdated}
             </p>
-            <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
               Please read these terms carefully before using our platform.
             </p>
           </motion.div>
@@ -154,15 +154,15 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="glass rounded-2xl border border-border/50 p-8"
+              className="glass border-border/50 rounded-2xl border p-8"
             >
               <div className="mb-4 flex items-start gap-4">
-                <div className="rounded-xl bg-primary/10 p-3">
-                  <section.icon className="h-6 w-6 text-primary" />
+                <div className="bg-primary/10 rounded-xl p-3">
+                  <section.icon className="text-primary h-6 w-6" />
                 </div>
                 <div className="flex-1">
                   <h2 className="mb-4 text-2xl font-bold">{section.title}</h2>
-                  <div className="whitespace-pre-line leading-relaxed text-muted-foreground">
+                  <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
                     {section.content}
                   </div>
                 </div>
@@ -183,14 +183,14 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
             <h2 className="mb-4 text-3xl font-bold">
               Questions About These Terms?
             </h2>
-            <p className="mb-6 text-lg text-muted-foreground">
+            <p className="text-muted-foreground mb-6 text-lg">
               Contact our legal team for clarification or concerns.
             </p>
             <div className="flex flex-col justify-center gap-4 text-sm sm:flex-row">
               <div>
                 <strong>Email:</strong> legal@agiworkforce.com
               </div>
-              <div className="hidden text-muted-foreground sm:block">|</div>
+              <div className="text-muted-foreground hidden sm:block">|</div>
               <div>
                 <strong>Support:</strong> support@agiworkforce.com
               </div>

@@ -116,7 +116,9 @@ describe('ProtectedRoute', () => {
   describe('authentication', () => {
     it('should render children when user is authenticated', () => {
       renderWithRouter({
-        user: { id: 'test-user', email: 'test@example.com' } as ReturnType<typeof useAuthStore>['user'],
+        user: { id: 'test-user', email: 'test@example.com' } as ReturnType<
+          typeof useAuthStore
+        >['user'],
         isAuthenticated: true,
         isLoading: false,
       });
@@ -150,7 +152,11 @@ describe('ProtectedRoute', () => {
   describe('role-based access', () => {
     it('should allow admin access for admin role', () => {
       vi.mocked(useAuthStore).mockReturnValue({
-        user: { id: 'admin-user', email: 'admin@example.com', role: 'admin' } as ReturnType<typeof useAuthStore>['user'],
+        user: {
+          id: 'admin-user',
+          email: 'admin@example.com',
+          role: 'admin',
+        } as ReturnType<typeof useAuthStore>['user'],
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -190,7 +196,11 @@ describe('ProtectedRoute', () => {
 
     it('should redirect non-admin users from admin routes', () => {
       vi.mocked(useAuthStore).mockReturnValue({
-        user: { id: 'user', email: 'user@example.com', role: 'user' } as ReturnType<typeof useAuthStore>['user'],
+        user: {
+          id: 'user',
+          email: 'user@example.com',
+          role: 'user',
+        } as ReturnType<typeof useAuthStore>['user'],
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -233,7 +243,9 @@ describe('ProtectedRoute', () => {
   describe('session timeout', () => {
     it('should render SessionTimeoutWarning when warning is active', () => {
       vi.mocked(useAuthStore).mockReturnValue({
-        user: { id: 'test-user', email: 'test@example.com' } as ReturnType<typeof useAuthStore>['user'],
+        user: { id: 'test-user', email: 'test@example.com' } as ReturnType<
+          typeof useAuthStore
+        >['user'],
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -285,7 +297,9 @@ describe('ProtectedRoute', () => {
 
     it('should not render SessionTimeoutWarning when timeout enforcement is disabled', () => {
       vi.mocked(useAuthStore).mockReturnValue({
-        user: { id: 'test-user', email: 'test@example.com' } as ReturnType<typeof useAuthStore>['user'],
+        user: { id: 'test-user', email: 'test@example.com' } as ReturnType<
+          typeof useAuthStore
+        >['user'],
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -332,7 +346,9 @@ describe('ProtectedRoute', () => {
       // Content should still be visible
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
       // Warning dialog should NOT be shown
-      expect(screen.queryByText('Session Expiring Soon')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Session Expiring Soon')
+      ).not.toBeInTheDocument();
     });
   });
 });

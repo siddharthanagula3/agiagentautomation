@@ -48,17 +48,14 @@ export async function openBillingPortal(customerId: string): Promise<void> {
     throw new Error('User not authenticated. Please log in to access billing.');
   }
 
-  const response = await fetch(
-    '/.netlify/functions/payments/get-billing-portal',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authToken}`,
-      },
-      body: JSON.stringify({ customerId }),
-    }
-  );
+  const response = await fetch('/api/payments/get-billing-portal', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ customerId }),
+  });
 
   if (!response.ok) {
     const error = await response.json();
@@ -138,17 +135,14 @@ async function upgradeToPlan(data: {
   }
 
   // Call Netlify function to create subscription checkout session
-  const response = await fetch(
-    '/.netlify/functions/payments/create-pro-subscription',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authToken}`,
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch('/api/payments/create-pro-subscription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify(data),
+  });
 
   if (!response.ok) {
     const error = await response.json();

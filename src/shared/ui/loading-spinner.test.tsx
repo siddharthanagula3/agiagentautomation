@@ -110,7 +110,9 @@ describe('LoadingSpinner Component', () => {
   describe('Accessibility', () => {
     it('should have accessible name from aria-label', () => {
       render(<LoadingSpinner />);
-      expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('status', { name: 'Loading' })
+      ).toBeInTheDocument();
     });
 
     it('should have sr-only text for additional context', () => {
@@ -146,7 +148,7 @@ describe('LoadingSpinner Component', () => {
 
     it('should work as a page loading indicator', () => {
       render(
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex h-screen items-center justify-center">
           <LoadingSpinner size="lg" />
         </div>
       );
@@ -249,7 +251,7 @@ describe('LoadingSpinner Component', () => {
     it('should work inline with text', () => {
       render(
         <span>
-          <LoadingSpinner size="sm" className="inline-block mr-1" />
+          <LoadingSpinner size="sm" className="mr-1 inline-block" />
           <span>Processing...</span>
         </span>
       );

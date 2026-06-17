@@ -26,7 +26,7 @@ async function getAuthToken(): Promise<string | null> {
 }
 
 // All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/llm-proxies/anthropic-proxy
+// Proxy endpoints: /api/llm-proxies/anthropic-proxy
 
 export interface AnthropicMessage {
   role: 'user' | 'assistant' | 'system';
@@ -306,7 +306,7 @@ export class AnthropicProvider {
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/anthropic-proxy';
+      const proxyUrl = '/api/llm-proxies/anthropic-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -506,7 +506,7 @@ export class AnthropicProvider {
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/anthropic-proxy';
+      const proxyUrl = '/api/llm-proxies/anthropic-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();

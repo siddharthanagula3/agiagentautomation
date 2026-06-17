@@ -24,7 +24,8 @@ const alertVariants = cva(
 );
 
 interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof alertVariants> {
   /**
    * For time-sensitive alerts, use 'assertive' to interrupt screen readers.
@@ -39,10 +40,20 @@ interface AlertProps
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, 'aria-live': ariaLive, 'aria-atomic': ariaAtomic = true, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      'aria-live': ariaLive,
+      'aria-atomic': ariaAtomic = true,
+      ...props
+    },
+    ref
+  ) => {
     // Destructive alerts should be more assertive by default
-    const liveValue = ariaLive ?? (variant === 'destructive' ? 'assertive' : 'polite');
-    
+    const liveValue =
+      ariaLive ?? (variant === 'destructive' ? 'assertive' : 'polite');
+
     return (
       <div
         ref={ref}
@@ -63,7 +74,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn('mb-1 font-medium leading-none tracking-tight', className)}
+    className={cn('mb-1 leading-none font-medium tracking-tight', className)}
     {...props}
   />
 ));

@@ -175,20 +175,26 @@ export const useChatHistory = () => {
           return;
         }
 
-        // Check if session exists in cached sessions
-        const cachedSession = sessions.find((s) => s.id === sessionId);
-        if (cachedSession) {
-          setCurrentSessionId(sessionId);
+        // Always set the current session ID first to update selection state
+        setCurrentSessionId(sessionId);
+
+        // If sessions are loading, skip checking database cache/invalidation for now
+        if (isLoading) {
           return;
         }
 
-        // Otherwise fetch from database
+        // Check if session exists in cached sessions
+        const cachedSession = sessions.find((s) => s.id === sessionId);
+        if (cachedSession) {
+          return;
+        }
+
+        // Otherwise fetch from database (could be archived or another user's public chat)
         const session = await chatPersistenceService.getSession(
           sessionId,
           user.id
         );
         if (session) {
-          setCurrentSessionId(sessionId);
           // Invalidate sessions cache to include this session
           queryClient.invalidateQueries({
             queryKey: queryKeys.chat.sessions(user.id),
@@ -201,7 +207,7 @@ export const useChatHistory = () => {
         toast.error('Failed to load chat');
       }
     },
-    [sessions, queryClient]
+    [sessions, isLoading, queryClient]
   );
 
   // Star/unstar session

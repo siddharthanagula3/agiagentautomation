@@ -18,9 +18,8 @@ export default defineConfig(({ mode }) => {
   // Local development URLs
   const supabaseUrl =
     process.env.VITE_SUPABASE_URL || (isDev ? 'http://localhost:54321' : '');
-  const netlifyFunctionsUrl = isDev ? 'http://localhost:8888' : '';
   const stripeWebhookUrl = isDev
-    ? 'http://localhost:8888/.netlify/functions/payments/stripe-webhook'
+    ? 'http://localhost:8000/api/payments/stripe-webhook'
     : '';
 
   return {
@@ -65,12 +64,6 @@ export default defineConfig(({ mode }) => {
               changeOrigin: true,
               secure: false,
               rewrite: (path) => path.replace(/^\/supabase/, ''),
-            },
-            // Netlify Functions local development proxy
-            '/.netlify/functions': {
-              target: netlifyFunctionsUrl,
-              changeOrigin: true,
-              secure: false,
             },
             // Stripe webhook proxy for local development
             '/stripe-webhook': {

@@ -119,8 +119,8 @@ export function TokenAnalyticsDashboard() {
     return (
       <div className="flex h-full items-center justify-center p-12">
         <div className="text-center">
-          <Activity className="mx-auto mb-4 h-12 w-12 animate-pulse text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading analytics...</p>
+          <Activity className="text-muted-foreground mx-auto mb-4 h-12 w-12 animate-pulse" />
+          <p className="text-muted-foreground text-sm">Loading analytics...</p>
         </div>
       </div>
     );
@@ -132,7 +132,7 @@ export function TokenAnalyticsDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Token Usage Analytics</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Track your AI usage, costs, and trends
           </p>
         </div>
@@ -167,11 +167,11 @@ export function TokenAnalyticsDashboard() {
           <Card className="p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Total Tokens</p>
+                <p className="text-muted-foreground text-xs">Total Tokens</p>
                 <p className="mt-1 text-2xl font-bold">
                   {formatNumber(stats.totalTokens)}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   Avg: {formatNumber(stats.avgTokensPerSession)} per session
                 </p>
               </div>
@@ -183,11 +183,11 @@ export function TokenAnalyticsDashboard() {
           <Card className="p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Total Cost</p>
+                <p className="text-muted-foreground text-xs">Total Cost</p>
                 <p className="mt-1 text-2xl font-bold">
                   {formatCost(stats.totalCost)}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   {stats.sessionsCount} sessions
                 </p>
               </div>
@@ -199,11 +199,11 @@ export function TokenAnalyticsDashboard() {
           <Card className="p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Today</p>
+                <p className="text-muted-foreground text-xs">Today</p>
                 <p className="mt-1 text-2xl font-bold">
                   {formatNumber(stats.todayTokens)}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   {formatCost(stats.todayCost)}
                 </p>
               </div>
@@ -215,11 +215,11 @@ export function TokenAnalyticsDashboard() {
           <Card className="p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">This Week</p>
+                <p className="text-muted-foreground text-xs">This Week</p>
                 <p className="mt-1 text-2xl font-bold">
                   {formatNumber(stats.weekTokens)}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   {formatCost(stats.weekCost)}
                 </p>
               </div>
@@ -244,11 +244,11 @@ export function TokenAnalyticsDashboard() {
                   key={`daily-usage-${day.date}`}
                   className="flex items-center gap-3"
                 >
-                  <span className="w-20 text-xs text-muted-foreground">
+                  <span className="text-muted-foreground w-20 text-xs">
                     {format(new Date(day.date), 'MMM d')}
                   </span>
                   <div className="flex-1">
-                    <div className="h-6 w-full rounded bg-muted">
+                    <div className="bg-muted h-6 w-full rounded">
                       <div
                         className="h-full rounded bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
                         style={{ width: `${percentage}%` }}
@@ -258,7 +258,7 @@ export function TokenAnalyticsDashboard() {
                   <span className="w-24 text-right text-xs font-medium">
                     {formatNumber(day.tokens)}
                   </span>
-                  <span className="w-20 text-right text-xs text-muted-foreground">
+                  <span className="text-muted-foreground w-20 text-right text-xs">
                     {formatCost(day.cost)}
                   </span>
                 </div>
@@ -281,7 +281,7 @@ export function TokenAnalyticsDashboard() {
               .map((session, idx) => (
                 <div
                   key={session.sessionId}
-                  className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent"
+                  className="hover:bg-accent flex items-center justify-between rounded-lg border p-3 transition-colors"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <Badge
@@ -294,7 +294,7 @@ export function TokenAnalyticsDashboard() {
                       <p className="truncate text-sm font-medium">
                         {session.sessionTitle}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {format(session.createdAt, 'MMM d, yyyy h:mm a')}
                       </p>
                     </div>
@@ -304,13 +304,13 @@ export function TokenAnalyticsDashboard() {
                       <p className="text-sm font-semibold">
                         {formatNumber(session.totalTokens)}
                       </p>
-                      <p className="text-xs text-muted-foreground">tokens</p>
+                      <p className="text-muted-foreground text-xs">tokens</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold">
                         {formatCost(session.totalCost)}
                       </p>
-                      <p className="text-xs text-muted-foreground">cost</p>
+                      <p className="text-muted-foreground text-xs">cost</p>
                     </div>
                     <Badge variant="outline" className="text-xs">
                       {session.provider}
@@ -325,11 +325,11 @@ export function TokenAnalyticsDashboard() {
       {usageData.length === 0 && (
         <Card className="p-12">
           <div className="text-center">
-            <BarChart3 className="mx-auto mb-4 h-12 w-12 text-muted-foreground opacity-30" />
-            <p className="text-sm text-muted-foreground">
+            <BarChart3 className="text-muted-foreground mx-auto mb-4 h-12 w-12 opacity-30" />
+            <p className="text-muted-foreground text-sm">
               No usage data for this period
             </p>
-            <p className="mt-1 text-xs text-muted-foreground/70">
+            <p className="text-muted-foreground/70 mt-1 text-xs">
               Start a conversation to see analytics
             </p>
           </div>

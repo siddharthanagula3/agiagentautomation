@@ -103,9 +103,9 @@ const SecurityPage: React.FC = () => {
         ]}
       />
 
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-background to-muted/20 px-4 py-20 sm:px-6 lg:px-8">
+        <section className="border-border from-background to-muted/20 relative overflow-hidden border-b bg-gradient-to-b px-4 py-20 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-4xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -119,7 +119,7 @@ const SecurityPage: React.FC = () => {
               <h1 className="mb-6 text-5xl font-bold tracking-tight md:text-6xl">
                 Your Data is Protected
               </h1>
-              <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
+              <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
                 We take security seriously. Learn about our comprehensive
                 security measures, compliance standards, and commitment to
                 protecting your data.
@@ -144,7 +144,7 @@ const SecurityPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <Card className="h-full border-border transition-all hover:border-primary/50">
+                    <Card className="border-border hover:border-primary/50 h-full transition-all">
                       <CardHeader>
                         <div
                           className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${feature.color}`}
@@ -167,7 +167,7 @@ const SecurityPage: React.FC = () => {
         </section>
 
         {/* Compliance Standards */}
-        <section className="border-t border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8">
+        <section className="border-border bg-muted/30 border-t px-4 py-16 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-4xl">
             <h2 className="mb-12 text-center text-3xl font-bold">
               Compliance Standards
@@ -181,7 +181,7 @@ const SecurityPage: React.FC = () => {
                     className="border-border text-center"
                   >
                     <CardHeader>
-                      <Icon className="mx-auto mb-4 h-12 w-12 text-primary" />
+                      <Icon className="text-primary mx-auto mb-4 h-12 w-12" />
                       <CardTitle>{standard.name}</CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -227,7 +227,7 @@ const SecurityPage: React.FC = () => {
         </section>
 
         {/* Data Protection */}
-        <section className="border-t border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8">
+        <section className="border-border bg-muted/30 border-t px-4 py-16 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-4xl">
             <Card className="border-border">
               <CardHeader>
@@ -241,7 +241,7 @@ const SecurityPage: React.FC = () => {
                   We are committed to protecting your data and privacy. Here's
                   what you need to know:
                 </p>
-                <ul className="list-disc space-y-2 pl-6 text-muted-foreground">
+                <ul className="text-muted-foreground list-disc space-y-2 pl-6">
                   <li>
                     <strong>Data Ownership:</strong> You own all your data. We
                     never sell or share your data with third parties.
@@ -290,7 +290,7 @@ const SecurityPage: React.FC = () => {
                 <CardTitle>Security Questions?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="mb-6 text-muted-foreground">
+                <p className="text-muted-foreground mb-6">
                   If you have security concerns or questions, please contact our
                   security team.
                 </p>

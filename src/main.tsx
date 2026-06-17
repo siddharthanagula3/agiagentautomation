@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Toaster } from 'sonner';
 import * as Sentry from '@sentry/react';
 import AppRouter from './AppRouter';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
@@ -181,7 +180,6 @@ export const Main = () => (
             <AppRouter />
             <Analytics />
             <SpeedInsights />
-            <Toaster position="top-right" richColors />
             {import.meta.env.DEV && (
               <ReactQueryDevtools initialIsOpen={false} />
             )}

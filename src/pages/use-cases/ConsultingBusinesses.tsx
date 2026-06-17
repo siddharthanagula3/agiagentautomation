@@ -106,7 +106,7 @@ const ConsultingBusinessesPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <Particles
         className="absolute inset-0 -z-10"
         quantity={50}
@@ -114,7 +114,7 @@ const ConsultingBusinessesPage: React.FC = () => {
       />
 
       {/* Hero */}
-      <section className="px-4 pb-20 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <motion.div
@@ -122,18 +122,18 @@ const ConsultingBusinessesPage: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+              <div className="bg-primary/10 text-primary mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
                 <Briefcase size={16} />
                 For Consulting Businesses
               </div>
-              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
+              <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
                 Replace $120K Consultants with $29/Month AI ($24.99/month if
                 billed yearly)
               </h1>
-              <p className="mb-4 text-2xl font-semibold text-foreground">
+              <p className="text-foreground mb-4 text-2xl font-semibold">
                 Save 99.8% • Serve 3x More Clients • Boost Margins 60%
               </p>
-              <p className="mb-8 text-xl text-muted-foreground">
+              <p className="text-muted-foreground mb-8 text-xl">
                 Junior analysts cost $120K+/year. AI employees do research, data
                 analysis, reports, and client comms for $29/month ($24.99/month
                 if billed yearly). Keep senior partners billable while AI
@@ -143,7 +143,7 @@ const ConsultingBusinessesPage: React.FC = () => {
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-primary to-accent"
+                  className="from-primary to-accent bg-gradient-to-r"
                   onClick={handleStartTrial}
                   aria-label={
                     user
@@ -200,7 +200,7 @@ const ConsultingBusinessesPage: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="rounded-2xl border border-border/40 bg-background/60 p-8 backdrop-blur-xl"
+                  className="border-border/40 bg-background/60 rounded-2xl border p-8 backdrop-blur-xl"
                   whileHover={{ y: -8 }}
                 >
                   <div
@@ -218,7 +218,7 @@ const ConsultingBusinessesPage: React.FC = () => {
       </section>
 
       {/* Use Cases */}
-      <section className="bg-gradient-to-b from-background to-accent/5 px-4 py-20 sm:px-6 lg:px-8">
+      <section className="from-background to-accent/5 bg-gradient-to-b px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -236,10 +236,10 @@ const ConsultingBusinessesPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="rounded-2xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl"
+                className="border-border/40 bg-background/60 rounded-2xl border p-6 backdrop-blur-xl"
               >
                 <h3 className="mb-3 text-xl font-bold">{useCase.title}</h3>
-                <p className="mb-4 text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   {useCase.description}
                 </p>
                 <div className="space-y-2">
@@ -300,10 +300,10 @@ const ConsultingBusinessesPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="rounded-2xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl"
+                className="border-border/40 bg-background/60 rounded-2xl border p-6 backdrop-blur-xl"
               >
                 <h3 className="mb-2 text-lg font-bold">{item.type}</h3>
-                <p className="text-sm text-muted-foreground">{item.use}</p>
+                <p className="text-muted-foreground text-sm">{item.use}</p>
               </motion.div>
             ))}
           </div>
@@ -317,7 +317,7 @@ const ConsultingBusinessesPage: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl border border-border/40 bg-background/60 p-12 backdrop-blur-xl"
+            className="border-border/40 bg-background/60 rounded-3xl border p-12 backdrop-blur-xl"
           >
             <div className="mb-6 text-4xl opacity-20">"</div>
             <p className="mb-8 text-2xl font-medium">
@@ -329,7 +329,7 @@ const ConsultingBusinessesPage: React.FC = () => {
               <span className="text-4xl">👩‍💼</span>
               <div>
                 <div className="font-bold">Jennifer Adams</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-muted-foreground text-sm">
                   Managing Partner, Apex Consulting
                 </div>
               </div>
@@ -345,7 +345,7 @@ const ConsultingBusinessesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
+            className="from-primary via-accent to-secondary rounded-3xl bg-gradient-to-r p-6 text-center text-white sm:p-8 md:p-12"
           >
             <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Ready to Scale Your Practice?

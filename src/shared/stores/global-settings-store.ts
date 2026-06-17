@@ -116,12 +116,11 @@ const INITIAL_STATE: AppState = {
   },
   version: import.meta.env.VITE_APP_VERSION || '1.0.0',
   buildNumber: import.meta.env.VITE_BUILD_NUMBER || 'dev',
-  environment:
-    (import.meta.env.MODE === 'production'
-      ? 'production'
-      : import.meta.env.MODE === 'staging'
-        ? 'staging'
-        : 'development') as AppEnvironment,
+  environment: (import.meta.env.MODE === 'production'
+    ? 'production'
+    : import.meta.env.MODE === 'staging'
+      ? 'staging'
+      : 'development') as AppEnvironment,
 };
 
 // SECURITY FIX: Only enable devtools in development/staging, not production

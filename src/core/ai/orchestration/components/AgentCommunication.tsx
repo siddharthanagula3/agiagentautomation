@@ -118,7 +118,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
       case 'completion':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       default:
-        return <MessageSquare className="h-4 w-4 text-muted-foreground" />;
+        return <MessageSquare className="text-muted-foreground h-4 w-4" />;
     }
   };
 
@@ -137,7 +137,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
       case 'failed':
         return <AlertCircle className="h-4 w-4 text-red-600" />;
       default:
-        return <Clock className="h-4 w-4 text-muted-foreground" />;
+        return <Clock className="text-muted-foreground h-4 w-4" />;
     }
   };
 
@@ -204,7 +204,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 rounded-lg bg-muted p-1">
+      <div className="bg-muted flex space-x-1 rounded-lg p-1">
         <Button
           variant={activeTab === 'messages' ? 'default' : 'ghost'}
           size="sm"
@@ -297,14 +297,14 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="animate-pulse">
-                      <div className="mb-2 h-4 w-1/4 rounded bg-muted"></div>
-                      <div className="h-3 w-1/2 rounded bg-muted"></div>
+                      <div className="bg-muted mb-2 h-4 w-1/4 rounded"></div>
+                      <div className="bg-muted h-3 w-1/2 rounded"></div>
                     </div>
                   ))}
                 </div>
               ) : messages.length === 0 ? (
                 <div className="py-8 text-center">
-                  <MessageSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <MessageSquare className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
                   <h3 className="mb-2 text-lg font-semibold">No Messages</h3>
                   <p className="text-muted-foreground">
                     No messages received yet.
@@ -316,7 +316,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                     {messages.map((message) => (
                       <div
                         key={message.id}
-                        className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/50"
+                        className="hover:bg-muted/50 flex items-start space-x-3 rounded-lg border p-4"
                       >
                         <div className="mt-1 flex-shrink-0">
                           {getMessageIcon(message.messageType)}
@@ -341,16 +341,16 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                             </div>
                             <div className="flex items-center space-x-2">
                               {getStatusIcon(message.status)}
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs">
                                 {formatTimestamp(message.createdAt)}
                               </span>
                             </div>
                           </div>
-                          <p className="mb-2 text-sm text-foreground">
+                          <p className="text-foreground mb-2 text-sm">
                             {message.content}
                           </p>
                           {message.taskId && (
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-muted-foreground text-xs">
                               Task ID: {message.taskId}
                             </div>
                           )}
@@ -377,14 +377,14 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="animate-pulse">
-                      <div className="mb-2 h-4 w-1/4 rounded bg-muted"></div>
-                      <div className="h-3 w-1/2 rounded bg-muted"></div>
+                      <div className="bg-muted mb-2 h-4 w-1/4 rounded"></div>
+                      <div className="bg-muted h-3 w-1/2 rounded"></div>
                     </div>
                   ))}
                 </div>
               ) : delegations.length === 0 ? (
                 <div className="py-8 text-center">
-                  <Workflow className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <Workflow className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
                   <h3 className="mb-2 text-lg font-semibold">No Delegations</h3>
                   <p className="text-muted-foreground">
                     No task delegations received yet.
@@ -395,14 +395,14 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                   {delegations.map((delegation) => (
                     <div
                       key={delegation.id}
-                      className="rounded-lg border p-4 hover:bg-muted/50"
+                      className="hover:bg-muted/50 rounded-lg border p-4"
                     >
                       <div className="mb-4 flex items-start justify-between">
                         <div>
                           <h4 className="font-semibold">
                             {delegation.task.title}
                           </h4>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             From: {delegation.delegatorId}
                           </p>
                         </div>
@@ -421,7 +421,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                         </div>
                       </div>
 
-                      <p className="mb-4 text-sm text-foreground">
+                      <p className="text-foreground mb-4 text-sm">
                         {delegation.task.description}
                       </p>
 
@@ -430,7 +430,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                           <span className="text-sm font-medium">
                             Requirements:
                           </span>
-                          <ul className="ml-4 text-sm text-muted-foreground">
+                          <ul className="text-muted-foreground ml-4 text-sm">
                             {delegation.task.requirements.map((req, index) => (
                               <li key={index}>• {req}</li>
                             ))}
@@ -440,7 +440,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                           <span className="text-sm font-medium">
                             Expected Output:
                           </span>
-                          <p className="ml-4 text-sm text-muted-foreground">
+                          <p className="text-muted-foreground ml-4 text-sm">
                             {delegation.task.expectedOutput}
                           </p>
                         </div>
@@ -449,7 +449,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                             <span className="text-sm font-medium">
                               Deadline:
                             </span>
-                            <span className="ml-2 text-sm text-muted-foreground">
+                            <span className="text-muted-foreground ml-2 text-sm">
                               {delegation.task.deadline.toLocaleDateString()}
                             </span>
                           </div>
@@ -489,9 +489,9 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                       )}
 
                       {delegation.result && (
-                        <div className="mt-4 rounded bg-muted p-3">
+                        <div className="bg-muted mt-4 rounded p-3">
                           <h5 className="mb-2 text-sm font-medium">Result:</h5>
-                          <p className="text-sm text-foreground">
+                          <p className="text-foreground text-sm">
                             {delegation.result.output}
                           </p>
                         </div>

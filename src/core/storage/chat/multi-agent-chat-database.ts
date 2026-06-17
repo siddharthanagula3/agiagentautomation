@@ -340,11 +340,12 @@ export async function listConversations(
       }
     }
 
-    const conversationsWithParticipants: ConversationWithParticipants[] =
-      (conversations ?? []).map((conv) => ({
-        ...conv,
-        participants: participantsMap[conv.id] ?? [],
-      }));
+    const conversationsWithParticipants: ConversationWithParticipants[] = (
+      conversations ?? []
+    ).map((conv) => ({
+      ...conv,
+      participants: participantsMap[conv.id] ?? [],
+    }));
 
     return {
       conversations: conversationsWithParticipants,

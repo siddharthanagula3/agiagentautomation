@@ -252,7 +252,7 @@ export function VibeMessageInput({
   return (
     <div
       className={cn(
-        'border-t border-gray-200 bg-background dark:border-gray-800',
+        'bg-background border-t border-gray-200 dark:border-gray-800',
         className
       )}
     >
@@ -263,13 +263,13 @@ export function VibeMessageInput({
             {selectedFiles.map((file, fileIndex) => (
               <div
                 key={`selected-file-${file.name}-${file.size}`}
-                className="flex items-center gap-2 rounded-md bg-muted px-3 py-1.5 text-sm"
+                className="bg-muted flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
               >
                 <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="max-w-[200px] truncate">{file.name}</span>
                 <button
                   onClick={() => removeFile(fileIndex)}
-                  className="ml-1 text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground ml-1"
                   aria-label={`Remove file ${file.name}`}
                 >
                   ×
@@ -292,11 +292,11 @@ export function VibeMessageInput({
               disabled={isLoading}
               className={cn(
                 'max-h-[200px] min-h-[80px] w-full rounded-lg px-4 py-3',
-                'border border-input bg-background',
+                'border-input bg-background border',
                 'resize-none',
-                'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none',
                 'disabled:cursor-not-allowed disabled:opacity-50',
-                'text-sm placeholder:text-muted-foreground'
+                'placeholder:text-muted-foreground text-sm'
               )}
               rows={1}
               aria-label="Message input"
@@ -304,7 +304,7 @@ export function VibeMessageInput({
 
             {/* Character count (optional) */}
             {input.length > 0 && (
-              <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+              <div className="text-muted-foreground absolute right-2 bottom-2 text-xs">
                 {input.length}
               </div>
             )}
@@ -313,7 +313,7 @@ export function VibeMessageInput({
             {showMentions && mentionSuggestions.length > 0 && (
               <div
                 ref={mentionPopoverRef}
-                className="absolute bottom-full left-0 z-50 mb-2 w-80 rounded-lg border border-border bg-popover shadow-lg"
+                className="border-border bg-popover absolute bottom-full left-0 z-50 mb-2 w-80 rounded-lg border shadow-lg"
                 role="listbox"
                 aria-label={
                   mentionType === 'agent'
@@ -321,12 +321,12 @@ export function VibeMessageInput({
                     : 'Select file to mention'
                 }
               >
-                <div className="border-b border-border bg-muted/30 p-2">
+                <div className="border-border bg-muted/30 border-b p-2">
                   <div className="flex items-center gap-2 text-sm">
                     {mentionType === 'agent' ? (
                       <>
                         <AtSign
-                          className="h-4 w-4 text-primary"
+                          className="text-primary h-4 w-4"
                           aria-hidden="true"
                         />
                         <span className="font-medium">Mention Agent</span>
@@ -334,13 +334,13 @@ export function VibeMessageInput({
                     ) : (
                       <>
                         <Hash
-                          className="h-4 w-4 text-primary"
+                          className="text-primary h-4 w-4"
                           aria-hidden="true"
                         />
                         <span className="font-medium">Mention File</span>
                       </>
                     )}
-                    <span className="ml-auto text-xs text-muted-foreground">
+                    <span className="text-muted-foreground ml-auto text-xs">
                       {mentionQuery ? `"${mentionQuery}"` : 'All'}
                     </span>
                   </div>
@@ -364,9 +364,9 @@ export function VibeMessageInput({
                       >
                         {suggestion.type === 'agent' ? (
                           <>
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                            <div className="bg-primary/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                               <User
-                                className="h-4 w-4 text-primary"
+                                className="text-primary h-4 w-4"
                                 aria-hidden="true"
                               />
                             </div>
@@ -375,7 +375,7 @@ export function VibeMessageInput({
                                 {suggestion.name}
                               </div>
                               {suggestion.role && (
-                                <div className="truncate text-xs text-muted-foreground">
+                                <div className="text-muted-foreground truncate text-xs">
                                   {suggestion.role}
                                 </div>
                               )}
@@ -383,9 +383,9 @@ export function VibeMessageInput({
                           </>
                         ) : (
                           <>
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                            <div className="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
                               <FileIcon
-                                className="h-4 w-4 text-muted-foreground"
+                                className="text-muted-foreground h-4 w-4"
                                 aria-hidden="true"
                               />
                             </div>
@@ -394,7 +394,7 @@ export function VibeMessageInput({
                                 {suggestion.name}
                               </div>
                               {suggestion.path && (
-                                <div className="truncate text-xs text-muted-foreground">
+                                <div className="text-muted-foreground truncate text-xs">
                                   {suggestion.path}
                                 </div>
                               )}
@@ -406,22 +406,22 @@ export function VibeMessageInput({
                   </div>
                 </ScrollArea>
 
-                <div className="border-t border-border bg-muted/30 p-2">
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <div className="border-border bg-muted/30 border-t p-2">
+                  <div className="text-muted-foreground flex items-center gap-4 text-xs">
                     <div className="flex items-center gap-1">
-                      <kbd className="rounded bg-background px-1.5 py-0.5 text-xs">
+                      <kbd className="bg-background rounded px-1.5 py-0.5 text-xs">
                         ↑↓
                       </kbd>
                       <span>Navigate</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <kbd className="rounded bg-background px-1.5 py-0.5 text-xs">
+                      <kbd className="bg-background rounded px-1.5 py-0.5 text-xs">
                         Tab
                       </kbd>
                       <span>Select</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <kbd className="rounded bg-background px-1.5 py-0.5 text-xs">
+                      <kbd className="bg-background rounded px-1.5 py-0.5 text-xs">
                         Esc
                       </kbd>
                       <span>Close</span>
@@ -487,11 +487,11 @@ export function VibeMessageInput({
         </div>
 
         {/* Helper Text */}
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-xs">
           Press{' '}
-          <kbd className="rounded bg-muted px-1.5 py-0.5 text-xs">Enter</kbd> to
+          <kbd className="bg-muted rounded px-1.5 py-0.5 text-xs">Enter</kbd> to
           send,{' '}
-          <kbd className="rounded bg-muted px-1.5 py-0.5 text-xs">
+          <kbd className="bg-muted rounded px-1.5 py-0.5 text-xs">
             Shift+Enter
           </kbd>{' '}
           for new line

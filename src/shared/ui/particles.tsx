@@ -8,7 +8,11 @@ interface ParticleData {
   size: number;
 }
 
-function createParticle(canvasWidth: number, canvasHeight: number, ease: number): ParticleData {
+function createParticle(
+  canvasWidth: number,
+  canvasHeight: number,
+  ease: number
+): ParticleData {
   return {
     x: Math.random() * canvasWidth,
     y: Math.random() * canvasHeight,
@@ -18,7 +22,11 @@ function createParticle(canvasWidth: number, canvasHeight: number, ease: number)
   };
 }
 
-function updateParticle(particle: ParticleData, canvasWidth: number, canvasHeight: number): void {
+function updateParticle(
+  particle: ParticleData,
+  canvasWidth: number,
+  canvasHeight: number
+): void {
   particle.x += particle.vx;
   particle.y += particle.vy;
 
@@ -26,7 +34,10 @@ function updateParticle(particle: ParticleData, canvasWidth: number, canvasHeigh
   if (particle.y < 0 || particle.y > canvasHeight) particle.vy = -particle.vy;
 }
 
-function drawParticle(particle: ParticleData, ctx: CanvasRenderingContext2D): void {
+function drawParticle(
+  particle: ParticleData,
+  ctx: CanvasRenderingContext2D
+): void {
   ctx.fillStyle = 'rgba(139, 92, 246, 0.5)'; // primary color with opacity
   ctx.beginPath();
   ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);

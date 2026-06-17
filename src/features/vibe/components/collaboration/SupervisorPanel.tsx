@@ -62,16 +62,16 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
   return (
     <Card className={cn('overflow-hidden', className)}>
       {/* Header */}
-      <div className="border-b bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3">
+      <div className="from-primary/10 to-primary/5 border-b bg-gradient-to-r px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
               <Avatar className="h-10 w-10">
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary/70 font-semibold text-primary-foreground">
+                <div className="from-primary to-primary/70 text-primary-foreground flex h-full w-full items-center justify-center bg-gradient-to-br font-semibold">
                   {supervisor.employee.name.charAt(0).toUpperCase()}
                 </div>
               </Avatar>
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-background bg-green-500" />
+              <div className="border-background absolute -right-1 -bottom-1 h-4 w-4 rounded-full border-2 bg-green-500" />
             </div>
 
             <div>
@@ -81,7 +81,7 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
                   Active
                 </Badge>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 text-xs">
                 {supervisor.employee.name} coordinating {activeAgents.length}{' '}
                 agents
               </p>
@@ -114,20 +114,20 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
               {/* Execution Strategy */}
               <div>
                 <div className="mb-3 flex items-center gap-2">
-                  <strategyConfig.icon className="h-4 w-4 text-primary" />
+                  <strategyConfig.icon className="text-primary h-4 w-4" />
                   <h4 className="text-sm font-semibold">Execution Strategy</h4>
                   <Badge variant="secondary" className="ml-auto text-xs">
                     {strategyConfig.label}
                   </Badge>
                 </div>
-                <p className="mb-3 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mb-3 text-xs">
                   {strategyConfig.description}
                 </p>
 
                 {/* Progress */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       Overall Progress
                     </span>
                     <span className="text-xs font-medium">{progress}%</span>
@@ -141,7 +141,7 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
               {/* Active Agents */}
               <div>
                 <div className="mb-3 flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
+                  <Users className="text-primary h-4 w-4" />
                   <h4 className="text-sm font-semibold">Active Agents</h4>
                   <Badge variant="secondary" className="ml-auto text-xs">
                     {activeAgents.length}
@@ -160,7 +160,7 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
               {/* Task Distribution */}
               <div>
                 <div className="mb-3 flex items-center gap-2">
-                  <GitBranch className="h-4 w-4 text-primary" />
+                  <GitBranch className="text-primary h-4 w-4" />
                   <h4 className="text-sm font-semibold">Task Distribution</h4>
                   <Badge variant="secondary" className="ml-auto text-xs">
                     {plan.tasks.length} tasks
@@ -173,7 +173,7 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
                   ))}
 
                   {plan.tasks.length > 3 && (
-                    <p className="py-2 text-center text-xs text-muted-foreground">
+                    <p className="text-muted-foreground py-2 text-center text-xs">
                       +{plan.tasks.length - 3} more tasks
                     </p>
                   )}
@@ -186,7 +186,7 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
                   <Separator />
                   <div>
                     <div className="mb-2 flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-primary" />
+                      <MessageSquare className="text-primary h-4 w-4" />
                       <h4 className="text-sm font-semibold">Communication</h4>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -223,16 +223,16 @@ const AgentItem: React.FC<AgentItemProps> = ({ agent }) => {
   const statusColor = getStatusColor(agent.status);
 
   return (
-    <div className="flex items-center gap-2 rounded-lg bg-muted/30 p-2 transition-colors hover:bg-muted/50">
+    <div className="bg-muted/30 hover:bg-muted/50 flex items-center gap-2 rounded-lg p-2 transition-colors">
       <div className="relative">
         <Avatar className="h-7 w-7">
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-xs font-semibold text-primary">
+          <div className="from-primary/20 to-primary/5 text-primary flex h-full w-full items-center justify-center bg-gradient-to-br text-xs font-semibold">
             {agent.employee.name.charAt(0).toUpperCase()}
           </div>
         </Avatar>
         <div
           className={cn(
-            'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-background',
+            'border-background absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border',
             statusColor
           )}
         />
@@ -241,14 +241,14 @@ const AgentItem: React.FC<AgentItemProps> = ({ agent }) => {
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-medium">{agent.employee.name}</p>
         {agent.current_task && (
-          <p className="truncate text-xs text-muted-foreground">
+          <p className="text-muted-foreground truncate text-xs">
             {agent.current_task}
           </p>
         )}
       </div>
 
       {agent.progress !== undefined && agent.progress > 0 && (
-        <span className="text-xs font-medium text-muted-foreground">
+        <span className="text-muted-foreground text-xs font-medium">
           {agent.progress}%
         </span>
       )}
@@ -267,7 +267,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
   const priorityConfig = getPriorityConfig(task.priority);
 
   return (
-    <div className="flex items-start gap-2 rounded-lg bg-muted/30 p-2">
+    <div className="bg-muted/30 flex items-start gap-2 rounded-lg p-2">
       <priorityConfig.icon
         className={cn('mt-0.5 h-4 w-4', priorityConfig.color)}
       />
@@ -279,7 +279,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
             {task.assigned_to.name}
           </Badge>
           {task.dependencies.length > 0 && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               • {task.dependencies.length} deps
             </span>
           )}
@@ -299,10 +299,10 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="rounded-lg bg-muted/30 p-3">
+  <div className="bg-muted/30 rounded-lg p-3">
     <div className="mb-1 flex items-center gap-2">
-      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <Icon className="text-muted-foreground h-3.5 w-3.5" />
+      <span className="text-muted-foreground text-xs">{label}</span>
     </div>
     <p className="text-sm font-semibold">{value}</p>
   </div>

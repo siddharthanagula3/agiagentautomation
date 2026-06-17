@@ -255,7 +255,10 @@ export function sanitizeEmployeeInput(
         employeeInjectionResult.confidence
       ),
     }).catch((error) => {
-      logger.error('[Employee Input Sanitizer] Failed to log injection attempt', error);
+      logger.error(
+        '[Employee Input Sanitizer] Failed to log injection attempt',
+        error
+      );
     });
 
     return {
@@ -318,7 +321,10 @@ export function sanitizeEmployeeInput(
       modifications,
       employeeName: fullConfig.employeeName,
     }).catch((error) => {
-      logger.error('[Employee Input Sanitizer] Failed to log suspicious input', error);
+      logger.error(
+        '[Employee Input Sanitizer] Failed to log suspicious input',
+        error
+      );
     });
   }
 

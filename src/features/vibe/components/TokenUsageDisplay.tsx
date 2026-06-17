@@ -44,7 +44,7 @@ export const TokenUsageDisplay: React.FC<TokenUsageDisplayProps> = ({
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-md bg-muted/50 px-3 py-1.5 text-xs">
+    <div className="bg-muted/50 flex items-center gap-3 rounded-md px-3 py-1.5 text-xs">
       <div className="flex items-center gap-1.5">
         <Zap className="h-3.5 w-3.5 text-yellow-500" />
         <span className="font-medium">
@@ -52,7 +52,7 @@ export const TokenUsageDisplay: React.FC<TokenUsageDisplayProps> = ({
         </span>
         <span className="text-muted-foreground">tokens</span>
       </div>
-      <div className="h-3 w-px bg-border" />
+      <div className="bg-border h-3 w-px" />
       <div className="flex items-center gap-1.5">
         <DollarSign className="h-3.5 w-3.5 text-green-500" />
         <span className="font-medium">${usage.totalCost.toFixed(4)}</span>

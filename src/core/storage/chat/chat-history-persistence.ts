@@ -284,7 +284,10 @@ export class ChatPersistenceService {
 
     if (this.isOnline && this.supabase) {
       try {
-        await this.supabase.from('web_conversations').delete().eq('id', sessionId);
+        await this.supabase
+          .from('web_conversations')
+          .delete()
+          .eq('id', sessionId);
 
         await this.supabase
           .from('web_messages')

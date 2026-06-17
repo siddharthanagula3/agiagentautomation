@@ -41,7 +41,7 @@ import { Tabs, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 // Build service API endpoint
-const BUILD_SERVICE_URL = '/.netlify/functions/utilities/vibe-build';
+const BUILD_SERVICE_URL = '/api/utilities/vibe-build';
 
 interface BuildResult {
   success: boolean;
@@ -285,7 +285,12 @@ function LivePreviewPanelContent({
     const handleMessage = (event: MessageEvent) => {
       // Security: validate message origin to prevent cross-origin attacks
       // Allow same-origin and null origin (sandboxed iframes use null origin)
-      if (event.origin !== window.location.origin && event.origin !== 'null' && event.origin !== '') return;
+      if (
+        event.origin !== window.location.origin &&
+        event.origin !== 'null' &&
+        event.origin !== ''
+      )
+        return;
 
       if (event.data?.type === 'console') {
         addConsoleMessage({
@@ -399,11 +404,11 @@ function LivePreviewPanelContent({
   // Use Sandpack mode by default for better browser support
   if (previewMode === 'sandpack') {
     return (
-      <div className="flex h-full flex-col bg-background">
+      <div className="bg-background flex h-full flex-col">
         {/* Mode Toggle Header */}
-        <div className="flex items-center justify-between border-b border-border bg-muted/20 px-3 py-1.5">
+        <div className="border-border bg-muted/20 flex items-center justify-between border-b px-3 py-1.5">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
+            <Sparkles className="text-primary h-4 w-4" />
             <span className="text-xs font-medium">Preview Engine</span>
           </div>
           <Tabs
@@ -467,11 +472,11 @@ function LivePreviewPanelContent({
 
   // Classic preview mode (iframe-based with build service)
   return (
-    <div className="flex h-full flex-col bg-background">
+    <div className="bg-background flex h-full flex-col">
       {/* Mode Toggle Header */}
-      <div className="flex items-center justify-between border-b border-border bg-muted/20 px-3 py-1.5">
+      <div className="border-border bg-muted/20 flex items-center justify-between border-b px-3 py-1.5">
         <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-muted-foreground" />
+          <Layers className="text-muted-foreground h-4 w-4" />
           <span className="text-xs font-medium">Preview Engine</span>
         </div>
         <Tabs
@@ -492,7 +497,7 @@ function LivePreviewPanelContent({
       </div>
 
       {/* Toolbar */}
-      <div className="border-b border-border bg-muted/30 px-3 py-2">
+      <div className="border-border bg-muted/30 border-b px-3 py-2">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-1">
             {/* Viewport Selector */}
@@ -608,7 +613,7 @@ function LivePreviewPanelContent({
             onChange={(e) => setCustomUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLoadUrl()}
             placeholder="Enter URL (e.g., http://localhost:3000)"
-            className="flex-1 rounded-md border border-input bg-background px-2.5 py-1 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="border-input bg-background placeholder:text-muted-foreground focus:ring-ring flex-1 rounded-md border px-2.5 py-1 text-xs focus:ring-2 focus:outline-none"
           />
           <Button
             size="sm"
@@ -624,7 +629,7 @@ function LivePreviewPanelContent({
       {/* Preview Area */}
       <div
         className={cn(
-          'flex-1 overflow-auto bg-gradient-to-br from-muted/20 to-muted/40',
+          'from-muted/20 to-muted/40 flex-1 overflow-auto bg-gradient-to-br',
           showConsole && 'flex-[0.6]'
         )}
       >
@@ -633,7 +638,7 @@ function LivePreviewPanelContent({
         ) : (
           <div className="flex h-full items-center justify-center p-4">
             <div
-              className="relative overflow-hidden rounded-lg border border-border bg-background shadow-2xl transition-all duration-300"
+              className="border-border bg-background relative overflow-hidden rounded-lg border shadow-2xl transition-all duration-300"
               style={{
                 width: currentViewport.width,
                 height: currentViewport.height,
@@ -643,10 +648,10 @@ function LivePreviewPanelContent({
             >
               {/* Loading Overlay */}
               {appViewerState.isLoading && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+                <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
                   <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">
+                    <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                    <span className="text-muted-foreground text-sm">
                       Loading preview...
                     </span>
                   </div>
@@ -682,12 +687,12 @@ function LivePreviewPanelContent({
       {showConsole && (
         <div
           className={cn(
-            'flex flex-col border-t border-border bg-black/95',
+            'border-border flex flex-col border-t bg-black/95',
             'flex-[0.4]'
           )}
         >
           {/* Console Header */}
-          <div className="flex items-center justify-between border-b border-border/50 px-3 py-1.5">
+          <div className="border-border/50 flex items-center justify-between border-b px-3 py-1.5">
             <div className="flex items-center gap-2">
               <Terminal className="h-3.5 w-3.5 text-green-500" />
               <span className="text-xs font-semibold text-white">Console</span>
@@ -757,14 +762,14 @@ function EmptyPreviewState() {
   return (
     <div className="flex h-full items-center justify-center p-8 text-center">
       <div>
-        <Monitor className="mx-auto mb-4 h-16 w-16 text-muted-foreground opacity-40" />
-        <h3 className="mb-2 text-sm font-medium text-foreground">
+        <Monitor className="text-muted-foreground mx-auto mb-4 h-16 w-16 opacity-40" />
+        <h3 className="text-foreground mb-2 text-sm font-medium">
           No preview available
         </h3>
-        <p className="mb-1 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mb-1 text-xs">
           Enter a URL above or wait for the agent to generate a preview
         </p>
-        <p className="text-xs text-muted-foreground/70">
+        <p className="text-muted-foreground/70 text-xs">
           Live previews appear here in real-time
         </p>
       </div>

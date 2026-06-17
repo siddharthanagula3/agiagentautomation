@@ -58,7 +58,15 @@ export interface WorkforceResponse {
 }
 
 /** Available tool names for plan tasks */
-export type ToolName = 'Read' | 'Grep' | 'Glob' | 'Bash' | 'Edit' | 'Write' | 'general' | string;
+export type ToolName =
+  | 'Read'
+  | 'Grep'
+  | 'Glob'
+  | 'Bash'
+  | 'Edit'
+  | 'Write'
+  | 'general'
+  | string;
 
 export interface PlanTask {
   id: string;
@@ -110,7 +118,10 @@ export class WorkforceOrchestratorRefactored {
    * @param missionId - Unique identifier for the mission
    * @param userId - User ID to fetch hired employees for
    */
-  private async initializeMissionEmployees(missionId: string, userId?: string): Promise<void> {
+  private async initializeMissionEmployees(
+    missionId: string,
+    userId?: string
+  ): Promise<void> {
     // Initialize the assigned employees set for this mission
     this.missionAssignedEmployees.set(missionId, new Set<string>());
 
@@ -139,13 +150,18 @@ export class WorkforceOrchestratorRefactored {
           );
         }
       } catch (error) {
-        logger.error('[Workforce Orchestrator] Error fetching hired employees for mission cache:', error);
+        logger.error(
+          '[Workforce Orchestrator] Error fetching hired employees for mission cache:',
+          error
+        );
         // On error, continue with all employees (degraded mode)
       }
     }
 
     this.missionEmployeeCache.set(missionId, availableEmployees);
-    logger.info(`[Workforce Orchestrator] Mission ${missionId} initialized with ${availableEmployees.length} available employees`);
+    logger.info(
+      `[Workforce Orchestrator] Mission ${missionId} initialized with ${availableEmployees.length} available employees`
+    );
   }
 
   /**
@@ -154,20 +170,29 @@ export class WorkforceOrchestratorRefactored {
    * @param employeeName - Name of the employee to mark as assigned
    * @returns true if successfully assigned, false if already assigned
    */
-  private assignEmployeeToMission(missionId: string, employeeName: string): boolean {
+  private assignEmployeeToMission(
+    missionId: string,
+    employeeName: string
+  ): boolean {
     const assignedSet = this.missionAssignedEmployees.get(missionId);
     if (!assignedSet) {
-      logger.warn(`[Workforce Orchestrator] No assignment set for mission ${missionId}`);
+      logger.warn(
+        `[Workforce Orchestrator] No assignment set for mission ${missionId}`
+      );
       return false;
     }
 
     if (assignedSet.has(employeeName)) {
-      logger.info(`[Workforce Orchestrator] Employee ${employeeName} already assigned in mission ${missionId}`);
+      logger.info(
+        `[Workforce Orchestrator] Employee ${employeeName} already assigned in mission ${missionId}`
+      );
       return false;
     }
 
     assignedSet.add(employeeName);
-    logger.info(`[Workforce Orchestrator] Employee ${employeeName} assigned to mission ${missionId}`);
+    logger.info(
+      `[Workforce Orchestrator] Employee ${employeeName} assigned to mission ${missionId}`
+    );
     return true;
   }
 
@@ -176,11 +201,16 @@ export class WorkforceOrchestratorRefactored {
    * @param missionId - Unique identifier for the mission
    * @param employeeName - Name of the employee to release
    */
-  private releaseEmployeeFromMission(missionId: string, employeeName: string): void {
+  private releaseEmployeeFromMission(
+    missionId: string,
+    employeeName: string
+  ): void {
     const assignedSet = this.missionAssignedEmployees.get(missionId);
     if (assignedSet) {
       assignedSet.delete(employeeName);
-      logger.info(`[Workforce Orchestrator] Employee ${employeeName} released from mission ${missionId}`);
+      logger.info(
+        `[Workforce Orchestrator] Employee ${employeeName} released from mission ${missionId}`
+      );
     }
   }
 
@@ -191,7 +221,9 @@ export class WorkforceOrchestratorRefactored {
   private cleanupMission(missionId: string): void {
     this.missionAssignedEmployees.delete(missionId);
     this.missionEmployeeCache.delete(missionId);
-    logger.info(`[Workforce Orchestrator] Mission ${missionId} tracking data cleaned up`);
+    logger.info(
+      `[Workforce Orchestrator] Mission ${missionId} tracking data cleaned up`
+    );
   }
 
   /**
@@ -201,7 +233,8 @@ export class WorkforceOrchestratorRefactored {
    */
   private getUnassignedEmployees(missionId: string): AIEmployee[] {
     const availableEmployees = this.missionEmployeeCache.get(missionId) || [];
-    const assignedSet = this.missionAssignedEmployees.get(missionId) || new Set<string>();
+    const assignedSet =
+      this.missionAssignedEmployees.get(missionId) || new Set<string>();
 
     return availableEmployees.filter((emp) => !assignedSet.has(emp.name));
   }
@@ -259,7 +292,9 @@ export class WorkforceOrchestratorRefactored {
         if (this.employees.length > 0) {
           this.employeesLoaded = true;
         } else {
-          logger.warn('[Workforce Orchestrator] No employees loaded from .agi/employees/');
+          logger.warn(
+            '[Workforce Orchestrator] No employees loaded from .agi/employees/'
+          );
         }
       }
 
@@ -305,7 +340,6 @@ export class WorkforceOrchestratorRefactored {
         );
       }
 
-
       // Convert to Task objects
       const tasks: Task[] = plan.plan.map((planTask, index) => ({
         id: planTask.id || `task-${index + 1}`,
@@ -341,7 +375,10 @@ export class WorkforceOrchestratorRefactored {
 
       for (const task of tasks) {
         // RACE CONDITION FIX: Pass missionId to use cached employees and track assignments
-        const selectedEmployee = await this.selectOptimalEmployee(task, missionId);
+        const selectedEmployee = await this.selectOptimalEmployee(
+          task,
+          missionId
+        );
 
         if (selectedEmployee) {
           task.assignedTo = selectedEmployee.name;
@@ -402,7 +439,10 @@ export class WorkforceOrchestratorRefactored {
       const technicalMessage =
         error instanceof Error ? error.message : 'Unknown error';
       const userMessage = getErrorMessage(error);
-      logger.error('[Workforce Orchestrator] Error processing request:', technicalMessage);
+      logger.error(
+        '[Workforce Orchestrator] Error processing request:',
+        technicalMessage
+      );
 
       // RACE CONDITION FIX: Clean up mission tracking data on error
       this.cleanupMission(missionId);
@@ -553,7 +593,14 @@ Think step-by-step, assign correct tools, map dependencies carefully, and create
     } catch (error) {
       logger.error('[Workforce Orchestrator] Error generating plan:', error);
       return {
-        plan: [{ id: 'task-1', task: userInput, tool_required: 'general', dependencies: [] }],
+        plan: [
+          {
+            id: 'task-1',
+            task: userInput,
+            tool_required: 'general',
+            dependencies: [],
+          },
+        ],
         reasoning: 'Fallback plan due to parsing error',
       };
     }
@@ -566,7 +613,10 @@ Think step-by-step, assign correct tools, map dependencies carefully, and create
    * @param task - The task to assign an employee to
    * @param missionId - Optional mission ID for using cached employees and tracking
    */
-  private async selectOptimalEmployee(task: Task, missionId?: string): Promise<AIEmployee | null> {
+  private async selectOptimalEmployee(
+    task: Task,
+    missionId?: string
+  ): Promise<AIEmployee | null> {
     if (this.employees.length === 0) {
       logger.warn('[Workforce Orchestrator] No employees available');
       return null;
@@ -588,7 +638,9 @@ Think step-by-step, assign correct tools, map dependencies carefully, and create
         const cachedEmployees = this.missionEmployeeCache.get(missionId);
         if (cachedEmployees && cachedEmployees.length > 0) {
           availableEmployees = cachedEmployees;
-          logger.info('[Workforce Orchestrator] All employees assigned, allowing reuse');
+          logger.info(
+            '[Workforce Orchestrator] All employees assigned, allowing reuse'
+          );
         } else {
           return null;
         }
@@ -628,7 +680,10 @@ Think step-by-step, assign correct tools, map dependencies carefully, and create
             }
           }
         } catch (error) {
-          logger.error('[Workforce Orchestrator] Error fetching hired employees:', error);
+          logger.error(
+            '[Workforce Orchestrator] Error fetching hired employees:',
+            error
+          );
           // On error, continue with all employees (degraded mode)
         }
       }
@@ -782,8 +837,7 @@ Think step-by-step, assign correct tools, map dependencies carefully, and create
             const depResults = (task.dependencies || [])
               .map((depId) => executionTasks.find((t) => t.id === depId))
               .filter(
-                (t): t is Task =>
-                  t !== undefined && t.status === 'completed'
+                (t): t is Task => t !== undefined && t.status === 'completed'
               )
               .map((t) => ({ task: t.description, result: t.result || '' }));
 
@@ -856,10 +910,7 @@ Think step-by-step, assign correct tools, map dependencies carefully, and create
                 errorMsg
               );
               store.updateEmployeeStatus(task.assignedTo!, 'error');
-              store.addEmployeeLog(
-                task.assignedTo!,
-                `✗ Failed: ${errorMsg}`
-              );
+              store.addEmployeeLog(task.assignedTo!, `✗ Failed: ${errorMsg}`);
               store.addMessage({
                 from: task.assignedTo!,
                 type: 'error',
@@ -906,7 +957,11 @@ Think step-by-step, assign correct tools, map dependencies carefully, and create
                 }
               }
 
-              return { taskId: task.id, status: 'failed' as const, error: errorMsg };
+              return {
+                taskId: task.id,
+                status: 'failed' as const,
+                error: errorMsg,
+              };
             }
           );
 
@@ -1009,9 +1064,10 @@ Available tools: Read, Grep, Glob, Bash, Edit, Write`;
         jsonText = jsonText.replace(/```\n?/g, '').replace(/```\n?$/g, '');
       }
 
-      const parseResult = safeJsonParse<{ plan: PlanTask[]; reasoning: string }>(
-        jsonText
-      );
+      const parseResult = safeJsonParse<{
+        plan: PlanTask[];
+        reasoning: string;
+      }>(jsonText);
       if (!parseResult.success || !parseResult.data.plan) {
         return null;
       }
@@ -1366,7 +1422,10 @@ Please correct your output. Make sure you strictly adhere to the requested forma
       const technicalMessage =
         error instanceof Error ? error.message : 'Unknown error';
       const userMessage = getErrorMessage(error);
-      logger.error('[Workforce Orchestrator] Error processing chat request:', technicalMessage);
+      logger.error(
+        '[Workforce Orchestrator] Error processing chat request:',
+        technicalMessage
+      );
 
       store.failMission(userMessage);
       store.addMessage({
@@ -1477,7 +1536,9 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
 
       // Fallback: if no match, select first employee
       if (selectedEmployees.length === 0 && this.employees.length > 0) {
-        logger.warn('[Workforce Orchestrator] Auto-select failed, using default employee');
+        logger.warn(
+          '[Workforce Orchestrator] Auto-select failed, using default employee'
+        );
         return [this.employees[0]];
       }
 

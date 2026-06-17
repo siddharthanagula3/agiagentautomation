@@ -274,7 +274,9 @@ describe('TOTP 2FA Implementation', () => {
   describe('verifyBackupCode', () => {
     it('should verify a valid backup code', async () => {
       const codes = generateBackupCodes();
-      const hashedCodes = await Promise.all(codes.map((c) => hashBackupCode(c)));
+      const hashedCodes = await Promise.all(
+        codes.map((c) => hashBackupCode(c))
+      );
 
       const index = await verifyBackupCode(codes[0], hashedCodes);
 
@@ -283,7 +285,9 @@ describe('TOTP 2FA Implementation', () => {
 
     it('should return the correct index of the matched code', async () => {
       const codes = generateBackupCodes();
-      const hashedCodes = await Promise.all(codes.map((c) => hashBackupCode(c)));
+      const hashedCodes = await Promise.all(
+        codes.map((c) => hashBackupCode(c))
+      );
 
       const index = await verifyBackupCode(codes[3], hashedCodes);
 
@@ -292,7 +296,9 @@ describe('TOTP 2FA Implementation', () => {
 
     it('should return -1 for an invalid code', async () => {
       const codes = generateBackupCodes();
-      const hashedCodes = await Promise.all(codes.map((c) => hashBackupCode(c)));
+      const hashedCodes = await Promise.all(
+        codes.map((c) => hashBackupCode(c))
+      );
 
       const index = await verifyBackupCode('INVALID-CODE', hashedCodes);
 
@@ -301,7 +307,9 @@ describe('TOTP 2FA Implementation', () => {
 
     it('should handle codes with different formatting', async () => {
       const codes = generateBackupCodes();
-      const hashedCodes = await Promise.all(codes.map((c) => hashBackupCode(c)));
+      const hashedCodes = await Promise.all(
+        codes.map((c) => hashBackupCode(c))
+      );
 
       // Remove dash from code
       const codeWithoutDash = codes[0].replace('-', '');
@@ -312,7 +320,9 @@ describe('TOTP 2FA Implementation', () => {
 
     it('should handle lowercase input', async () => {
       const codes = generateBackupCodes();
-      const hashedCodes = await Promise.all(codes.map((c) => hashBackupCode(c)));
+      const hashedCodes = await Promise.all(
+        codes.map((c) => hashBackupCode(c))
+      );
 
       const lowercaseCode = codes[0].toLowerCase();
       const index = await verifyBackupCode(lowercaseCode, hashedCodes);

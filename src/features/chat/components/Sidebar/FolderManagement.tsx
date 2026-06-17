@@ -240,7 +240,7 @@ export function FolderManagement({
     <div className={cn('space-y-2', className)}>
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2">
-        <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+        <h3 className="text-muted-foreground text-xs font-semibold uppercase">
           Folders
         </h3>
         <Button
@@ -258,11 +258,11 @@ export function FolderManagement({
       <button
         onClick={() => onFolderSelect(null)}
         className={cn(
-          'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent',
+          'hover:bg-accent flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
           selectedFolderId === null && 'bg-accent font-medium'
         )}
       >
-        <Folder className="h-4 w-4 text-muted-foreground" />
+        <Folder className="text-muted-foreground h-4 w-4" />
         <span className="flex-1 text-left">All Chats</span>
       </button>
 
@@ -271,24 +271,27 @@ export function FolderManagement({
         {isLoading ? (
           <div className="space-y-1 px-3 py-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-lg px-3 py-2">
+              <div
+                key={i}
+                className="flex items-center gap-2 rounded-lg px-3 py-2"
+              >
                 <Skeleton className="h-4 w-4" />
                 <Skeleton className="h-4 flex-1" />
               </div>
             ))}
           </div>
         ) : (
-        <div className="space-y-1">
-          {folders.map((folder) => (
-            <div key={folder.id} className="space-y-1">
-              <div
-                className={cn(
-                  'group flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent',
-                  selectedFolderId === folder.id && 'bg-accent font-medium'
-                )}
-              >
-                {/* Expand/Collapse (if has subfolders - future enhancement) */}
-                {/* <button
+          <div className="space-y-1">
+            {folders.map((folder) => (
+              <div key={folder.id} className="space-y-1">
+                <div
+                  className={cn(
+                    'group hover:bg-accent flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+                    selectedFolderId === folder.id && 'bg-accent font-medium'
+                  )}
+                >
+                  {/* Expand/Collapse (if has subfolders - future enhancement) */}
+                  {/* <button
                   className="flex-shrink-0"
                   onClick={() => toggleFolderExpand(folder.id)}
                 >
@@ -299,75 +302,75 @@ export function FolderManagement({
                   )}
                 </button> */}
 
-                {/* Folder Icon and Name */}
-                <button
-                  onClick={() => onFolderSelect(folder.id)}
-                  className="flex min-w-0 flex-1 items-center gap-2"
-                >
-                  {selectedFolderId === folder.id ? (
-                    <FolderOpen
-                      className={cn(
-                        'h-4 w-4 flex-shrink-0',
-                        getFolderColorClass(folder.color)
-                      )}
-                    />
-                  ) : (
-                    <Folder
-                      className={cn(
-                        'h-4 w-4 flex-shrink-0',
-                        getFolderColorClass(folder.color)
-                      )}
-                    />
-                  )}
-                  <span className="truncate">{folder.name}</span>
-                  {folder.sessionCount !== undefined &&
-                    folder.sessionCount > 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="ml-auto flex-shrink-0 px-1.5 py-0 text-[10px]"
-                      >
-                        {folder.sessionCount}
-                      </Badge>
+                  {/* Folder Icon and Name */}
+                  <button
+                    onClick={() => onFolderSelect(folder.id)}
+                    className="flex min-w-0 flex-1 items-center gap-2"
+                  >
+                    {selectedFolderId === folder.id ? (
+                      <FolderOpen
+                        className={cn(
+                          'h-4 w-4 flex-shrink-0',
+                          getFolderColorClass(folder.color)
+                        )}
+                      />
+                    ) : (
+                      <Folder
+                        className={cn(
+                          'h-4 w-4 flex-shrink-0',
+                          getFolderColorClass(folder.color)
+                        )}
+                      />
                     )}
-                </button>
+                    <span className="truncate">{folder.name}</span>
+                    {folder.sessionCount !== undefined &&
+                      folder.sessionCount > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="ml-auto flex-shrink-0 px-1.5 py-0 text-[10px]"
+                        >
+                          {folder.sessionCount}
+                        </Badge>
+                      )}
+                  </button>
 
-                {/* Actions Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <MoreVertical className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openEditDialog(folder)}>
-                      <Edit className="mr-2 h-3.5 w-3.5" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => setDeletingFolder(folder)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-3.5 w-3.5" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  {/* Actions Menu */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                      >
+                        <MoreVertical className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openEditDialog(folder)}>
+                        <Edit className="mr-2 h-3.5 w-3.5" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setDeletingFolder(folder)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
       </ScrollArea>
 
       {!isLoading && folders.length === 0 && (
         <div className="px-3 py-6 text-center">
-          <Folder className="mx-auto mb-2 h-8 w-8 text-muted-foreground opacity-30" />
-          <p className="text-xs text-muted-foreground">No folders yet</p>
+          <Folder className="text-muted-foreground mx-auto mb-2 h-8 w-8 opacity-30" />
+          <p className="text-muted-foreground text-xs">No folders yet</p>
           <Button
             variant="link"
             size="sm"
@@ -467,8 +470,10 @@ export function FolderManagement({
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {editingFolder ? 'Saving...' : 'Creating...'}
                 </>
+              ) : editingFolder ? (
+                'Save Changes'
               ) : (
-                editingFolder ? 'Save Changes' : 'Create Folder'
+                'Create Folder'
               )}
             </Button>
           </DialogFooter>

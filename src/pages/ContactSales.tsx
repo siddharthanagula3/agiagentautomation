@@ -180,7 +180,7 @@ const ContactSalesPage: React.FC = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         <Particles
           className="absolute inset-0 -z-10"
           quantity={50}
@@ -197,7 +197,7 @@ const ContactSalesPage: React.FC = () => {
               <CheckCircle2 size={40} className="text-green-500" />
             </div>
             <h1 className="mb-4 text-4xl font-bold">Thank You!</h1>
-            <p className="mb-8 text-xl text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-xl">
               We've received your message. Our sales team will contact you
               within 24 hours.
             </p>
@@ -211,7 +211,7 @@ const ContactSalesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <SEOHead
         title="Contact Sales | Get Custom AI Employee Solutions | AGI Workforce"
         description="Contact our sales team for custom AI employee solutions. Get personalized pricing, enterprise features, and dedicated support. Schedule a demo today."
@@ -251,7 +251,7 @@ const ContactSalesPage: React.FC = () => {
       />
 
       {/* Hero */}
-      <section className="px-4 pb-16 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-16 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -259,10 +259,10 @@ const ContactSalesPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mx-auto max-w-3xl text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
               Let's Talk About Your AI Automation Needs
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-xl">
               Speak with our sales team to learn how AGI Workforce can transform
               your business
             </p>
@@ -283,13 +283,13 @@ const ContactSalesPage: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="rounded-2xl border border-border/40 bg-background/60 p-6 text-center backdrop-blur-xl"
+                  className="border-border/40 bg-background/60 rounded-2xl border p-6 text-center backdrop-blur-xl"
                 >
-                  <div className="mb-4 inline-flex rounded-xl bg-gradient-to-br from-primary to-accent p-3 text-white">
+                  <div className="from-primary to-accent mb-4 inline-flex rounded-xl bg-gradient-to-br p-3 text-white">
                     <Icon size={24} />
                   </div>
                   <h3 className="mb-2 text-lg font-bold">{benefit.title}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {benefit.description}
                   </p>
                 </motion.div>
@@ -308,7 +308,7 @@ const ContactSalesPage: React.FC = () => {
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="rounded-3xl border border-border/40 bg-background/60 p-4 backdrop-blur-xl sm:p-6 md:p-8"
+              className="border-border/40 bg-background/60 rounded-3xl border p-4 backdrop-blur-xl sm:p-6 md:p-8"
             >
               <h2 className="mb-6 text-2xl font-bold sm:text-3xl">
                 Get in Touch
@@ -413,7 +413,7 @@ const ContactSalesPage: React.FC = () => {
                     onChange={(e) =>
                       handleInputChange('employees', e.target.value)
                     }
-                    className={`h-10 w-full rounded-md border border-border/40 bg-background/60 px-3 ${errors.employees ? 'border-red-500' : ''}`}
+                    className={`border-border/40 bg-background/60 h-10 w-full rounded-md border px-3 ${errors.employees ? 'border-red-500' : ''}`}
                   >
                     <option value="">Select...</option>
                     <option value="1-10">1-10 employees</option>
@@ -440,7 +440,7 @@ const ContactSalesPage: React.FC = () => {
                       handleInputChange('message', e.target.value)
                     }
                     rows={4}
-                    className={`w-full resize-none rounded-md border border-border/40 bg-background/60 px-3 py-2 ${errors.message ? 'border-red-500' : ''}`}
+                    className={`border-border/40 bg-background/60 w-full resize-none rounded-md border px-3 py-2 ${errors.message ? 'border-red-500' : ''}`}
                   />
                   {errors.message && (
                     <p className="mt-1 text-sm text-red-500">
@@ -452,7 +452,7 @@ const ContactSalesPage: React.FC = () => {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-gradient-to-r from-primary to-accent"
+                  className="from-primary to-accent w-full bg-gradient-to-r"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -477,7 +477,7 @@ const ContactSalesPage: React.FC = () => {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              <div className="rounded-3xl border border-border/40 bg-background/60 p-4 backdrop-blur-xl sm:p-6 md:p-8">
+              <div className="border-border/40 bg-background/60 rounded-3xl border p-4 backdrop-blur-xl sm:p-6 md:p-8">
                 <h2 className="mb-6 text-2xl font-bold sm:text-3xl">
                   Other Ways to Reach Us
                 </h2>
@@ -486,13 +486,13 @@ const ContactSalesPage: React.FC = () => {
                     const Icon = method.icon;
                     return (
                       <div key={idx} className="flex items-start gap-4">
-                        <div className="rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 p-3">
+                        <div className="from-primary/20 to-accent/20 rounded-xl bg-gradient-to-br p-3">
                           <Icon size={24} className="text-primary" />
                         </div>
                         <div>
                           <h3 className="mb-1 font-bold">{method.title}</h3>
-                          <p className="mb-1 text-foreground">{method.value}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-foreground mb-1">{method.value}</p>
+                          <p className="text-muted-foreground text-sm">
                             {method.description}
                           </p>
                         </div>
@@ -502,46 +502,46 @@ const ContactSalesPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-4 backdrop-blur-xl sm:p-6 md:p-8">
+              <div className="border-border/40 from-primary/10 via-accent/10 to-secondary/10 rounded-3xl border bg-gradient-to-r p-4 backdrop-blur-xl sm:p-6 md:p-8">
                 <h3 className="mb-4 text-lg font-bold sm:text-xl">
                   What Happens Next?
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/20">
-                      <span className="text-xs font-bold text-primary">1</span>
+                    <div className="bg-primary/20 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full">
+                      <span className="text-primary text-xs font-bold">1</span>
                     </div>
                     <div>
                       <p className="text-sm font-medium">
                         Response within 24 hours
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         Our team will review your request
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/20">
-                      <span className="text-xs font-bold text-primary">2</span>
+                    <div className="bg-primary/20 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full">
+                      <span className="text-primary text-xs font-bold">2</span>
                     </div>
                     <div>
                       <p className="text-sm font-medium">
                         Schedule a personalized demo
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         See AGI Workforce in action
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/20">
-                      <span className="text-xs font-bold text-primary">3</span>
+                    <div className="bg-primary/20 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full">
+                      <span className="text-primary text-xs font-bold">3</span>
                     </div>
                     <div>
                       <p className="text-sm font-medium">
                         Custom proposal & pricing
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         Tailored to your needs
                       </p>
                     </div>

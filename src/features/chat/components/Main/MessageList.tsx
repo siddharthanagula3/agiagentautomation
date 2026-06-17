@@ -141,13 +141,16 @@ function getValidatedMetadata(
     result.videoData = metadata.videoData as MessageMetadata['videoData'];
   }
   if (Array.isArray(metadata.searchResults)) {
-    result.searchResults = metadata.searchResults as MessageMetadata['searchResults'];
+    result.searchResults =
+      metadata.searchResults as MessageMetadata['searchResults'];
   }
   if (metadata.documentData && typeof metadata.documentData === 'object') {
-    result.documentData = metadata.documentData as MessageMetadata['documentData'];
+    result.documentData =
+      metadata.documentData as MessageMetadata['documentData'];
   }
   if (metadata.downloadData && typeof metadata.downloadData === 'object') {
-    result.downloadData = metadata.downloadData as MessageMetadata['downloadData'];
+    result.downloadData =
+      metadata.downloadData as MessageMetadata['downloadData'];
   }
 
   return result;
@@ -227,11 +230,11 @@ const MessageListComponent: React.FC<MessageListProps> = ({
       fallback={
         <div className="flex h-full items-center justify-center p-8">
           <div className="text-center">
-            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
+            <AlertCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
             <h3 className="mb-2 text-lg font-semibold">
               Message Display Error
             </h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mb-4 text-sm">
               Something went wrong displaying the chat messages.
             </p>
             <Button

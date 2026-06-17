@@ -183,7 +183,8 @@ class WebContainerManager {
         this.bootPromise = null;
         this.isSupported = false;
         // Package not installed or failed to load
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        const errorMsg =
+          error instanceof Error ? error.message : 'Unknown error';
         if (
           errorMsg.includes('Failed to resolve') ||
           errorMsg.includes('Cannot find module') ||
@@ -209,10 +210,7 @@ class WebContainerManager {
     options: ExecutionOptions
   ): Promise<ExecutionResult> {
     const startTime = performance.now();
-    const timeout = Math.min(
-      options.timeout || DEFAULT_TIMEOUT,
-      MAX_TIMEOUT
-    );
+    const timeout = Math.min(options.timeout || DEFAULT_TIMEOUT, MAX_TIMEOUT);
 
     try {
       const container = await this.boot();
@@ -478,10 +476,7 @@ class PyodideManager {
     options: ExecutionOptions
   ): Promise<ExecutionResult> {
     const startTime = performance.now();
-    const timeout = Math.min(
-      options.timeout || DEFAULT_TIMEOUT,
-      MAX_TIMEOUT
-    );
+    const timeout = Math.min(options.timeout || DEFAULT_TIMEOUT, MAX_TIMEOUT);
 
     try {
       const pyodide = await this.load();
@@ -588,8 +583,7 @@ __captured_stderr__ = __stderr_capture__.getvalue()
           } catch (execError) {
             // Cleanup and capture error
             await pyodide.runPythonAsync(cleanupCode);
-            const stderr =
-              pyodide.globals.get('__captured_stderr__') as string;
+            const stderr = pyodide.globals.get('__captured_stderr__') as string;
 
             if (!resolved) {
               resolved = true;
@@ -643,11 +637,9 @@ __captured_stderr__ = __stderr_capture__.getvalue()
             resolve({
               success: false,
               stdout: '',
-              stderr:
-                error instanceof Error ? error.message : String(error),
+              stderr: error instanceof Error ? error.message : String(error),
               exitCode: 1,
-              error:
-                error instanceof Error ? error.message : String(error),
+              error: error instanceof Error ? error.message : String(error),
             });
           }
         }
@@ -670,10 +662,7 @@ class FallbackExecutor {
     options: ExecutionOptions
   ): Promise<ExecutionResult> {
     const startTime = performance.now();
-    const timeout = Math.min(
-      options.timeout || DEFAULT_TIMEOUT,
-      MAX_TIMEOUT
-    );
+    const timeout = Math.min(options.timeout || DEFAULT_TIMEOUT, MAX_TIMEOUT);
 
     // Only allow simple expressions (no statements)
     if (code.length > 1000) {
@@ -712,10 +701,7 @@ class FallbackExecutor {
     }
   }
 
-  private executeWithTimeout(
-    code: string,
-    timeout: number
-  ): Promise<unknown> {
+  private executeWithTimeout(code: string, timeout: number): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error('Execution timed out'));
@@ -785,9 +771,7 @@ export class CodeExecutionService {
   /**
    * Normalize language string to supported language
    */
-  private normalizeLanguage(
-    lang: string
-  ): SupportedLanguage | null {
+  private normalizeLanguage(lang: string): SupportedLanguage | null {
     const normalized = lang.toLowerCase().trim();
     const languageMap: Record<string, SupportedLanguage> = {
       javascript: 'javascript',
@@ -969,13 +953,11 @@ export class CodeExecutionService {
         execution.resolve({
           success: false,
           stdout: '',
-          stderr:
-            error instanceof Error ? error.message : 'Unknown error',
+          stderr: error instanceof Error ? error.message : 'Unknown error',
           exitCode: 1,
           executionTime: 0,
           language: execution.language,
-          error:
-            error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -1015,8 +997,7 @@ export class CodeExecutionService {
         : 'javascript';
 
     // Try WebContainer first
-    const webContainerSupported =
-      await this.webContainerManager.checkSupport();
+    const webContainerSupported = await this.webContainerManager.checkSupport();
 
     if (webContainerSupported) {
       return this.webContainerManager.execute(code, jsLanguage, options);

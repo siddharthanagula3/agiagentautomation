@@ -356,7 +356,10 @@ describe('Media Generation Handler', () => {
         };
       });
 
-      await mediaGenerationService.generateVideo({ prompt: 'Test' }, onProgress);
+      await mediaGenerationService.generateVideo(
+        { prompt: 'Test' },
+        onProgress
+      );
 
       expect(progressUpdates.some((u) => u.progress === 50)).toBe(true);
     });
@@ -583,7 +586,9 @@ describe('Media Generation Handler', () => {
       const deleted = mediaGenerationService.deleteGeneration('img-123');
 
       expect(deleted).toBe(true);
-      expect(mediaGenerationService.getGenerationById('img-123')).toBeUndefined();
+      expect(
+        mediaGenerationService.getGenerationById('img-123')
+      ).toBeUndefined();
     });
 
     it('should return false for non-existent ID', () => {

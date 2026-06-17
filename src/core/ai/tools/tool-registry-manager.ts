@@ -137,7 +137,8 @@ export class ToolManager {
 
     // Also trim to max entries
     if (this.executionHistory.length > this.historyConfig.maxEntries) {
-      const excess = this.executionHistory.length - this.historyConfig.maxEntries;
+      const excess =
+        this.executionHistory.length - this.historyConfig.maxEntries;
       this.executionHistory.splice(0, excess);
     }
   }
@@ -267,7 +268,8 @@ export class ToolManager {
     if (!permissionCheck.allowed) {
       return {
         success: false,
-        error: permissionCheck.reason || `Permission denied for tool ${tool.name}`,
+        error:
+          permissionCheck.reason || `Permission denied for tool ${tool.name}`,
         executionTime: 0,
         cost: 0,
         toolId: tool.id,
@@ -358,7 +360,8 @@ export class ToolManager {
 
     // Trim if over max entries
     if (this.executionHistory.length > this.historyConfig.maxEntries) {
-      const excess = this.executionHistory.length - this.historyConfig.maxEntries;
+      const excess =
+        this.executionHistory.length - this.historyConfig.maxEntries;
       this.executionHistory.splice(0, excess);
     }
   }
@@ -381,7 +384,11 @@ export class ToolManager {
       // Normalize permission format (e.g., "file:read" vs "file_read")
       const normalizedRequired = required.replace('_', ':');
 
-      if (!userPermissions.includes(normalizedRequired as typeof userPermissions[number])) {
+      if (
+        !userPermissions.includes(
+          normalizedRequired as (typeof userPermissions)[number]
+        )
+      ) {
         return {
           allowed: false,
           reason: `Missing permission: ${required}. Your level (${level}) has: ${userPermissions.join(', ')}`,
@@ -528,7 +535,12 @@ export class ToolManager {
       },
       estimateCost: () => 0.02,
       requiredPermissions: ['file:write'],
-      supportedAgents: ['cursor-agent', 'replit-agent', 'mcp-tool', 'claude-code'],
+      supportedAgents: [
+        'cursor-agent',
+        'replit-agent',
+        'mcp-tool',
+        'claude-code',
+      ],
     });
 
     this.registerTool({
@@ -537,7 +549,11 @@ export class ToolManager {
       aliases: ['Edit', 'delete_files'], // Employee MD uses "Edit"
       description: 'Edit file with find/replace',
       category: 'file',
-      execute: async (params: { path: string; old_string: string; new_string: string }) => {
+      execute: async (params: {
+        path: string;
+        old_string: string;
+        new_string: string;
+      }) => {
         // Integration with filesystem API
         return { success: true, path: params.path };
       },
@@ -549,7 +565,12 @@ export class ToolManager {
       },
       estimateCost: () => 0.02,
       requiredPermissions: ['file:write'],
-      supportedAgents: ['cursor-agent', 'replit-agent', 'mcp-tool', 'claude-code'],
+      supportedAgents: [
+        'cursor-agent',
+        'replit-agent',
+        'mcp-tool',
+        'claude-code',
+      ],
     });
 
     // Search Tools
@@ -570,7 +591,12 @@ export class ToolManager {
       },
       estimateCost: () => 0.01,
       requiredPermissions: ['file:read'],
-      supportedAgents: ['claude-code', 'cursor-agent', 'replit-agent', 'mcp-tool'],
+      supportedAgents: [
+        'claude-code',
+        'cursor-agent',
+        'replit-agent',
+        'mcp-tool',
+      ],
     });
 
     this.registerTool({
@@ -590,7 +616,12 @@ export class ToolManager {
       },
       estimateCost: () => 0.01,
       requiredPermissions: ['file:read'],
-      supportedAgents: ['claude-code', 'cursor-agent', 'replit-agent', 'mcp-tool'],
+      supportedAgents: [
+        'claude-code',
+        'cursor-agent',
+        'replit-agent',
+        'mcp-tool',
+      ],
     });
 
     // System Tools

@@ -63,8 +63,7 @@ export interface ImagenServiceError {
 }
 
 // SECURITY: API calls route through Netlify proxy
-const IMAGEN_PROXY_URL =
-  '/.netlify/functions/media-proxies/google-imagen-proxy';
+const IMAGEN_PROXY_URL = '/api/media-proxies/google-imagen-proxy';
 
 // Pricing per image (USD)
 const IMAGEN_PRICING = {
@@ -317,27 +316,24 @@ export class GoogleImagenService {
         'Keep the enhanced prompt concise (under 200 words) but rich in detail.';
 
       // SECURITY: Route through Google proxy instead of direct API call
-      const apiResponse = await fetch(
-        '/.netlify/functions/llm-proxies/google-proxy',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({
-            model: 'gemini-2.0-flash',
-            messages: [
-              {
-                role: 'user',
-                content: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:`,
-              },
-            ],
-            temperature: 0.7,
-            max_tokens: 200,
-          }),
-        }
-      );
+      const apiResponse = await fetch('/api/llm-proxies/google-proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          model: 'gemini-2.0-flash',
+          messages: [
+            {
+              role: 'user',
+              content: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:`,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 200,
+        }),
+      });
 
       if (!apiResponse.ok) {
         console.warn('Failed to enhance prompt with Gemini, using original');

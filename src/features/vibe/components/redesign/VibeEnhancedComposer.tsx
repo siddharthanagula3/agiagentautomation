@@ -172,7 +172,7 @@ export function VibeEnhancedComposer({
   return (
     <div
       className={cn(
-        'border-t border-border bg-background/95 backdrop-blur',
+        'border-border bg-background/95 border-t backdrop-blur',
         className
       )}
       onDrop={handleDrop}
@@ -189,7 +189,7 @@ export function VibeEnhancedComposer({
                 onClick={() => handleQuickAction(action)}
                 disabled={isLoading}
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium transition-all',
+                  'border-border/60 bg-muted/30 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
                   'hover:border-primary/40 hover:bg-primary/5 hover:text-primary',
                   'disabled:cursor-not-allowed disabled:opacity-50'
                 )}
@@ -207,19 +207,19 @@ export function VibeEnhancedComposer({
             {selectedFiles.map((file, fileIndex) => (
               <div
                 key={`file-${file.name}-${file.size}`}
-                className="group flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5"
+                className="group border-border bg-muted/50 flex items-center gap-2 rounded-lg border px-2.5 py-1.5"
               >
                 {file.type.startsWith('image/') ? (
-                  <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ImageIcon className="text-muted-foreground h-3.5 w-3.5" />
                 ) : (
-                  <FileCode className="h-3.5 w-3.5 text-muted-foreground" />
+                  <FileCode className="text-muted-foreground h-3.5 w-3.5" />
                 )}
                 <span className="max-w-[120px] truncate text-xs">
                   {file.name}
                 </span>
                 <button
                   onClick={() => removeFile(fileIndex)}
-                  className="rounded-full p-0.5 hover:bg-background"
+                  className="hover:bg-background rounded-full p-0.5"
                   aria-label={`Remove ${file.name}`}
                 >
                   <X className="h-3 w-3" aria-hidden="true" />
@@ -232,16 +232,16 @@ export function VibeEnhancedComposer({
         {/* Main Input */}
         <div
           className={cn(
-            'relative rounded-2xl border bg-background shadow-sm transition-all',
+            'bg-background relative rounded-2xl border shadow-sm transition-all',
             isDragging
-              ? 'border-dashed border-primary bg-primary/5'
-              : 'border-border focus-within:border-ring focus-within:ring-1 focus-within:ring-ring'
+              ? 'border-primary bg-primary/5 border-dashed'
+              : 'border-border focus-within:border-ring focus-within:ring-ring focus-within:ring-1'
           )}
         >
           {/* Drag overlay */}
           {isDragging && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-primary/5">
-              <div className="flex items-center gap-2 text-primary">
+            <div className="bg-primary/5 absolute inset-0 z-10 flex items-center justify-center rounded-2xl">
+              <div className="text-primary flex items-center gap-2">
                 <Upload className="h-5 w-5" aria-hidden="true" />
                 <span className="text-sm font-medium">Drop files</span>
               </div>
@@ -365,8 +365,8 @@ export function VibeEnhancedComposer({
         </div>
 
         {/* Minimal helper */}
-        <div className="mt-2 text-center text-xs text-muted-foreground">
-          <kbd className="rounded border bg-muted px-1 font-mono">Enter</kbd> to
+        <div className="text-muted-foreground mt-2 text-center text-xs">
+          <kbd className="bg-muted rounded border px-1 font-mono">Enter</kbd> to
           send
         </div>
       </div>

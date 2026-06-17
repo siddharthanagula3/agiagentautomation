@@ -259,7 +259,10 @@ export class RealtimeCollaborationService {
       })
       .catch((error) => {
         // WebSocket is fallback, Supabase is primary - log but don't fail
-        logger.debug('[Collaboration] WebSocket presence send failed (non-critical)', error);
+        logger.debug(
+          '[Collaboration] WebSocket presence send failed (non-critical)',
+          error
+        );
       });
   }
 
@@ -338,7 +341,10 @@ export class RealtimeCollaborationService {
       })
       .catch((error) => {
         // WebSocket is fallback, Supabase is primary - log but don't fail
-        logger.debug('[Collaboration] WebSocket typing send failed (non-critical)', error);
+        logger.debug(
+          '[Collaboration] WebSocket typing send failed (non-critical)',
+          error
+        );
       });
   }
 
@@ -396,7 +402,10 @@ export class RealtimeCollaborationService {
       })
       .catch((error) => {
         // WebSocket is fallback, Supabase is primary - log but don't fail
-        logger.debug('[Collaboration] WebSocket cursor send failed (non-critical)', error);
+        logger.debug(
+          '[Collaboration] WebSocket cursor send failed (non-critical)',
+          error
+        );
       });
 
     // Set throttle timer
@@ -465,7 +474,10 @@ export class RealtimeCollaborationService {
         })
         .catch((error) => {
           // WebSocket is fallback, Supabase is primary - log but don't fail
-          logger.debug('[Collaboration] WebSocket activity send failed (non-critical)', error);
+          logger.debug(
+            '[Collaboration] WebSocket activity send failed (non-critical)',
+            error
+          );
         });
 
       this.activityDebounceTimers.delete(timerKey);
@@ -617,7 +629,6 @@ export class RealtimeCollaborationService {
         session.participants.set(presence.userId, presence);
       }
     }
-
   }
 
   /**

@@ -30,7 +30,8 @@ function getErrorMessage(error: unknown): string {
     if ('status' in error) {
       const status = (error as { status: number }).status;
       if (status === 401) return 'Please sign in to continue';
-      if (status === 403) return 'You do not have permission to perform this action';
+      if (status === 403)
+        return 'You do not have permission to perform this action';
       if (status === 404) return 'Resource not found';
       if (status === 429) return 'Too many requests. Please try again later';
       if (status >= 500) return 'Server error. Please try again later';
@@ -55,7 +56,9 @@ const queryCache = new QueryCache({
 
     // Don't show toast for background refetch errors when we have cached data
     if (query.state.data !== undefined) {
-      logger.warn(`[QueryError] Background refetch failed for ${query.queryKey.join('/')}, using cached data`);
+      logger.warn(
+        `[QueryError] Background refetch failed for ${query.queryKey.join('/')}, using cached data`
+      );
       return;
     }
 
@@ -70,7 +73,10 @@ const queryCache = new QueryCache({
 const mutationCache = new MutationCache({
   onError: (error, _variables, _context, mutation) => {
     // Log all mutation errors
-    logger.error(`[MutationError] ${mutation.options.mutationKey?.join('/') || 'unknown'}:`, error);
+    logger.error(
+      `[MutationError] ${mutation.options.mutationKey?.join('/') || 'unknown'}:`,
+      error
+    );
 
     // Get custom error message from mutation meta, or use default
     const errorMessage =
@@ -84,7 +90,9 @@ const mutationCache = new MutationCache({
   },
   onSuccess: (_data, _variables, _context, mutation) => {
     // Log successful mutations in debug mode
-    logger.debug(`[MutationSuccess] ${mutation.options.mutationKey?.join('/') || 'unknown'}`);
+    logger.debug(
+      `[MutationSuccess] ${mutation.options.mutationKey?.join('/') || 'unknown'}`
+    );
   },
 });
 
@@ -191,7 +199,8 @@ export const queryKeys = {
   // Message Reactions
   reactions: {
     all: () => ['reactions'] as const,
-    message: (messageId: string) => ['reactions', 'message', messageId] as const,
+    message: (messageId: string) =>
+      ['reactions', 'message', messageId] as const,
     messages: (messageIds: string[]) =>
       ['reactions', 'messages', messageIds.sort().join(',')] as const,
   },
@@ -202,8 +211,10 @@ export const queryKeys = {
     session: (sessionId: string) => ['branches', 'session', sessionId] as const,
     history: (sessionId: string) => ['branches', 'history', sessionId] as const,
     root: (sessionId: string) => ['branches', 'root', sessionId] as const,
-    isBranch: (sessionId: string) => ['branches', 'isBranch', sessionId] as const,
-    atMessage: (messageId: string) => ['branches', 'atMessage', messageId] as const,
+    isBranch: (sessionId: string) =>
+      ['branches', 'isBranch', sessionId] as const,
+    atMessage: (messageId: string) =>
+      ['branches', 'atMessage', messageId] as const,
     info: (sessionId: string) => ['branches', 'info', sessionId] as const,
     tree: (sessionId: string) => ['branches', 'tree', sessionId] as const,
     count: (sessionId: string) => ['branches', 'count', sessionId] as const,
@@ -263,7 +274,15 @@ export const queryKeys = {
     tokenUsageHistoryInfinite: (
       userId: string,
       filters?: { provider?: string; startDate?: string; endDate?: string }
-    ) => ['billing', 'tokenUsage', 'history', 'infinite', userId, filters] as const,
+    ) =>
+      [
+        'billing',
+        'tokenUsage',
+        'history',
+        'infinite',
+        userId,
+        filters,
+      ] as const,
     analytics: (userId: string, timeRange: string) =>
       ['billing', 'analytics', userId, timeRange] as const,
   },

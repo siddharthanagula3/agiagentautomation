@@ -83,13 +83,13 @@ export const CookieConsent = () => {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
+            className="fixed right-0 bottom-0 left-0 z-50 p-4 md:p-6"
           >
             <div className="mx-auto max-w-7xl">
-              <div className="relative rounded-lg border bg-card p-3 shadow-2xl backdrop-blur-sm sm:p-4 md:p-6">
+              <div className="bg-card relative rounded-lg border p-3 shadow-2xl backdrop-blur-sm sm:p-4 md:p-6">
                 <button
                   onClick={() => setShowBanner(false)}
-                  className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-muted"
+                  className="hover:bg-muted absolute top-2 right-2 flex h-11 w-11 items-center justify-center rounded-full"
                   aria-label="Close banner"
                 >
                   <X className="h-4 w-4" />
@@ -97,12 +97,12 @@ export const CookieConsent = () => {
 
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
                   <div className="flex flex-1 items-start gap-3">
-                    <Cookie className="mt-1 h-6 w-6 flex-shrink-0 text-primary" />
+                    <Cookie className="text-primary mt-1 h-6 w-6 flex-shrink-0" />
                     <div>
                       <h3 className="mb-1 font-semibold">
                         We Value Your Privacy
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         We use cookies to enhance your browsing experience,
                         provide personalized content, and analyze our traffic.
                         By clicking "Accept All", you consent to our use of
@@ -155,7 +155,7 @@ export const CookieConsent = () => {
             <div className="flex items-center justify-between space-x-2">
               <div className="flex-1">
                 <Label className="font-medium">Necessary Cookies</Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Required for the website to function properly. Cannot be
                   disabled.
                 </p>
@@ -167,7 +167,7 @@ export const CookieConsent = () => {
             <div className="flex items-center justify-between space-x-2">
               <div className="flex-1">
                 <Label className="font-medium">Analytics Cookies</Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Help us understand how visitors interact with our website.
                 </p>
               </div>
@@ -183,7 +183,7 @@ export const CookieConsent = () => {
             <div className="flex items-center justify-between space-x-2">
               <div className="flex-1">
                 <Label className="font-medium">Marketing Cookies</Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Used to track visitors across websites for marketing purposes.
                 </p>
               </div>

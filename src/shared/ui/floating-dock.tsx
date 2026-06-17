@@ -28,7 +28,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
     <TooltipProvider>
       <motion.div
         className={cn(
-          'flex items-end gap-4 rounded-2xl border border-border/50 bg-background/80 px-6 py-4 shadow-2xl backdrop-blur-xl',
+          'border-border/50 bg-background/80 flex items-end gap-4 rounded-2xl border px-6 py-4 shadow-2xl backdrop-blur-xl',
           className
         )}
         initial={{ y: 100, opacity: 0 }}
@@ -81,7 +81,7 @@ const DockItem: React.FC<DockItemProps> = ({
     <Tooltip>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors hover:bg-primary/20"
+          className="bg-primary/10 hover:bg-primary/20 relative flex h-12 w-12 items-center justify-center rounded-xl transition-colors"
           style={{ scale: scaleSpring, y: ySpring }}
           onMouseEnter={() => setHoveredIndex(index)}
           onMouseLeave={() => setHoveredIndex(null)}

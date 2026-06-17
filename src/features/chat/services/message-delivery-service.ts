@@ -534,7 +534,10 @@ export class MessageDeliveryService {
       })
       .catch((error) => {
         // Status updates are non-critical - log but don't fail
-        logger.debug('[MessageDelivery] Broadcast status update failed (non-critical)', error);
+        logger.debug(
+          '[MessageDelivery] Broadcast status update failed (non-critical)',
+          error
+        );
       });
   }
 

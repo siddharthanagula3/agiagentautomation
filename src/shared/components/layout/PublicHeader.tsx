@@ -121,9 +121,9 @@ const PublicHeader: React.FC = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={cn(
-        'fixed left-0 right-0 top-0 z-50 w-full max-w-full overflow-x-hidden transition-all duration-300',
+        'fixed top-0 right-0 left-0 z-50 w-full max-w-full overflow-x-hidden transition-all duration-300',
         scrolled
-          ? 'glass-strong border-b border-border shadow-lg'
+          ? 'glass-strong border-border border-b shadow-lg'
           : 'bg-transparent'
       )}
     >
@@ -136,7 +136,7 @@ const PublicHeader: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-bold">AI Workforce</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 Powered by AGI
               </span>
             </div>
@@ -167,7 +167,7 @@ const PublicHeader: React.FC = () => {
             />
             <button
               onClick={() => handleNavigate('/pricing')}
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+              className="text-foreground/80 hover:text-foreground text-sm font-medium transition-colors"
             >
               Pricing
             </button>
@@ -201,7 +201,7 @@ const PublicHeader: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted/50 md:hidden"
+            className="hover:bg-muted/50 flex h-11 w-11 items-center justify-center rounded-lg transition-colors md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
@@ -222,7 +222,7 @@ const PublicHeader: React.FC = () => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden md:hidden"
             >
-              <nav className="space-y-2 border-t border-border px-4 py-6 sm:px-6">
+              <nav className="border-border space-y-2 border-t px-4 py-6 sm:px-6">
                 <MobileDropdown
                   label="Product"
                   items={productMenu}
@@ -319,7 +319,7 @@ const HeaderDropdown: React.FC<HeaderDropdownProps> = ({
     <div className="relative">
       <button
         onClick={onToggle}
-        className="flex items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+        className="text-foreground/80 hover:text-foreground flex items-center gap-1 text-sm font-medium transition-colors"
       >
         {label}
         <motion.div
@@ -336,26 +336,26 @@ const HeaderDropdown: React.FC<HeaderDropdownProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-full mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border/40 bg-background/95 shadow-2xl backdrop-blur-xl sm:w-72 sm:max-w-none"
+            className="border-border/40 bg-background/95 absolute top-full left-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border shadow-2xl backdrop-blur-xl sm:w-72 sm:max-w-none"
           >
             <div className="p-2">
               {items.map((item, idx) => (
                 <motion.button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}
-                  className="group flex w-full items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent/10"
+                  className="group hover:bg-accent/10 flex w-full items-start gap-3 rounded-lg p-3 transition-colors"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
                 >
-                  <div className="mt-0.5 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 p-2 transition-colors group-hover:from-primary/30 group-hover:to-accent/30">
+                  <div className="from-primary/20 to-accent/20 group-hover:from-primary/30 group-hover:to-accent/30 mt-0.5 rounded-lg bg-gradient-to-br p-2 transition-colors">
                     <item.icon size={18} className="text-primary" />
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+                    <div className="text-foreground group-hover:text-primary text-sm font-medium transition-colors">
                       {item.label}
                     </div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground mt-0.5 text-xs">
                       {item.description}
                     </div>
                   </div>
@@ -384,7 +384,7 @@ const MobileDropdown: React.FC<MobileDropdownProps> = ({
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent/10 hover:text-foreground"
+        className="text-foreground/80 hover:bg-accent/10 hover:text-foreground flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors"
       >
         {label}
         <motion.div
@@ -407,7 +407,7 @@ const MobileDropdown: React.FC<MobileDropdownProps> = ({
                 <button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}
-                  className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-foreground/70 transition-colors hover:bg-accent/10 hover:text-foreground"
+                  className="text-foreground/70 hover:bg-accent/10 hover:text-foreground flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors"
                 >
                   <item.icon size={16} className="text-primary" />
                   {item.label}

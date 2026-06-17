@@ -205,9 +205,7 @@ export const TOOL_DISPLAY_NAMES: Record<CanonicalToolName, string> = {
 /**
  * Resolve a tool name alias to its canonical name
  */
-export function resolveToolName(
-  nameOrAlias: string
-): CanonicalToolName | null {
+export function resolveToolName(nameOrAlias: string): CanonicalToolName | null {
   const canonical = TOOL_ALIASES[nameOrAlias];
   if (canonical) return canonical;
 

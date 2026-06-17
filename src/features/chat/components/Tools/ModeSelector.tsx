@@ -90,7 +90,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
                       </Badge>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {config.description}
                   </p>
                 </div>
@@ -100,8 +100,8 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
         })}
       </div>
 
-      <div className="rounded-lg border border-border bg-muted/50 p-3">
-        <p className="text-xs text-muted-foreground">
+      <div className="border-border bg-muted/50 rounded-lg border p-3">
+        <p className="text-muted-foreground text-xs">
           <strong className="text-foreground">Current:</strong>{' '}
           {MODE_CONFIG[selectedMode].name}
         </p>

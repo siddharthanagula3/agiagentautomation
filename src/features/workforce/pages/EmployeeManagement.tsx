@@ -47,8 +47,8 @@ const WorkforceErrorFallback = () => (
   <div className="flex min-h-screen items-center justify-center p-8">
     <Card className="glass-strong max-w-md text-center">
       <CardHeader>
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-          <Users className="h-8 w-8 text-destructive" />
+        <div className="bg-destructive/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <Users className="text-destructive h-8 w-8" />
         </div>
         <CardTitle>Workforce Error</CardTitle>
         <CardDescription>
@@ -126,7 +126,7 @@ const EmployeeManagement: React.FC = () => {
           className="glass-strong relative overflow-hidden rounded-3xl p-4 md:p-8"
         >
           <Particles className="absolute inset-0" quantity={30} ease={20} />
-          <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
+          <div className="bg-primary/10 absolute top-0 right-0 h-64 w-64 rounded-full blur-3xl"></div>
           <div className="relative z-10">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -137,7 +137,7 @@ const EmployeeManagement: React.FC = () => {
                 <h1 className="mb-2 text-2xl font-bold md:text-4xl">
                   Your AI Workforce
                 </h1>
-                <p className="text-base text-muted-foreground md:text-xl">
+                <p className="text-muted-foreground text-base md:text-xl">
                   Manage your AI team and track performance in real-time
                 </p>
               </div>
@@ -164,8 +164,8 @@ const EmployeeManagement: React.FC = () => {
             <Card className="glass-strong card-hover group">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-transform group-hover:scale-110">
-                    <Users className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
+                    <Users className="text-primary h-6 w-6" />
                   </div>
                   <Badge variant="secondary" className="text-xs">
                     Total
@@ -176,7 +176,7 @@ const EmployeeManagement: React.FC = () => {
                 ) : (
                   <>
                     <p className="mb-1 text-3xl font-bold">{totalEmployees}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Total Employees
                     </p>
                   </>
@@ -193,8 +193,8 @@ const EmployeeManagement: React.FC = () => {
             <Card className="glass-strong card-hover group">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 transition-transform group-hover:scale-110">
-                    <Bot className="h-6 w-6 text-success" />
+                  <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
+                    <Bot className="text-success h-6 w-6" />
                   </div>
                   <div className="flex items-center gap-1">
                     {activeEmployees > 0 && (
@@ -210,7 +210,7 @@ const EmployeeManagement: React.FC = () => {
                 ) : (
                   <>
                     <p className="mb-1 text-3xl font-bold">{activeEmployees}</p>
-                    <p className="text-sm text-muted-foreground">Active Now</p>
+                    <p className="text-muted-foreground text-sm">Active Now</p>
                   </>
                 )}
               </CardContent>
@@ -225,8 +225,8 @@ const EmployeeManagement: React.FC = () => {
             <Card className="glass-strong card-hover group">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 transition-transform group-hover:scale-110">
-                    <Target className="h-6 w-6 text-accent" />
+                  <div className="bg-accent/10 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
+                    <Target className="text-accent h-6 w-6" />
                   </div>
                   <Badge variant="secondary" className="text-xs">
                     <TrendingUp className="mr-1 h-3 w-3" />
@@ -242,7 +242,7 @@ const EmployeeManagement: React.FC = () => {
                 ) : (
                   <>
                     <p className="mb-1 text-3xl font-bold">{activeEmployees}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Ready to Work
                     </p>
                   </>
@@ -259,8 +259,8 @@ const EmployeeManagement: React.FC = () => {
             <Card className="glass-strong card-hover group">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10 transition-transform group-hover:scale-110">
-                    <Zap className="h-6 w-6 text-secondary" />
+                  <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
+                    <Zap className="text-secondary h-6 w-6" />
                   </div>
                   <Badge variant="secondary" className="text-xs">
                     Utilization
@@ -271,7 +271,7 @@ const EmployeeManagement: React.FC = () => {
                 ) : (
                   <>
                     <p className="mb-1 text-3xl font-bold">{totalEmployees}</p>
-                    <p className="text-sm text-muted-foreground">Total Hired</p>
+                    <p className="text-muted-foreground text-sm">Total Hired</p>
                   </>
                 )}
               </CardContent>
@@ -293,7 +293,7 @@ const EmployeeManagement: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-primary" />
+                        <Sparkles className="text-primary h-5 w-5" />
                         Your AI Team
                       </CardTitle>
                       <CardDescription>
@@ -315,13 +315,13 @@ const EmployeeManagement: React.FC = () => {
                     </div>
                   ) : hiredEmployees.length === 0 ? (
                     <div className="py-16 text-center">
-                      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted/20">
-                        <Users className="h-10 w-10 text-muted-foreground" />
+                      <div className="bg-muted/20 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full">
+                        <Users className="text-muted-foreground h-10 w-10" />
                       </div>
                       <h3 className="mb-2 text-xl font-semibold">
                         No AI Employees Yet
                       </h3>
-                      <p className="mx-auto mb-6 max-w-md text-muted-foreground">
+                      <p className="text-muted-foreground mx-auto mb-6 max-w-md">
                         Start building your AI workforce by hiring specialized
                         employees from the marketplace
                       </p>
@@ -355,7 +355,7 @@ const EmployeeManagement: React.FC = () => {
                             <BentoCard
                               key={rec.id}
                               gradient={true}
-                              className="glass group transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
+                              className="glass group hover:shadow-primary/10 transition-all duration-300 hover:shadow-lg"
                             >
                               <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -369,12 +369,12 @@ const EmployeeManagement: React.FC = () => {
                                       src={displayAvatar}
                                       alt={displayName}
                                       size="lg"
-                                      className="h-14 w-14 flex-shrink-0 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20"
+                                      className="group-hover:shadow-primary/20 h-14 w-14 flex-shrink-0 transition-all duration-300 group-hover:shadow-xl"
                                     />
                                   </InteractiveHoverCard>
                                   <div className="min-w-0 flex-1">
                                     <div className="mb-1 flex items-center gap-2">
-                                      <h3 className="truncate text-lg font-semibold transition-colors group-hover:text-primary">
+                                      <h3 className="group-hover:text-primary truncate text-lg font-semibold transition-colors">
                                         {displayName}
                                       </h3>
                                       {emp?.popular && (
@@ -395,7 +395,7 @@ const EmployeeManagement: React.FC = () => {
                                   </div>
                                 </div>
 
-                                <p className="mb-4 line-clamp-2 flex-grow text-sm text-muted-foreground">
+                                <p className="text-muted-foreground mb-4 line-clamp-2 flex-grow text-sm">
                                   {displaySpecialty}
                                 </p>
 
@@ -407,7 +407,7 @@ const EmployeeManagement: React.FC = () => {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="w-full transition-colors group-hover:border-primary/50"
+                                      className="group-hover:border-primary/50 w-full transition-colors"
                                     >
                                       <Code className="mr-2 h-4 w-4" />
                                       Build with AI
@@ -416,7 +416,7 @@ const EmployeeManagement: React.FC = () => {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="transition-colors group-hover:bg-primary/10"
+                                    className="group-hover:bg-primary/10 transition-colors"
                                   >
                                     <Settings className="h-4 w-4" />
                                   </Button>
@@ -427,8 +427,8 @@ const EmployeeManagement: React.FC = () => {
                         })}
                       </BentoGrid>
 
-                      <div className="flex items-center justify-between border-t border-border pt-4">
-                        <p className="text-sm text-muted-foreground">
+                      <div className="border-border flex items-center justify-between border-t pt-4">
+                        <p className="text-muted-foreground text-sm">
                           Showing {hiredEmployees.length}{' '}
                           {hiredEmployees.length === 1
                             ? 'employee'
@@ -451,7 +451,7 @@ const EmployeeManagement: React.FC = () => {
               <Card className="card-premium">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-primary" />
+                    <BarChart3 className="text-primary h-5 w-5" />
                     Workforce Overview
                   </CardTitle>
                   <CardDescription>
@@ -471,7 +471,7 @@ const EmployeeManagement: React.FC = () => {
                         <h4 className="mb-4 font-semibold">
                           Workforce Summary
                         </h4>
-                        <p className="mb-4 leading-relaxed text-muted-foreground">
+                        <p className="text-muted-foreground mb-4 leading-relaxed">
                           Your AI workforce is{' '}
                           {totalEmployees > 5
                             ? 'performing excellently'
@@ -479,7 +479,7 @@ const EmployeeManagement: React.FC = () => {
                               ? 'performing well'
                               : 'growing steadily'}{' '}
                           with{' '}
-                          <span className="font-semibold text-foreground">
+                          <span className="text-foreground font-semibold">
                             {totalEmployees}
                           </span>{' '}
                           AI employees ready to assist you.
@@ -487,26 +487,26 @@ const EmployeeManagement: React.FC = () => {
 
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                           <div className="glass rounded-xl p-4 text-center">
-                            <div className="mb-1 text-2xl font-bold text-primary">
+                            <div className="text-primary mb-1 text-2xl font-bold">
                               {totalEmployees}
                             </div>
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-muted-foreground text-xs">
                               Total Employees
                             </div>
                           </div>
                           <div className="glass rounded-xl p-4 text-center">
-                            <div className="mb-1 text-2xl font-bold text-accent">
+                            <div className="text-accent mb-1 text-2xl font-bold">
                               {activeEmployees}
                             </div>
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-muted-foreground text-xs">
                               Active Now
                             </div>
                           </div>
                           <div className="glass rounded-xl p-4 text-center">
-                            <div className="mb-1 text-2xl font-bold text-secondary">
+                            <div className="text-secondary mb-1 text-2xl font-bold">
                               {hiredEmployees.length}
                             </div>
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-muted-foreground text-xs">
                               Specialists
                             </div>
                           </div>
@@ -530,13 +530,13 @@ const EmployeeManagement: React.FC = () => {
                     </div>
                   ) : (
                     <div className="py-12 text-center">
-                      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted/20">
-                        <BarChart3 className="h-10 w-10 text-muted-foreground" />
+                      <div className="bg-muted/20 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full">
+                        <BarChart3 className="text-muted-foreground h-10 w-10" />
                       </div>
                       <h3 className="mb-2 text-xl font-semibold">
                         No Activity Yet
                       </h3>
-                      <p className="mx-auto mb-6 max-w-md text-muted-foreground">
+                      <p className="text-muted-foreground mx-auto mb-6 max-w-md">
                         Hire AI employees and start assigning tasks to see
                         performance metrics
                       </p>

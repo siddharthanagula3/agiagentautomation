@@ -84,7 +84,10 @@ class AnalyticsService {
 
     // Only add listeners in browser environment
     if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', this.handleVisibilityChange);
+      document.addEventListener(
+        'visibilitychange',
+        this.handleVisibilityChange
+      );
     }
     if (typeof window !== 'undefined') {
       window.addEventListener('beforeunload', this.handleBeforeUnload);
@@ -98,7 +101,10 @@ class AnalyticsService {
    */
   destroy(): void {
     if (this.handleVisibilityChange && typeof document !== 'undefined') {
-      document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+      document.removeEventListener(
+        'visibilitychange',
+        this.handleVisibilityChange
+      );
       this.handleVisibilityChange = null;
     }
     if (this.handleBeforeUnload && typeof window !== 'undefined') {

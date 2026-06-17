@@ -118,7 +118,9 @@ class AccountLockoutService {
    */
   updateConfig(config: Partial<LockoutConfig>): void {
     this.config = { ...this.config, ...config };
-    logger.auth(`Account lockout config updated: max=${this.config.maxAttempts}, duration=${this.config.lockoutDurationMinutes}min`);
+    logger.auth(
+      `Account lockout config updated: max=${this.config.maxAttempts}, duration=${this.config.lockoutDurationMinutes}min`
+    );
   }
 
   /**
@@ -141,14 +143,19 @@ class AccountLockoutService {
       });
 
       if (error) {
-        logger.warn('Database lockout check failed, using in-memory fallback:', error.message);
+        logger.warn(
+          'Database lockout check failed, using in-memory fallback:',
+          error.message
+        );
         return this.checkLockoutInMemory(normalizedEmail);
       }
 
       if (data && data.length > 0) {
         const result = data[0];
         const isLocked = result.is_locked === true;
-        const lockedUntil = result.locked_until ? new Date(result.locked_until) : null;
+        const lockedUntil = result.locked_until
+          ? new Date(result.locked_until)
+          : null;
 
         return {
           isLocked,
@@ -190,7 +197,10 @@ class AccountLockoutService {
       });
 
       if (error) {
-        logger.warn('Database failed login record failed, using in-memory fallback:', error.message);
+        logger.warn(
+          'Database failed login record failed, using in-memory fallback:',
+          error.message
+        );
         return this.recordFailedLoginInMemory(normalizedEmail);
       }
 
@@ -198,13 +208,21 @@ class AccountLockoutService {
         const result = data[0];
         const isLocked = result.is_locked === true;
         const justLocked = result.should_lock === true;
-        const lockedUntil = result.locked_until ? new Date(result.locked_until) : null;
+        const lockedUntil = result.locked_until
+          ? new Date(result.locked_until)
+          : null;
         const attemptsRemaining = result.attempts_remaining || 0;
 
         // Log security event
         if (this.config.enableAuditLogging) {
-          const severity: SecuritySeverity = justLocked ? 'critical' : isLocked ? 'warning' : 'info';
-          const eventType: SecurityEventType = justLocked ? 'account_locked' : 'login_failed';
+          const severity: SecuritySeverity = justLocked
+            ? 'critical'
+            : isLocked
+              ? 'warning'
+              : 'info';
+          const eventType: SecurityEventType = justLocked
+            ? 'account_locked'
+            : 'login_failed';
 
           await this.logSecurityEvent({
             eventType,
@@ -249,7 +267,10 @@ class AccountLockoutService {
         message: 'Invalid credentials.',
       };
     } catch (err) {
-      logger.warn('Failed login record exception, using in-memory fallback:', err);
+      logger.warn(
+        'Failed login record exception, using in-memory fallback:',
+        err
+      );
       return this.recordFailedLoginInMemory(normalizedEmail);
     }
   }
@@ -482,7 +503,10 @@ class AccountLockoutService {
     }
 
     const isLocked = entry.lockedUntil !== null && entry.lockedUntil > now;
-    const attemptsRemaining = Math.max(0, this.config.maxAttempts - entry.failedAttempts);
+    const attemptsRemaining = Math.max(
+      0,
+      this.config.maxAttempts - entry.failedAttempts
+    );
     const lockedUntil = entry.lockedUntil ? new Date(entry.lockedUntil) : null;
 
     let message: string;

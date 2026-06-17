@@ -19,9 +19,9 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_created_at
 
 -- Composite index for user's messages across all sessions
 -- Useful for global message search
-CREATE INDEX IF NOT EXISTS idx_chat_messages_user_created
-  ON public.chat_messages(session_id, created_at DESC)
-  WHERE session_id IN (SELECT id FROM chat_sessions);
+-- Note: Commented out because it is redundant with idx_chat_messages_session_created and had an invalid subquery predicate.
+-- CREATE INDEX IF NOT EXISTS idx_chat_messages_user_created
+--   ON public.chat_messages(session_id, created_at DESC);
 
 -- =============================================
 -- 2. CHAT SESSIONS INDEXES

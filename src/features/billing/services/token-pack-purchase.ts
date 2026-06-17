@@ -49,23 +49,20 @@ export async function buyTokenPack(params: BuyTokenPackParams): Promise<void> {
     }
 
     // Call Netlify function to create Stripe checkout session
-    const response = await fetch(
-      '/.netlify/functions/payments/buy-token-pack',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          userId,
-          userEmail,
-          packId,
-          tokens,
-          price,
-        }),
-      }
-    );
+    const response = await fetch('/api/payments/buy-token-pack', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({
+        userId,
+        userEmail,
+        packId,
+        tokens,
+        price,
+      }),
+    });
 
     if (!response.ok) {
       const error = await response.json();

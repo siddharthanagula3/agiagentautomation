@@ -85,9 +85,9 @@ const ChatSidebarContent = memo(function ChatSidebarContent({
   );
 
   return (
-    <div className="flex h-full flex-col bg-card/50 backdrop-blur-sm">
+    <div className="bg-card/50 flex h-full flex-col backdrop-blur-sm">
       {/* Header */}
-      <div className="border-b border-border p-4">
+      <div className="border-border border-b p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Chat History</h2>
           <Button
@@ -107,7 +107,7 @@ const ChatSidebarContent = memo(function ChatSidebarContent({
           </Button>
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="Search chats..."
               value={searchQuery}
@@ -138,7 +138,7 @@ const ChatSidebarContent = memo(function ChatSidebarContent({
         {isLoading ? (
           <SessionSkeleton />
         ) : sessions.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
+          <div className="text-muted-foreground py-8 text-center">
             <MessageSquare className="mx-auto mb-4 h-12 w-12 opacity-50" />
             <p className="text-sm">No chat history yet</p>
             <p className="text-xs">Start a new conversation</p>
@@ -203,8 +203,8 @@ const ChatSidebarContent = memo(function ChatSidebarContent({
       </ScrollArea>
 
       {/* Footer */}
-      <div className="border-t border-border p-4">
-        <div className="text-center text-xs text-muted-foreground">
+      <div className="border-border border-t p-4">
+        <div className="text-muted-foreground text-center text-xs">
           {sessionCountText}
         </div>
       </div>

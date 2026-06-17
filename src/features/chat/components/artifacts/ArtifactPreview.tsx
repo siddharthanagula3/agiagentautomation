@@ -306,22 +306,22 @@ export function ArtifactPreview({
     <div
       ref={containerRef}
       className={cn(
-        'mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-lg',
-        isFullscreen && 'fixed inset-0 z-modal rounded-none',
+        'border-border bg-card mt-3 overflow-hidden rounded-xl border shadow-lg',
+        isFullscreen && 'z-modal fixed inset-0 rounded-none',
         className
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-2">
+      <div className="border-border bg-muted/50 flex items-center justify-between border-b px-4 py-2">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <Code className="h-4 w-4 text-muted-foreground" />
+            <Code className="text-muted-foreground h-4 w-4" />
             <span className="text-sm font-semibold">
               {artifact.title || 'Artifact'}
             </span>
           </div>
           {artifact.type && (
-            <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+            <span className="bg-primary/10 text-primary rounded px-2 py-0.5 text-xs font-medium">
               {artifact.type}
             </span>
           )}
@@ -352,7 +352,7 @@ export function ArtifactPreview({
                       <span className="text-xs font-medium">
                         Version {index + 1}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         {version.timestamp.toLocaleString()}
                       </span>
                     </div>
@@ -464,7 +464,7 @@ export function ArtifactPreview({
         className="w-full"
       >
         {canPreview && (
-          <TabsList className="w-full justify-start rounded-none border-b border-border bg-muted/30 px-4">
+          <TabsList className="border-border bg-muted/30 w-full justify-start rounded-none border-b px-4">
             <TabsTrigger value="preview" className="gap-2">
               <Eye className="h-3.5 w-3.5" />
               Preview

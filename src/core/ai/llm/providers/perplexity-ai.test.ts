@@ -175,7 +175,9 @@ describe('PerplexityProvider', () => {
       expect(response.usage?.completionTokens).toBe(15);
       expect(response.usage?.totalTokens).toBe(25);
       expect(response.model).toBe('sonar');
-      expect(response.metadata?.citations).toEqual(['https://example.com/news']);
+      expect(response.metadata?.citations).toEqual([
+        'https://example.com/news',
+      ]);
     });
 
     it('should handle response with content field directly', async () => {
@@ -428,7 +430,7 @@ describe('PerplexityProvider', () => {
       await provider.sendMessage(mockMessages);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/perplexity-proxy',
+        '/api/llm-proxies/perplexity-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -501,7 +503,11 @@ describe('PerplexityProvider', () => {
     });
 
     it('should create non-retryable error', () => {
-      const error = new PerplexityError('Auth failed', 'INVALID_API_KEY', false);
+      const error = new PerplexityError(
+        'Auth failed',
+        'INVALID_API_KEY',
+        false
+      );
 
       expect(error.retryable).toBe(false);
     });
@@ -576,7 +582,9 @@ describe('PerplexityProvider', () => {
     });
 
     it('should handle database save error gracefully', async () => {
-      const insertMock = vi.fn().mockResolvedValue({ error: new Error('DB error') });
+      const insertMock = vi
+        .fn()
+        .mockResolvedValue({ error: new Error('DB error') });
       vi.mocked(supabase.from).mockReturnValue({
         insert: insertMock,
       } as never);

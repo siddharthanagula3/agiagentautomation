@@ -158,7 +158,7 @@ const ImageViewDialog: React.FC<ImageViewDialogProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="relative overflow-hidden rounded-2xl bg-card shadow-2xl"
+          className="bg-card relative overflow-hidden rounded-2xl shadow-2xl"
         >
           <img
             src={imageUrl}
@@ -246,7 +246,7 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
           <div
             ref={ref}
             className={cn(
-              'rounded-3xl border border-border bg-card p-2 shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300',
+              'border-border bg-card rounded-3xl border p-2 shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300',
               isLoading && 'border-red-500/70',
               className
             )}
@@ -303,7 +303,7 @@ const PromptInputTextarea: React.FC<
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
       className={cn(
-        'flex min-h-[44px] w-full resize-none rounded-md border-none bg-transparent px-3 py-2.5 text-base text-gray-100 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50',
+        'flex min-h-[44px] w-full resize-none rounded-md border-none bg-transparent px-3 py-2.5 text-base text-gray-100 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
         className
       )}
       disabled={disabled}
@@ -356,7 +356,7 @@ const PromptInputAction: React.FC<PromptInputActionProps> = ({
 const CustomDivider: React.FC = () => (
   <div className="relative mx-1 h-6 w-[1.5px]">
     <div
-      className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-secondary/70 to-transparent"
+      className="via-secondary/70 absolute inset-0 rounded-full bg-gradient-to-t from-transparent to-transparent"
       style={{
         clipPath:
           'polygon(0% 0%, 100% 0%, 100% 40%, 140% 50%, 100% 60%, 100% 100%, 0% 100%, 0% 60%, -40% 50%, 0% 40%)',
@@ -517,7 +517,7 @@ export const PromptInputBox = React.forwardRef(
           isLoading={isLoading}
           onSubmit={handleSubmit}
           className={cn(
-            'w-full border-border bg-card shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300 ease-in-out',
+            'border-border bg-card w-full shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300 ease-in-out',
             isRecording && 'border-red-500/70',
             className
           )}
@@ -534,7 +534,7 @@ export const PromptInputBox = React.forwardRef(
                   {file.type.startsWith('image/') &&
                     filePreviews[file.name] && (
                       <div
-                        className="h-16 w-16 cursor-pointer overflow-hidden rounded-xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                        className="focus-visible:ring-primary h-16 w-16 cursor-pointer overflow-hidden rounded-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                         onClick={() => openImageModal(filePreviews[file.name])}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
@@ -556,7 +556,7 @@ export const PromptInputBox = React.forwardRef(
                             e.stopPropagation();
                             handleRemoveFile(index);
                           }}
-                          className="absolute right-1 top-1 rounded-full bg-black/70 p-0.5 opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 rounded-full bg-black/70 p-0.5 opacity-100 transition-opacity"
                         >
                           <X className="h-3 w-3 text-white" />
                         </button>
@@ -605,7 +605,7 @@ export const PromptInputBox = React.forwardRef(
               <PromptInputAction tooltip="Upload image">
                 <button
                   onClick={() => uploadInputRef.current?.click()}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-colors"
                   disabled={isRecording}
                 >
                   <Paperclip className="h-5 w-5 transition-colors" />
@@ -631,7 +631,7 @@ export const PromptInputBox = React.forwardRef(
                     'flex h-8 items-center gap-1 rounded-full border px-2 py-1 transition-all',
                     showSearch
                       ? 'border-accent bg-accent/15 text-accent'
-                      : 'border-transparent bg-transparent text-muted-foreground hover:text-foreground'
+                      : 'text-muted-foreground hover:text-foreground border-transparent bg-transparent'
                   )}
                 >
                   <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
@@ -670,7 +670,7 @@ export const PromptInputBox = React.forwardRef(
                         animate={{ width: 'auto', opacity: 1 }}
                         exit={{ width: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="flex-shrink-0 overflow-hidden whitespace-nowrap text-xs text-accent"
+                        className="text-accent flex-shrink-0 overflow-hidden text-xs whitespace-nowrap"
                       >
                         Search
                       </motion.span>
@@ -687,7 +687,7 @@ export const PromptInputBox = React.forwardRef(
                     'flex h-8 items-center gap-1 rounded-full border px-2 py-1 transition-all',
                     showThink
                       ? 'border-secondary bg-secondary/15 text-secondary'
-                      : 'border-transparent bg-transparent text-muted-foreground hover:text-foreground'
+                      : 'text-muted-foreground hover:text-foreground border-transparent bg-transparent'
                   )}
                 >
                   <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
@@ -726,7 +726,7 @@ export const PromptInputBox = React.forwardRef(
                         animate={{ width: 'auto', opacity: 1 }}
                         exit={{ width: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="flex-shrink-0 overflow-hidden whitespace-nowrap text-xs text-secondary"
+                        className="text-secondary flex-shrink-0 overflow-hidden text-xs whitespace-nowrap"
                       >
                         Think
                       </motion.span>
@@ -743,7 +743,7 @@ export const PromptInputBox = React.forwardRef(
                     'flex h-8 items-center gap-1 rounded-full border px-2 py-1 transition-all',
                     showCanvas
                       ? 'border-warning bg-warning/15 text-warning'
-                      : 'border-transparent bg-transparent text-muted-foreground hover:text-foreground'
+                      : 'text-muted-foreground hover:text-foreground border-transparent bg-transparent'
                   )}
                 >
                   <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
@@ -782,7 +782,7 @@ export const PromptInputBox = React.forwardRef(
                         animate={{ width: 'auto', opacity: 1 }}
                         exit={{ width: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="flex-shrink-0 overflow-hidden whitespace-nowrap text-xs text-warning"
+                        className="text-warning flex-shrink-0 overflow-hidden text-xs whitespace-nowrap"
                       >
                         Canvas
                       </motion.span>
@@ -809,10 +809,10 @@ export const PromptInputBox = React.forwardRef(
                 className={cn(
                   'h-8 w-8 rounded-full transition-all duration-200',
                   isRecording
-                    ? 'bg-transparent text-destructive hover:bg-muted hover:text-destructive/80'
+                    ? 'text-destructive hover:bg-muted hover:text-destructive/80 bg-transparent'
                     : hasContent
                       ? 'bg-foreground text-background hover:bg-foreground/80'
-                      : 'bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent'
                 )}
                 onClick={() => {
                   if (isRecording) setIsRecording(false);
@@ -822,13 +822,13 @@ export const PromptInputBox = React.forwardRef(
                 disabled={isLoading && !hasContent}
               >
                 {isLoading ? (
-                  <Square className="h-4 w-4 animate-pulse fill-background" />
+                  <Square className="fill-background h-4 w-4 animate-pulse" />
                 ) : isRecording ? (
-                  <StopCircle className="h-5 w-5 text-destructive" />
+                  <StopCircle className="text-destructive h-5 w-5" />
                 ) : hasContent ? (
-                  <ArrowUp className="h-4 w-4 text-background" />
+                  <ArrowUp className="text-background h-4 w-4" />
                 ) : (
-                  <Mic className="h-5 w-5 text-background transition-colors" />
+                  <Mic className="text-background h-5 w-5 transition-colors" />
                 )}
               </Button>
             </PromptInputAction>

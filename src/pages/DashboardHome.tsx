@@ -4,7 +4,13 @@
  * The DashboardLayout provides the app navigation sidebar and header.
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { useAuthStore } from '@shared/stores/authentication-store';
@@ -116,7 +122,7 @@ const WorkforcePanel: React.FC<{
 
   if (!isOpen) {
     return (
-      <div className="flex flex-col items-center border-l border-border bg-card/30 py-3">
+      <div className="border-border bg-card/30 flex flex-col items-center border-l py-3">
         <Button
           variant="ghost"
           size="icon"
@@ -127,8 +133,8 @@ const WorkforcePanel: React.FC<{
           <PanelRightOpen className="h-4 w-4" />
         </Button>
         <div className="flex flex-col items-center gap-3 pt-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <Brain className="h-4 w-4 text-primary" />
+          <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+            <Brain className="text-primary h-4 w-4" />
           </div>
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10">
             <Target className="h-4 w-4 text-green-500" />
@@ -142,11 +148,11 @@ const WorkforcePanel: React.FC<{
   }
 
   return (
-    <div className="flex w-72 flex-shrink-0 flex-col border-l border-border bg-card/30">
+    <div className="border-border bg-card/30 flex w-72 flex-shrink-0 flex-col border-l">
       {/* Panel header */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      <div className="border-border flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-primary" />
+          <Users className="text-primary h-4 w-4" />
           <h3 className="text-sm font-semibold">Workforce</h3>
         </div>
         <Button
@@ -164,10 +170,10 @@ const WorkforcePanel: React.FC<{
         <div className="space-y-4 p-4">
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-border bg-background/50 p-3">
+            <div className="border-border bg-background/50 rounded-lg border p-3">
               <div className="flex items-center gap-1.5">
-                <Brain className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs text-muted-foreground">Agents</span>
+                <Brain className="text-primary h-3.5 w-3.5" />
+                <span className="text-muted-foreground text-xs">Agents</span>
               </div>
               <p className="mt-1 text-lg font-bold">
                 <AnimatedCounter value={stats.totalAgents} />
@@ -180,10 +186,10 @@ const WorkforcePanel: React.FC<{
               )}
             </div>
 
-            <div className="rounded-lg border border-border bg-background/50 p-3">
+            <div className="border-border bg-background/50 rounded-lg border p-3">
               <div className="flex items-center gap-1.5">
                 <Target className="h-3.5 w-3.5 text-green-500" />
-                <span className="text-xs text-muted-foreground">Tasks</span>
+                <span className="text-muted-foreground text-xs">Tasks</span>
               </div>
               <p className="mt-1 text-lg font-bold">
                 <AnimatedCounter value={stats.completedTasks} />
@@ -196,27 +202,28 @@ const WorkforcePanel: React.FC<{
               )}
             </div>
 
-            <div className="rounded-lg border border-border bg-background/50 p-3">
+            <div className="border-border bg-background/50 rounded-lg border p-3">
               <div className="flex items-center gap-1.5">
                 <Zap className="h-3.5 w-3.5 text-yellow-500" />
-                <span className="text-xs text-muted-foreground">Tokens</span>
+                <span className="text-muted-foreground text-xs">Tokens</span>
               </div>
               <p className="mt-1 text-lg font-bold">
                 <AnimatedCounter
                   value={stats.tokensUsed}
                   format={(v) => {
                     const rounded = Math.round(v);
-                    if (rounded >= 1000) return `${(rounded / 1000).toFixed(1)}k`;
+                    if (rounded >= 1000)
+                      return `${(rounded / 1000).toFixed(1)}k`;
                     return String(rounded);
                   }}
                 />
               </p>
             </div>
 
-            <div className="rounded-lg border border-border bg-background/50 p-3">
+            <div className="border-border bg-background/50 rounded-lg border p-3">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-xs text-muted-foreground">Success</span>
+                <span className="text-muted-foreground text-xs">Success</span>
               </div>
               <p className="mt-1 text-lg font-bold">
                 {stats.completedTasks + stats.failedTasks > 0 ? (
@@ -234,7 +241,7 @@ const WorkforcePanel: React.FC<{
           {hiredEmployees.length > 0 && (
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <h4 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                   Hired Employees
                 </h4>
                 <Badge variant="outline" className="text-[10px]">
@@ -245,14 +252,14 @@ const WorkforcePanel: React.FC<{
                 {hiredEmployees.slice(0, 5).map((emp) => (
                   <div
                     key={emp.id}
-                    className="flex items-center gap-2 rounded-lg border border-border bg-background/50 p-2"
+                    className="border-border bg-background/50 flex items-center gap-2 rounded-lg border p-2"
                   >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
-                      <Brain className="h-3.5 w-3.5 text-primary" />
+                    <div className="bg-primary/10 flex h-7 w-7 items-center justify-center rounded-full">
+                      <Brain className="text-primary h-3.5 w-3.5" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-medium">{emp.name}</p>
-                      <p className="truncate text-[10px] text-muted-foreground">
+                      <p className="text-muted-foreground truncate text-[10px]">
                         {emp.role}
                       </p>
                     </div>
@@ -262,7 +269,7 @@ const WorkforcePanel: React.FC<{
                   </div>
                 ))}
                 {hiredEmployees.length > 5 && (
-                  <p className="text-center text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-center text-xs">
                     +{hiredEmployees.length - 5} more
                   </p>
                 )}
@@ -272,12 +279,16 @@ const WorkforcePanel: React.FC<{
 
           {/* Quick Links */}
           <div className="space-y-1.5">
-            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <h4 className="text-muted-foreground mb-2 text-xs font-medium tracking-wider uppercase">
               Quick Links
             </h4>
             {[
               { label: 'Workforce', href: '/workforce', icon: Users },
-              { label: 'Mission Control', href: '/mission-control', icon: Target },
+              {
+                label: 'Mission Control',
+                href: '/mission-control',
+                icon: Target,
+              },
               { label: 'VIBE Workspace', href: '/vibe', icon: Zap },
               { label: 'Marketplace', href: '/hire', icon: TrendingUp },
             ].map((link) => (
@@ -345,6 +356,7 @@ export const DashboardHomePage: React.FC = () => {
     renameSession,
     deleteSession,
     loadSessions,
+    loadSession,
     toggleStarSession,
     togglePinSession,
     toggleArchiveSession,
@@ -418,14 +430,20 @@ export const DashboardHomePage: React.FC = () => {
     loadSessions();
   }, [loadSessions]);
 
-  // Create new session if none exists
+  // Select most recent session or create one if none exists
   useEffect(() => {
+    if (isLoadingSessions) return;
+
     if (!currentSession) {
-      createSession('New Chat').catch((err) => {
-        console.error('Failed to create session:', err);
-      });
+      if (sessions.length > 0) {
+        loadSession(sessions[0].id);
+      } else {
+        createSession('New Chat').catch((err) => {
+          console.error('Failed to create session:', err);
+        });
+      }
     }
-  }, [currentSession, createSession]);
+  }, [currentSession, sessions, isLoadingSessions, loadSession, createSession]);
 
   // Handlers
   const handleSendMessage = async (
@@ -452,7 +470,10 @@ export const DashboardHomePage: React.FC = () => {
       })
       .catch((err) => {
         console.error('Failed to create new chat:', err);
-        showError('Unable to create a new chat. Please try again.', 'Chat Creation Failed');
+        showError(
+          'Unable to create a new chat. Please try again.',
+          'Chat Creation Failed'
+        );
       });
   }, [createSession, navigate, showError]);
 
@@ -554,14 +575,20 @@ export const DashboardHomePage: React.FC = () => {
         markWarningShown(85);
       }
     }
-  }, [usageData, userUsage?.tokensLimit, updateUsage, shouldShowWarning, markWarningShown]);
+  }, [
+    usageData,
+    userUsage?.tokensLimit,
+    updateUsage,
+    shouldShowWarning,
+    markWarningShown,
+  ]);
 
   return (
     <div className="-mx-4 -mt-0 flex h-[calc(100vh-4rem)] sm:-mx-6 lg:-mx-8">
       {/* Left: Chat session sidebar */}
       <div
         className={cn(
-          'border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out',
+          'border-border bg-card/50 border-r backdrop-blur-sm transition-all duration-300 ease-in-out',
           chatSidebarOpen ? 'w-0 sm:w-64 md:w-72' : 'w-0',
           'overflow-hidden'
         )}
@@ -606,7 +633,7 @@ export const DashboardHomePage: React.FC = () => {
 
         {/* Usage Warning Banner */}
         {usageData.length > 0 && (
-          <div className="border-b border-border px-4 py-2">
+          <div className="border-border border-b px-4 py-2">
             <UsageWarningBanner usageData={usageData} />
           </div>
         )}
@@ -635,7 +662,7 @@ export const DashboardHomePage: React.FC = () => {
         </div>
 
         {/* Composer */}
-        <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky bottom-0 border-t backdrop-blur">
           <div className="mx-auto max-w-4xl p-3 sm:p-4">
             <ChatComposer
               onSendMessage={handleSendMessage}

@@ -98,9 +98,9 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
       <CommandList className="max-h-[300px]">
         <CommandEmpty>
           <div className="flex flex-col items-center justify-center py-6 text-center">
-            <Search className="mb-2 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">No agents found</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <Search className="text-muted-foreground mb-2 h-8 w-8" />
+            <p className="text-muted-foreground text-sm">No agents found</p>
+            <p className="text-muted-foreground mt-1 text-xs">
               Try a different search term
             </p>
           </div>
@@ -118,7 +118,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
                 >
                   {/* Agent Avatar */}
                   <Avatar className="mt-0.5 h-8 w-8">
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-sm font-semibold text-primary">
+                    <div className="from-primary/20 to-primary/5 text-primary flex h-full w-full items-center justify-center bg-gradient-to-br text-sm font-semibold">
                       {employee.name.charAt(0).toUpperCase()}
                     </div>
                   </Avatar>
@@ -130,10 +130,10 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
                         {employee.name}
                       </span>
                       {selectedAgent === employee.name && (
-                        <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />
+                        <CheckCircle2 className="text-primary h-4 w-4 flex-shrink-0" />
                       )}
                     </div>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                    <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
                       {employee.description}
                     </p>
 
@@ -163,7 +163,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
 
                   {/* Quick Indicator */}
                   <div className="flex-shrink-0">
-                    <Zap className="h-4 w-4 text-muted-foreground" />
+                    <Zap className="text-muted-foreground h-4 w-4" />
                   </div>
                 </CommandItem>
               ))}

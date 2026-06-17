@@ -111,7 +111,7 @@ export function CustomShortcutDialog({
               onChange={(e) => setLabel(e.target.value)}
               maxLength={50}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               A short, descriptive name for your shortcut
             </p>
           </div>
@@ -156,7 +156,7 @@ export function CustomShortcutDialog({
               rows={4}
               maxLength={500}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               The prompt that will be inserted when you click this shortcut
             </p>
           </div>

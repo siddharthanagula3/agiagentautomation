@@ -80,7 +80,10 @@ describe('ToolsExecutionService', () => {
 
       expect(result.id).toBeDefined();
       expect(result.name).toBe('code_runner');
-      expect(result.arguments).toEqual({ code: '2 + 2', language: 'javascript' });
+      expect(result.arguments).toEqual({
+        code: '2 + 2',
+        language: 'javascript',
+      });
       expect(result.startedAt).toBeInstanceOf(Date);
     });
 
@@ -94,7 +97,8 @@ describe('ToolsExecutionService', () => {
 
   describe('Web Search', () => {
     it('should execute web search successfully', async () => {
-      const { webSearch } = await import('@core/integrations/web-search-handler');
+      const { webSearch } =
+        await import('@core/integrations/web-search-handler');
 
       const mockSearchResponse = {
         query: 'test query',
@@ -121,7 +125,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should use default maxResults when not specified', async () => {
-      const { webSearch } = await import('@core/integrations/web-search-handler');
+      const { webSearch } =
+        await import('@core/integrations/web-search-handler');
 
       vi.mocked(webSearch).mockResolvedValue({
         query: 'test',
@@ -142,7 +147,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should handle web search API errors', async () => {
-      const { webSearch } = await import('@core/integrations/web-search-handler');
+      const { webSearch } =
+        await import('@core/integrations/web-search-handler');
 
       vi.mocked(webSearch).mockRejectedValue(new Error('API rate limit'));
 
@@ -155,7 +161,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should support different search providers', async () => {
-      const { webSearch } = await import('@core/integrations/web-search-handler');
+      const { webSearch } =
+        await import('@core/integrations/web-search-handler');
 
       vi.mocked(webSearch).mockResolvedValue({
         query: 'test',
@@ -353,9 +360,8 @@ describe('ToolsExecutionService', () => {
 
   describe('Image Generator', () => {
     it('should generate image successfully', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockResolvedValue([
         {
@@ -404,9 +410,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should validate size parameter', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockResolvedValue([
         {
@@ -430,9 +435,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should support valid sizes', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockResolvedValue([
         {
@@ -454,9 +458,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should support quality parameter', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockResolvedValue([
         {
@@ -478,9 +481,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should support style parameter', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockResolvedValue([
         {
@@ -502,9 +504,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should handle API rate limit error', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockRejectedValue(
         new Error('429 rate limit exceeded')
@@ -522,9 +523,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should handle content policy error', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockRejectedValue(
         new Error('Content policy violation')
@@ -542,9 +542,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should handle authentication error', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockRejectedValue(
         new Error('User not authenticated')
@@ -562,9 +561,8 @@ describe('ToolsExecutionService', () => {
     });
 
     it('should handle empty image result', async () => {
-      const { dallEImageService } = await import(
-        '@core/integrations/dalle-image-service'
-      );
+      const { dallEImageService } =
+        await import('@core/integrations/dalle-image-service');
 
       vi.mocked(dallEImageService.generateImage).mockResolvedValue([]);
 

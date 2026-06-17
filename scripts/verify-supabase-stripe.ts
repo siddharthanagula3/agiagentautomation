@@ -227,7 +227,7 @@ async function verifyStripe() {
 
       const productionWebhooks = webhooks.data.filter(
         (w) =>
-          w.url.includes('agiagentautomation.com') &&
+          w.url.includes('agiagentautomation.vercel.app') &&
           !w.url.includes('localhost') &&
           !w.url.includes('test')
       );
@@ -267,7 +267,7 @@ async function verifyStripe() {
       } else {
         log('   ⚠️  No production webhooks found', 'yellow');
         log(
-          '   Create webhook for: https://agiagentautomation.com/.netlify/functions/payments/stripe-webhook',
+          '   Create webhook for: https://agiagentautomation.vercel.app/.netlify/functions/payments/stripe-webhook',
           'yellow'
         );
       }

@@ -294,7 +294,7 @@ const PricingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-background">
+    <div className="bg-background min-h-screen w-full max-w-full overflow-x-hidden">
       <SEOHead
         title="AI Employee Pricing | Free Forever to $99/mo | Save 99% vs Human Employees"
         description="Hire Free AI Employees. Free plan: 1M tokens/month (250K per provider). Pro plan: 10M tokens/month (2.5M per provider). Token costs at market rates. Save 99%+ on payroll. Start in 60 seconds!"
@@ -337,7 +337,7 @@ const PricingPage: React.FC = () => {
       />
 
       {/* Hero */}
-      <section className="px-4 pb-16 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-16 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -345,13 +345,13 @@ const PricingPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mx-auto max-w-3xl text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
               Hire Free AI Employees - Pay Only for Tokens
             </h1>
-            <p className="mb-4 text-2xl font-semibold text-foreground">
+            <p className="text-foreground mb-4 text-2xl font-semibold">
               Free Plan: 1M Tokens/Month • Pro: 10M Tokens/Month
             </p>
-            <p className="mb-8 text-xl text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-xl">
               Free Forever: 250K tokens each (OpenAI, Claude, Perplexity,
               Gemini)
               <br />
@@ -379,7 +379,7 @@ const PricingPage: React.FC = () => {
         <div className="container mx-auto max-w-7xl">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="animate-spin text-primary" size={48} />
+              <Loader2 className="text-primary animate-spin" size={48} />
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -398,7 +398,7 @@ const PricingPage: React.FC = () => {
       </section>
 
       {/* Comparison Table */}
-      <section className="bg-gradient-to-b from-background to-accent/5 px-4 py-20 sm:px-6 lg:px-8">
+      <section className="from-background to-accent/5 bg-gradient-to-b px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -412,7 +412,7 @@ const PricingPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-border/40">
+                <tr className="border-border/40 border-b">
                   <th className="px-2 py-3 text-left text-sm font-semibold sm:px-4 md:px-6 md:py-4">
                     Features
                   </th>
@@ -441,7 +441,7 @@ const PricingPage: React.FC = () => {
                     {category.features.map((feature, featIdx) => (
                       <tr
                         key={featIdx}
-                        className="border-b border-border/20 hover:bg-accent/5"
+                        className="border-border/20 hover:bg-accent/5 border-b"
                       >
                         <td className="px-2 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm md:px-6">
                           {feature.name}
@@ -456,7 +456,7 @@ const PricingPage: React.FC = () => {
                             ) : (
                               <X
                                 size={18}
-                                className="inline text-muted-foreground"
+                                className="text-muted-foreground inline"
                               />
                             )
                           ) : (
@@ -475,7 +475,7 @@ const PricingPage: React.FC = () => {
                             ) : (
                               <X
                                 size={18}
-                                className="inline text-muted-foreground"
+                                className="text-muted-foreground inline"
                               />
                             )
                           ) : (
@@ -494,7 +494,7 @@ const PricingPage: React.FC = () => {
                             ) : (
                               <X
                                 size={18}
-                                className="inline text-muted-foreground"
+                                className="text-muted-foreground inline"
                               />
                             )
                           ) : (
@@ -550,7 +550,7 @@ const PricingPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="rounded-xl border border-border/40 bg-background/60 p-4 backdrop-blur-xl sm:p-6"
+                className="border-border/40 bg-background/60 rounded-xl border p-4 backdrop-blur-xl sm:p-6"
               >
                 <h3 className="mb-2 text-base font-bold sm:text-lg">{faq.q}</h3>
                 <p className="text-muted-foreground">{faq.a}</p>
@@ -567,7 +567,7 @@ const PricingPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
+            className="from-primary via-accent to-secondary rounded-3xl bg-gradient-to-r p-6 text-center text-white sm:p-8 md:p-12"
           >
             <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Still Have Questions?
@@ -606,13 +606,13 @@ const PricingCard: React.FC<{
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className={`relative overflow-hidden rounded-3xl border p-4 backdrop-blur-xl sm:p-6 md:p-8 ${
         plan.popular
-          ? 'border-primary bg-gradient-to-b from-primary/10 to-accent/10 shadow-2xl sm:scale-105'
+          ? 'border-primary from-primary/10 to-accent/10 bg-gradient-to-b shadow-2xl sm:scale-105'
           : 'border-border/40 bg-background/60'
       }`}
       whileHover={{ y: -8 }}
     >
       {plan.popular && (
-        <div className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-primary to-accent px-4 py-1 text-xs font-bold text-white">
+        <div className="from-primary to-accent absolute top-0 right-0 rounded-bl-xl bg-gradient-to-r px-4 py-1 text-xs font-bold text-white">
           MOST POPULAR
         </div>
       )}
@@ -621,16 +621,16 @@ const PricingCard: React.FC<{
       <div className="mb-4">
         <span className="text-5xl font-bold">{plan.price}</span>
         {plan.period && (
-          <span className="ml-2 text-muted-foreground">{plan.period}</span>
+          <span className="text-muted-foreground ml-2">{plan.period}</span>
         )}
       </div>
-      <p className="mb-8 text-muted-foreground">{plan.description}</p>
+      <p className="text-muted-foreground mb-8">{plan.description}</p>
 
       <Button
         onClick={onSelect}
         disabled={isLoading}
         className={`mb-8 w-full ${
-          plan.popular ? 'bg-gradient-to-r from-primary to-accent' : ''
+          plan.popular ? 'from-primary to-accent bg-gradient-to-r' : ''
         }`}
         variant={plan.popular ? 'default' : 'outline'}
       >
@@ -658,7 +658,7 @@ const PricingCard: React.FC<{
           <div key={idx} className="flex items-start gap-3 opacity-50">
             <X
               size={18}
-              className="mt-0.5 flex-shrink-0 text-muted-foreground"
+              className="text-muted-foreground mt-0.5 flex-shrink-0"
             />
             <span className="text-sm">{feature}</span>
           </div>

@@ -75,7 +75,7 @@ async function listWebhooks(stripe: Stripe) {
 
     webhooks.data.forEach((webhook, index) => {
       const isProduction =
-        webhook.url.includes('agiagentautomation.com') &&
+        webhook.url.includes('agiagentautomation.vercel.app') &&
         !webhook.url.includes('localhost') &&
         !webhook.url.includes('test');
 

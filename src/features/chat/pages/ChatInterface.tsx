@@ -1,10 +1,5 @@
 // Updated: Jan 15th 2026 - Added error boundary
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useChat } from '../hooks/use-chat-interface';
 import { useChatHistory } from '../hooks/use-conversation-history';
@@ -179,18 +174,25 @@ const ChatPage: React.FC = () => {
     }
   }, [sessionId, currentSession, loadSession]);
 
-  // Create new session if none exists
+  // Create new session if none exists and we're not loading
   useEffect(() => {
-    if (!currentSession && !sessionId) {
-      createSession('New Chat')
-        .then((session) => {
-          navigate(`/chat/${session.id}`);
-        })
-        .catch((error) => {
-          console.error('Failed to create session:', error);
-        });
+    if (isLoadingSessions) return;
+
+    if (!sessionId) {
+      if (sessions.length > 0) {
+        // Redirect to the most recent session
+        navigate(`/chat/${sessions[0].id}`, { replace: true });
+      } else {
+        createSession('New Chat')
+          .then((session) => {
+            navigate(`/chat/${session.id}`, { replace: true });
+          })
+          .catch((error) => {
+            console.error('Failed to create session:', error);
+          });
+      }
     }
-  }, [currentSession, sessionId, createSession, navigate]);
+  }, [sessions, sessionId, isLoadingSessions, createSession, navigate]);
 
   const handleSendMessage = async (
     content: string,
@@ -357,10 +359,10 @@ const ChatPage: React.FC = () => {
   return (
     <ErrorBoundary
       fallback={
-        <div className="flex h-screen items-center justify-center bg-background p-8">
+        <div className="bg-background flex h-screen items-center justify-center p-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Chat interface error</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="text-muted-foreground mt-2">
               Something went wrong with the chat interface. Please refresh the
               page.
             </p>
@@ -371,11 +373,11 @@ const ChatPage: React.FC = () => {
         </div>
       }
     >
-      <div className="flex h-screen bg-background">
+      <div className="bg-background flex h-screen">
         {/* Sidebar - Collapsible with smooth transition */}
         <div
           className={cn(
-            'border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out',
+            'border-border bg-card/50 border-r backdrop-blur-sm transition-all duration-300 ease-in-out',
             sidebarOpen ? 'w-0 sm:w-64 md:w-80' : 'w-0',
             'overflow-hidden' // Prevent content overflow when collapsed
           )}
@@ -422,7 +424,7 @@ const ChatPage: React.FC = () => {
 
           {/* Usage Warning Banner */}
           {usageData.length > 0 && (
-            <div className="border-b border-border px-4 py-2">
+            <div className="border-border border-b px-4 py-2">
               <UsageWarningBanner usageData={usageData} />
             </div>
           )}
@@ -452,7 +454,7 @@ const ChatPage: React.FC = () => {
           </div>
 
           {/* Composer - Sticky at bottom with backdrop */}
-          <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky bottom-0 border-t backdrop-blur">
             <div className="mx-auto max-w-4xl p-3 sm:p-4">
               <ChatComposer
                 onSendMessage={handleSendMessage}

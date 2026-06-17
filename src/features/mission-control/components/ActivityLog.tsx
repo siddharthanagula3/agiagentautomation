@@ -54,7 +54,7 @@ const getTaskStatusIcon = (status: Task['status']) => {
     case 'failed':
       return <XCircle className="h-4 w-4 text-red-500" />;
     default:
-      return <Circle className="h-4 w-4 text-muted-foreground" />;
+      return <Circle className="text-muted-foreground h-4 w-4" />;
   }
 };
 
@@ -80,7 +80,7 @@ const getMessageIcon = (
     case 'user':
       return <User className="h-4 w-4" />;
     case 'system':
-      return <Sparkles className="h-4 w-4 text-primary" />;
+      return <Sparkles className="text-primary h-4 w-4" />;
     case 'agent':
       // Differentiate between supervisor and regular agents
       if (role === 'supervisor') {
@@ -90,7 +90,7 @@ const getMessageIcon = (
     case 'assistant':
       return <Bot className="h-4 w-4 text-green-500" />;
     case 'status':
-      return <Loader2 className="h-4 w-4 text-muted-foreground" />;
+      return <Loader2 className="text-muted-foreground h-4 w-4" />;
     case 'employee':
       return <Bot className="h-4 w-4 text-purple-500" />;
     case 'plan':
@@ -160,7 +160,7 @@ const TaskItem = memo(function TaskItem({
             </p>
           )}
           {task.result && (
-            <div className="mt-1 rounded bg-background/50 p-1.5 sm:mt-2 sm:p-2">
+            <div className="bg-background/50 mt-1 rounded p-1.5 sm:mt-2 sm:p-2">
               <p className="text-[10px] sm:text-xs">{task.result}</p>
             </div>
           )}
@@ -239,7 +239,7 @@ const MessageItem = memo(function MessageItem({
         {/* Message Sender */}
         {message.from !== 'user' && (
           <div className="mb-1 flex flex-wrap items-center gap-1 sm:gap-2">
-            <p className="text-[10px] font-semibold text-foreground sm:text-xs">
+            <p className="text-foreground text-[10px] font-semibold sm:text-xs">
               {employeeName}
             </p>
             {role && role !== 'user' && (
@@ -250,7 +250,7 @@ const MessageItem = memo(function MessageItem({
                 {role === 'supervisor' ? 'Supervisor' : 'Agent'}
               </Badge>
             )}
-            <p className="text-[10px] text-muted-foreground sm:text-xs">
+            <p className="text-muted-foreground text-[10px] sm:text-xs">
               {formattedTime}
             </p>
           </div>
@@ -258,7 +258,10 @@ const MessageItem = memo(function MessageItem({
 
         {/* Message Content */}
         <div
-          className={cn('rounded-lg p-2 sm:p-3', getMessageColor(message.type, role))}
+          className={cn(
+            'rounded-lg p-2 sm:p-3',
+            getMessageColor(message.type, role)
+          )}
         >
           {message.type === 'user' ? (
             <p className="text-xs sm:text-sm">{message.content}</p>
@@ -275,7 +278,7 @@ const MessageItem = memo(function MessageItem({
       {message.type === 'user' && (
         <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
           <AvatarFallback className="bg-primary">
-            <User className="h-3 w-3 text-primary-foreground sm:h-4 sm:w-4" />
+            <User className="text-primary-foreground h-3 w-3 sm:h-4 sm:w-4" />
           </AvatarFallback>
         </Avatar>
       )}
@@ -299,21 +302,22 @@ export const MissionLogEnhanced = memo(function MissionLogEnhanced() {
   const { hasPlan, completedTasks, totalTasks } = useMemo(
     () => ({
       hasPlan: missionPlan.length > 0,
-      completedTasks: missionPlan.filter((t) => t.status === 'completed').length,
+      completedTasks: missionPlan.filter((t) => t.status === 'completed')
+        .length,
       totalTasks: missionPlan.length,
     }),
     [missionPlan]
   );
 
   return (
-    <Card className="flex h-full flex-col border-border bg-card">
+    <Card className="border-border bg-card flex h-full flex-col">
       <CardHeader className="p-3 pb-2 sm:p-4 sm:pb-3">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <ListTodo className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+          <ListTodo className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
           Mission Log
         </CardTitle>
         {hasPlan && (
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className="text-muted-foreground text-xs sm:text-sm">
             {completedTasks} of {totalTasks} tasks completed
           </p>
         )}
@@ -348,18 +352,18 @@ export const MissionLogEnhanced = memo(function MissionLogEnhanced() {
         <div className="space-y-2 sm:space-y-3">
           {messages.length === 0 ? (
             <div className="flex h-48 flex-col items-center justify-center text-center sm:h-64">
-              <Sparkles className="mb-3 h-10 w-10 text-muted-foreground opacity-50 sm:mb-4 sm:h-12 sm:w-12" />
-              <h3 className="mb-2 text-base font-semibold text-foreground sm:text-lg">
+              <Sparkles className="text-muted-foreground mb-3 h-10 w-10 opacity-50 sm:mb-4 sm:h-12 sm:w-12" />
+              <h3 className="text-foreground mb-2 text-base font-semibold sm:text-lg">
                 Mission Control Ready
               </h3>
-              <p className="max-w-sm px-4 text-xs text-muted-foreground sm:px-0 sm:text-sm">
+              <p className="text-muted-foreground max-w-sm px-4 text-xs sm:px-0 sm:text-sm">
                 Your AI Workforce Mission Control is ready. Start a mission to
                 deploy your AI employees.
               </p>
             </div>
           ) : (
             <>
-              <h4 className="text-xs font-semibold text-foreground sm:text-sm">
+              <h4 className="text-foreground text-xs font-semibold sm:text-sm">
                 Activity Log
               </h4>
               <AnimatePresence mode="popLayout">

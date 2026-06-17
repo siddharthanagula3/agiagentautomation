@@ -131,7 +131,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
             </div>
             <div>
               <CardTitle className="text-lg">{workflow.name}</CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {workflow.description}
               </p>
             </div>
@@ -155,7 +155,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
 
         {/* Timeline */}
         {workflow.startedAt && (
-          <div className="mt-3 flex items-center space-x-4 text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-3 flex items-center space-x-4 text-xs">
             <span>Started: {workflow.startedAt.toLocaleTimeString()}</span>
             {workflow.completedAt && (
               <span>
@@ -196,7 +196,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                     step.status === 'completed' &&
                       'border-green-500/30 bg-green-50/30 dark:bg-green-900/10',
                     step.status === 'failed' && 'border-red-500/50',
-                    isExpanded && 'ring-2 ring-primary/20'
+                    isExpanded && 'ring-primary/20 ring-2'
                   )}
                   onClick={() => toggleStep(step.id)}
                 >
@@ -212,7 +212,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                               step.status === 'in_progress' && 'animate-pulse'
                             )}
                           />
-                          <span className="text-sm font-medium text-muted-foreground">
+                          <span className="text-muted-foreground text-sm font-medium">
                             #{index + 1}
                           </span>
                         </div>
@@ -235,7 +235,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                                   AI
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="text-sm text-muted-foreground">
+                              <span className="text-muted-foreground text-sm">
                                 {step.agentId}
                               </span>
                             </div>
@@ -243,7 +243,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
 
                           {/* Dependencies */}
                           {step.dependencies.length > 0 && !isExpanded && (
-                            <div className="mt-2 text-xs text-muted-foreground">
+                            <div className="text-muted-foreground mt-2 text-xs">
                               Depends on: {step.dependencies.length} step(s)
                             </div>
                           )}
@@ -310,7 +310,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                                   return (
                                     <div
                                       key={depId}
-                                      className="flex items-center space-x-2 text-sm text-muted-foreground"
+                                      className="text-muted-foreground flex items-center space-x-2 text-sm"
                                     >
                                       <CheckCircle2 className="h-3 w-3 text-green-500" />
                                       <span>
@@ -341,12 +341,12 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                                       <CardContent className="p-3">
                                         <div className="flex items-start justify-between">
                                           <div className="flex items-start space-x-2">
-                                            <ArtifactIcon className="mt-0.5 h-4 w-4 text-primary" />
+                                            <ArtifactIcon className="text-primary mt-0.5 h-4 w-4" />
                                             <div>
                                               <div className="text-sm font-medium">
                                                 {artifact.title}
                                               </div>
-                                              <div className="text-xs text-muted-foreground">
+                                              <div className="text-muted-foreground text-xs">
                                                 {artifact.type} • v
                                                 {artifact.metadata.version} •{' '}
                                                 {artifact.metadata.status}
@@ -375,7 +375,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
 
                           {/* Timing */}
                           {step.startTime && (
-                            <div className="space-y-1 text-xs text-muted-foreground">
+                            <div className="text-muted-foreground space-y-1 text-xs">
                               <div>
                                 Started: {step.startTime.toLocaleTimeString()}
                               </div>
@@ -415,13 +415,13 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                 return (
                   <Card
                     key={artifact.id}
-                    className="cursor-pointer border-border/50 bg-muted/30 transition-colors hover:bg-muted/50"
+                    className="border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
                     onClick={() => onArtifactClick?.(artifact)}
                   >
                     <CardContent className="p-3 text-center">
-                      <ArtifactIcon className="mx-auto mb-2 h-6 w-6 text-primary" />
+                      <ArtifactIcon className="text-primary mx-auto mb-2 h-6 w-6" />
                       <div className="text-xs font-medium">{artifact.type}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">
+                      <div className="text-muted-foreground mt-1 text-xs">
                         v{artifact.metadata.version}
                       </div>
                     </CardContent>

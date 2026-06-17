@@ -87,14 +87,14 @@ const AIChatPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <Particles
         className="absolute inset-0 -z-10"
         quantity={50}
         staticity={40}
       />
 
-      <section className="px-4 pb-20 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <motion.div
@@ -102,21 +102,21 @@ const AIChatPage: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+              <div className="bg-primary/10 text-primary mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
                 <MessageSquare size={16} />
                 AI Chat
               </div>
-              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
+              <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
                 Intelligent Conversations at Scale
               </h1>
-              <p className="mb-8 text-xl text-muted-foreground">
+              <p className="text-muted-foreground mb-8 text-xl">
                 Deploy AI chat agents that understand context, speak 100+
                 languages, and provide instant support 24/7.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-primary to-accent"
+                  className="from-primary to-accent bg-gradient-to-r"
                   onClick={handleStartTrial}
                 >
                   {user ? 'Go to Dashboard' : 'Start Free Trial'}{' '}
@@ -162,7 +162,7 @@ const AIChatPage: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="rounded-2xl border border-border/40 bg-background/60 p-8 backdrop-blur-xl"
+                  className="border-border/40 bg-background/60 rounded-2xl border p-8 backdrop-blur-xl"
                   whileHover={{ y: -8 }}
                 >
                   <div
@@ -179,7 +179,7 @@ const AIChatPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-gradient-to-b from-background to-accent/5 px-4 py-20 sm:px-6 lg:px-8">
+      <section className="from-background to-accent/5 bg-gradient-to-b px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -197,7 +197,7 @@ const AIChatPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="rounded-2xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl"
+                className="border-border/40 bg-background/60 rounded-2xl border p-6 backdrop-blur-xl"
               >
                 <h3 className="mb-2 text-xl font-bold">{useCase.title}</h3>
                 <p className="text-muted-foreground">{useCase.description}</p>
@@ -213,7 +213,7 @@ const AIChatPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
+            className="from-primary via-accent to-secondary rounded-3xl bg-gradient-to-r p-6 text-center text-white sm:p-8 md:p-12"
           >
             <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Ready to Transform Customer Conversations?

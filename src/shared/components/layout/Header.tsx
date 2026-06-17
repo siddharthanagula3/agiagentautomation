@@ -113,7 +113,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
+    <header className="border-border/40 bg-background/80 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-xl">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -125,7 +125,7 @@ const Header: React.FC = () => {
             >
               🤖
             </motion.div>
-            <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-xl font-bold text-transparent">
+            <span className="from-primary via-accent to-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
               AGI Workforce
             </span>
           </Link>
@@ -162,7 +162,7 @@ const Header: React.FC = () => {
             {/* Pricing Quick Link */}
             <button
               onClick={() => handleNavigation('/pricing')}
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+              className="text-foreground/80 hover:text-foreground text-sm font-medium transition-colors"
             >
               Pricing
             </button>
@@ -174,7 +174,7 @@ const Header: React.FC = () => {
             {user ? (
               <Button
                 onClick={() => navigate('/dashboard')}
-                className="bg-gradient-to-r from-primary to-accent text-sm font-medium hover:opacity-90"
+                className="from-primary to-accent bg-gradient-to-r text-sm font-medium hover:opacity-90"
               >
                 Go to Dashboard
               </Button>
@@ -189,7 +189,7 @@ const Header: React.FC = () => {
                 </Button>
                 <Button
                   onClick={() => navigate('/auth/register')}
-                  className="bg-gradient-to-r from-primary to-accent text-sm font-medium hover:opacity-90"
+                  className="from-primary to-accent bg-gradient-to-r text-sm font-medium hover:opacity-90"
                 >
                   Get Started Free
                 </Button>
@@ -199,7 +199,7 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="flex h-11 w-11 items-center justify-center text-foreground/80 hover:text-foreground lg:hidden"
+            className="text-foreground/80 hover:text-foreground flex h-11 w-11 items-center justify-center lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
@@ -245,14 +245,14 @@ const Header: React.FC = () => {
 
                 <button
                   onClick={() => handleNavigation('/pricing')}
-                  className="block w-full rounded-lg px-4 py-2 text-left text-sm font-medium text-foreground/80 transition-colors hover:bg-accent/10 hover:text-foreground"
+                  className="text-foreground/80 hover:bg-accent/10 hover:text-foreground block w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-colors"
                 >
                   Pricing
                 </button>
 
                 <div className="flex flex-col gap-2 px-4 pt-2">
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-sm font-medium text-foreground/80">
+                    <span className="text-foreground/80 text-sm font-medium">
                       Theme
                     </span>
                     <ThemeToggle />
@@ -260,7 +260,7 @@ const Header: React.FC = () => {
                   {user ? (
                     <Button
                       onClick={() => handleNavigation('/dashboard')}
-                      className="w-full bg-gradient-to-r from-primary to-accent"
+                      className="from-primary to-accent w-full bg-gradient-to-r"
                     >
                       Go to Dashboard
                     </Button>
@@ -275,7 +275,7 @@ const Header: React.FC = () => {
                       </Button>
                       <Button
                         onClick={() => handleNavigation('/auth/register')}
-                        className="w-full bg-gradient-to-r from-primary to-accent"
+                        className="from-primary to-accent w-full bg-gradient-to-r"
                       >
                         Get Started Free
                       </Button>
@@ -317,7 +317,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
     <div className="relative">
       <button
         onClick={onToggle}
-        className="flex items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+        className="text-foreground/80 hover:text-foreground flex items-center gap-1 text-sm font-medium transition-colors"
       >
         {label}
         <motion.div
@@ -335,26 +335,26 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-full mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border/40 bg-background/95 shadow-2xl backdrop-blur-xl sm:w-72 sm:max-w-none"
+            className="border-border/40 bg-background/95 absolute top-full left-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border shadow-2xl backdrop-blur-xl sm:w-72 sm:max-w-none"
           >
             <div className="p-2">
               {items.map((item, idx) => (
                 <motion.button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}
-                  className="group flex w-full items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent/10"
+                  className="group hover:bg-accent/10 flex w-full items-start gap-3 rounded-lg p-3 transition-colors"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
                 >
-                  <div className="mt-0.5 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 p-2 transition-colors group-hover:from-primary/30 group-hover:to-accent/30">
+                  <div className="from-primary/20 to-accent/20 group-hover:from-primary/30 group-hover:to-accent/30 mt-0.5 rounded-lg bg-gradient-to-br p-2 transition-colors">
                     <item.icon size={18} className="text-primary" />
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+                    <div className="text-foreground group-hover:text-primary text-sm font-medium transition-colors">
                       {item.label}
                     </div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground mt-0.5 text-xs">
                       {item.description}
                     </div>
                   </div>
@@ -385,7 +385,7 @@ const MobileDropdown: React.FC<MobileDropdownProps> = ({
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent/10 hover:text-foreground"
+        className="text-foreground/80 hover:bg-accent/10 hover:text-foreground flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors"
       >
         {label}
         <motion.div
@@ -409,7 +409,7 @@ const MobileDropdown: React.FC<MobileDropdownProps> = ({
                 <button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}
-                  className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-foreground/70 transition-colors hover:bg-accent/10 hover:text-foreground"
+                  className="text-foreground/70 hover:bg-accent/10 hover:text-foreground flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors"
                 >
                   <item.icon size={16} className="text-primary" />
                   {item.label}

@@ -123,12 +123,7 @@ function clearLastActivity(): void {
 export function useSessionTimeout(
   options: UseSessionTimeoutOptions = {}
 ): UseSessionTimeoutReturn {
-  const {
-    enabled = true,
-    onTimeout,
-    onWarning,
-    onSessionExtended,
-  } = options;
+  const { enabled = true, onTimeout, onWarning, onSessionExtended } = options;
 
   const { user, logout, isAuthenticated } = useAuthStore();
   const { data: settings } = useUserSettings();
@@ -138,19 +133,23 @@ export function useSessionTimeout(
     isTimedOut: false,
     isWarningActive: false,
     secondsUntilTimeout: 0,
-    timeoutMinutes: settings?.session_timeout ?? DEFAULT_SESSION_TIMEOUT_MINUTES,
+    timeoutMinutes:
+      settings?.session_timeout ?? DEFAULT_SESSION_TIMEOUT_MINUTES,
     lastActivity: getLastActivity(),
   }));
 
   // Refs for cleanup and throttling
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
   const lastActivityUpdateRef = useRef<number>(0);
   const wasWarningActiveRef = useRef<boolean>(false);
   const hasLoggedOutRef = useRef<boolean>(false);
 
   // Get timeout in milliseconds
-  const timeoutMs = (settings?.session_timeout ?? DEFAULT_SESSION_TIMEOUT_MINUTES) * 60 * 1000;
+  const timeoutMs =
+    (settings?.session_timeout ?? DEFAULT_SESSION_TIMEOUT_MINUTES) * 60 * 1000;
 
   /**
    * Update last activity timestamp (throttled)
@@ -169,7 +168,9 @@ export function useSessionTimeout(
     setState((prev) => {
       // If we were in warning state and user became active, extend session
       if (prev.isWarningActive) {
-        logger.debug('[SessionTimeout] User activity detected, extending session');
+        logger.debug(
+          '[SessionTimeout] User activity detected, extending session'
+        );
         onSessionExtended?.();
         return {
           ...prev,
@@ -256,7 +257,8 @@ export function useSessionTimeout(
       const newState = {
         ...prev,
         lastActivity,
-        timeoutMinutes: settings?.session_timeout ?? DEFAULT_SESSION_TIMEOUT_MINUTES,
+        timeoutMinutes:
+          settings?.session_timeout ?? DEFAULT_SESSION_TIMEOUT_MINUTES,
         isWarningActive: shouldShowWarning,
         secondsUntilTimeout: shouldShowWarning ? secondsRemaining : 0,
       };
@@ -271,7 +273,14 @@ export function useSessionTimeout(
 
       return newState;
     });
-  }, [isAuthenticated, user, timeoutMs, settings?.session_timeout, forceLogout, onWarning]);
+  }, [
+    isAuthenticated,
+    user,
+    timeoutMs,
+    settings?.session_timeout,
+    forceLogout,
+    onWarning,
+  ]);
 
   /**
    * Set up activity event listeners
@@ -334,7 +343,10 @@ export function useSessionTimeout(
     });
 
     // Set up interval for periodic checks
-    checkIntervalRef.current = setInterval(checkTimeout, ACTIVITY_CHECK_INTERVAL_MS);
+    checkIntervalRef.current = setInterval(
+      checkTimeout,
+      ACTIVITY_CHECK_INTERVAL_MS
+    );
 
     return () => {
       if (checkIntervalRef.current) {

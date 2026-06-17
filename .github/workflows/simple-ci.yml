@@ -90,18 +90,15 @@ jobs:
       - name: License compliance check
         run: |
           echo "Checking license compliance..."
-          # Install license checker
-          npm install -g license-checker
-
-          # Check for problematic licenses (GPL, AGPL, etc. that may have copyleft implications)
-          license-checker --summary --production
+          # Run license checker via npx to avoid global installation permission issues
+          npx license-checker --summary --production
 
           echo ""
           echo "Checking for copyleft licenses..."
-          COPYLEFT=$(license-checker --production --json | grep -E '"(GPL|AGPL|LGPL|CC-BY-SA)' || true)
+          COPYLEFT=$(npx license-checker --production --json | grep -E '"(GPL|AGPL|LGPL|CC-BY-SA)' || true)
           if [ -n "$COPYLEFT" ]; then
             echo "::warning::Found packages with copyleft licenses. Review for compliance:"
-            license-checker --production --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;CC0-1.0;Unlicense;WTFPL' || {
+            npx license-checker --production --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;CC0-1.0;Unlicense;WTFPL' || {
               echo "Some packages have licenses that may need review"
             }
           else

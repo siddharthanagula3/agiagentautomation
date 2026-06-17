@@ -120,11 +120,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="h-4 w-4 text-success" />;
+        return <CheckCircle className="text-success h-4 w-4" />;
       case 'warning':
-        return <AlertCircle className="h-4 w-4 text-warning" />;
+        return <AlertCircle className="text-warning h-4 w-4" />;
       case 'error':
-        return <AlertCircle className="h-4 w-4 text-error" />;
+        return <AlertCircle className="text-error h-4 w-4" />;
       default:
         return <Activity className="text-info h-4 w-4" />;
     }
@@ -162,7 +162,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <header
       className={cn(
-        'glass-strong fixed left-0 right-0 top-0 z-40 border-b border-border',
+        'glass-strong border-border fixed top-0 right-0 left-0 z-40 border-b',
         className
       )}
     >
@@ -202,7 +202,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {/* Page Title */}
           <div className="hidden sm:block">
             <h1 className="flex items-center gap-2 text-lg font-semibold">
-              <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+              <Sparkles className="text-primary h-5 w-5" aria-hidden="true" />
               {getPageTitle()}
             </h1>
           </div>
@@ -212,7 +212,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <div className="mx-4 max-w-md flex-1 lg:mx-8" ref={searchRef}>
           <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground"
+              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
               aria-hidden="true"
             />
             <Input
@@ -221,11 +221,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowSearch(true)}
-              className="glass pl-10 pr-20"
+              className="glass pr-20 pl-10"
               aria-label="Search"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
-              <kbd className="hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+            <div className="absolute top-1/2 right-3 -translate-y-1/2 transform">
+              <kbd className="bg-muted text-muted-foreground hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium select-none sm:inline-flex">
                 <Command className="h-3 w-3" aria-hidden="true" />K
               </kbd>
             </div>
@@ -263,7 +263,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error"
+                  className="bg-error absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full"
                 >
                   <span className="text-[10px] font-medium text-white">
                     {unreadCount}
@@ -278,16 +278,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="glass-strong absolute right-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-border shadow-2xl sm:w-80 sm:max-w-none"
+                  className="glass-strong border-border absolute right-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border shadow-2xl sm:w-80 sm:max-w-none"
                 >
-                  <div className="flex items-center justify-between border-b border-border p-4">
+                  <div className="border-border flex items-center justify-between border-b p-4">
                     <h3 className="font-semibold">Notifications</h3>
                     {unreadCount > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={markAllAsRead}
-                        className="text-xs text-primary"
+                        className="text-primary text-xs"
                       >
                         Mark all read
                       </Button>
@@ -296,8 +296,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <div className="p-12 text-center">
-                        <Bell className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
-                        <p className="text-sm text-muted-foreground">
+                        <Bell className="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
+                        <p className="text-muted-foreground text-sm">
                           No notifications
                         </p>
                       </div>
@@ -309,7 +309,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                             handleNotificationClick(notification.id)
                           }
                           className={cn(
-                            'w-full border-b border-border p-4 text-left transition-colors hover:bg-muted/50',
+                            'border-border hover:bg-muted/50 w-full border-b p-4 text-left transition-colors',
                             !notification.read && 'bg-primary/5'
                           )}
                         >
@@ -321,13 +321,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                                   {notification.title}
                                 </p>
                                 {!notification.read && (
-                                  <div className="ml-2 h-2 w-2 rounded-full bg-primary"></div>
+                                  <div className="bg-primary ml-2 h-2 w-2 rounded-full"></div>
                                 )}
                               </div>
-                              <p className="mt-1 text-xs text-muted-foreground">
+                              <p className="text-muted-foreground mt-1 text-xs">
                                 {notification.message}
                               </p>
-                              <p className="mt-1 text-xs text-muted-foreground">
+                              <p className="text-muted-foreground mt-1 text-xs">
                                 {formatTimeAgo(notification.timestamp)}
                               </p>
                             </div>
@@ -358,7 +358,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </Avatar>
               <div className="hidden text-left md:block">
                 <p className="text-sm font-medium">{user?.name || 'User'}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {user?.role || 'Member'}
                 </p>
               </div>
@@ -371,9 +371,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="glass-strong absolute right-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-border shadow-2xl sm:w-56 sm:max-w-none"
+                  className="glass-strong border-border absolute right-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border shadow-2xl sm:w-56 sm:max-w-none"
                 >
-                  <div className="border-b border-border p-4">
+                  <div className="border-border border-b p-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={user?.avatar} />
@@ -385,7 +385,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         <p className="truncate text-sm font-medium">
                           {user?.name || 'User'}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">
+                        <p className="text-muted-foreground truncate text-xs">
                           {user?.email}
                         </p>
                       </div>
@@ -398,7 +398,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         setShowUserMenu(false);
                         navigate('/settings');
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
+                      className="hover:bg-muted/50 flex w-full items-center gap-3 px-4 py-2 text-left text-sm"
                     >
                       <UserIcon className="h-4 w-4" aria-hidden="true" />
                       Profile Settings
@@ -408,7 +408,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         setShowUserMenu(false);
                         navigate('/billing');
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
+                      className="hover:bg-muted/50 flex w-full items-center gap-3 px-4 py-2 text-left text-sm"
                     >
                       <CreditCard className="h-4 w-4" aria-hidden="true" />
                       Billing & Usage
@@ -418,27 +418,27 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         setShowUserMenu(false);
                         navigate('/settings');
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
+                      className="hover:bg-muted/50 flex w-full items-center gap-3 px-4 py-2 text-left text-sm"
                     >
                       <Settings className="h-4 w-4" aria-hidden="true" />
                       Settings
                     </button>
                   </div>
 
-                  <div className="border-t border-border py-2">
+                  <div className="border-border border-t py-2">
                     <button
                       onClick={() => {
                         setShowUserMenu(false);
                         navigate('/support');
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
+                      className="hover:bg-muted/50 flex w-full items-center gap-3 px-4 py-2 text-left text-sm"
                     >
                       <HelpCircle className="h-4 w-4" aria-hidden="true" />
                       Help & Support
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-error hover:bg-error/10"
+                      className="text-error hover:bg-error/10 flex w-full items-center gap-3 px-4 py-2 text-left text-sm"
                     >
                       <LogOut className="h-4 w-4" aria-hidden="true" />
                       Sign Out

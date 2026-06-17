@@ -86,7 +86,7 @@ export async function searchWithPerplexity(
 
   try {
     const response = await fetchWithTimeout(
-      '/.netlify/functions/llm-proxies/perplexity-proxy',
+      '/api/llm-proxies/perplexity-proxy',
       {
         timeoutMs: TimeoutPresets.SEARCH,
         timeoutMessage: 'Perplexity search timed out',
@@ -197,25 +197,22 @@ export async function searchWithGoogle(
 
   try {
     // SECURITY: Route through Google proxy instead of direct API call
-    const response = await fetchWithTimeout(
-      '/.netlify/functions/llm-proxies/google-proxy',
-      {
-        timeoutMs: TimeoutPresets.SEARCH,
-        timeoutMessage: 'Google Search timed out',
-        fetchOptions: {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({
-            action: 'search',
-            query,
-            maxResults: Math.min(maxResults, 10),
-          }),
+    const response = await fetchWithTimeout('/api/llm-proxies/google-proxy', {
+      timeoutMs: TimeoutPresets.SEARCH,
+      timeoutMessage: 'Google Search timed out',
+      fetchOptions: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
         },
-      }
-    );
+        body: JSON.stringify({
+          action: 'search',
+          query,
+          maxResults: Math.min(maxResults, 10),
+        }),
+      },
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

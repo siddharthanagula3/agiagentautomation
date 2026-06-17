@@ -103,8 +103,8 @@ export class ChatPersistenceService {
         | { count: number }
         | undefined;
       const messageCount = Array.isArray(chatMessages)
-        ? chatMessages[0]?.count ?? 0
-        : chatMessages?.count ?? 0;
+        ? (chatMessages[0]?.count ?? 0)
+        : (chatMessages?.count ?? 0);
 
       // Remove the nested web_messages from the session object before mapping
       const { web_messages: _, ...sessionData } = session;
@@ -158,8 +158,8 @@ export class ChatPersistenceService {
         | { count: number }
         | undefined;
       const messageCount = Array.isArray(chatMessages)
-        ? chatMessages[0]?.count ?? 0
-        : chatMessages?.count ?? 0;
+        ? (chatMessages[0]?.count ?? 0)
+        : (chatMessages?.count ?? 0);
 
       const { web_messages: _, ...sessionData } = session;
 
@@ -191,7 +191,10 @@ export class ChatPersistenceService {
     sessionId: string,
     userId?: string
   ): Promise<ChatSession | null> {
-    let query = supabase.from('web_conversations').select('*').eq('id', sessionId);
+    let query = supabase
+      .from('web_conversations')
+      .select('*')
+      .eq('id', sessionId);
 
     // Add user_id filter if provided for extra security (RLS should handle this, but explicit is better)
     if (userId) {

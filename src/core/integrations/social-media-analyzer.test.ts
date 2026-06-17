@@ -60,7 +60,11 @@ describe('Social Media Analyzer', () => {
     });
 
     // Cast to unknown first, then to the expected type to avoid direct any cast
-    analyzer = new SocialMediaAnalyzer(mockGrokProvider as unknown as ConstructorParameters<typeof SocialMediaAnalyzer>[0]);
+    analyzer = new SocialMediaAnalyzer(
+      mockGrokProvider as unknown as ConstructorParameters<
+        typeof SocialMediaAnalyzer
+      >[0]
+    );
 
     // Suppress console logs during tests
     vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -104,9 +108,7 @@ describe('Social Media Analyzer', () => {
             emotionalTone: { joy: 40, surprise: 30 },
           },
           trends: {
-            trending: [
-              { topic: 'GPT-5', volume: 50000, growth: '+200%' },
-            ],
+            trending: [{ topic: 'GPT-5', volume: 50000, growth: '+200%' }],
             emerging: [],
             declining: [],
           },
@@ -115,7 +117,12 @@ describe('Social Media Analyzer', () => {
               {
                 content: 'AI is transforming everything',
                 author: '@techinfluencer',
-                engagement: { likes: 5000, shares: 1000, comments: 200, total: 6200 },
+                engagement: {
+                  likes: 5000,
+                  shares: 1000,
+                  comments: 200,
+                  total: 6200,
+                },
                 sentiment: 'positive',
               },
             ],

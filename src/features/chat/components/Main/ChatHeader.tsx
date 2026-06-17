@@ -79,7 +79,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 flex h-14 items-center justify-between border-b px-4 backdrop-blur">
       {/* Left: Sidebar toggle + Title */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <Button
@@ -127,14 +127,14 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         ) : (
           <button
             onClick={() => setIsEditing(true)}
-            className="group flex min-w-0 items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-muted"
+            className="group hover:bg-muted flex min-w-0 items-center gap-2 rounded-md px-2 py-1 transition-colors"
             aria-label={`Edit chat title: ${session?.title || 'New Chat'}`}
           >
             <h1 className="truncate text-sm font-semibold">
               {session?.title || 'New Chat'}
             </h1>
             <Edit3
-              className="h-3 w-3 flex-shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+              className="text-muted-foreground h-3 w-3 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
               aria-hidden="true"
             />
           </button>
@@ -153,7 +153,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             aria-label="Search conversations"
           >
             <Search className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden text-xs text-muted-foreground lg:inline">
+            <span className="text-muted-foreground hidden text-xs lg:inline">
               ⌘K
             </span>
           </Button>

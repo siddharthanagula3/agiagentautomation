@@ -23,7 +23,7 @@ export function TokenAnalyticsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-6xl p-0">
-        <DialogHeader className="px-6 pb-0 pt-6">
+        <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="sr-only">Token Usage Analytics</DialogTitle>
         </DialogHeader>
         <div className="overflow-y-auto">

@@ -139,12 +139,12 @@ export class SearchHistoryService {
     }
 
     try {
-      const { data, error } = await supabase.rpc('track_search', {
+      const { data, error } = (await supabase.rpc('track_search', {
         p_user_id: userId,
         p_query: query,
         p_result_count: resultCount,
         p_filters: filters,
-      }) as TrackSearchResult;
+      })) as TrackSearchResult;
 
       if (error) {
         logger.error('[SearchHistory] Failed to track search:', error);

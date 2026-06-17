@@ -237,7 +237,7 @@ export const MarketplacePublicPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="glass-strong relative mb-8 overflow-hidden rounded-3xl p-8"
       >
-        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
+        <div className="bg-primary/10 absolute top-0 right-0 h-64 w-64 rounded-full blur-3xl"></div>
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -252,7 +252,7 @@ export const MarketplacePublicPage: React.FC = () => {
                 <h1 className="mb-2 text-2xl font-bold sm:text-3xl md:text-4xl">
                   Hire Your AI Workforce
                 </h1>
-                <p className="text-xl text-muted-foreground">
+                <p className="text-muted-foreground text-xl">
                   Specialized AI employees for{' '}
                   <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text font-extrabold text-transparent">
                     FREE
@@ -266,7 +266,7 @@ export const MarketplacePublicPage: React.FC = () => {
             <div className="flex items-center gap-4">
               {/* Countdown Banner */}
               {discountEnd && (
-                <div className="glass rounded-xl border border-primary/30 p-3">
+                <div className="glass border-primary/30 rounded-xl border p-3">
                   <CountdownTimer
                     targetDate={discountEnd}
                     showHours={false}
@@ -299,7 +299,7 @@ export const MarketplacePublicPage: React.FC = () => {
               {/* Search */}
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
+                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform" />
                   <Input
                     placeholder="Search by role, skills, or specialty..."
                     value={searchQuery}
@@ -309,9 +309,9 @@ export const MarketplacePublicPage: React.FC = () => {
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 transform"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 transform"
                     >
-                      <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      <X className="text-muted-foreground hover:text-foreground h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -343,7 +343,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-6 border-t border-border pt-6">
+                  <div className="border-border mt-6 border-t pt-6">
                     <h3 className="mb-3 text-sm font-semibold">Categories</h3>
                     <div className="flex flex-wrap gap-2">
                       {categories.map((category) => (
@@ -384,7 +384,7 @@ export const MarketplacePublicPage: React.FC = () => {
             {filteredEmployees.length}{' '}
             {filteredEmployees.length === 1 ? 'Employee' : 'Employees'}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {selectedCategory !== 'all' &&
               `In ${categories.find((c) => c.id === selectedCategory)?.label}`}
             {searchQuery && ` matching "${searchQuery}"`}
@@ -428,7 +428,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   {/* Header */}
                   <div className="mb-4 flex items-start justify-between">
                     <div className="flex min-w-0 flex-1 items-center space-x-3">
-                      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl ring-2 ring-border transition-transform group-hover:scale-110">
+                      <div className="ring-border h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl ring-2 transition-transform group-hover:scale-110">
                         <img
                           src={employee.avatar}
                           alt={employee.role}
@@ -449,7 +449,7 @@ export const MarketplacePublicPage: React.FC = () => {
                             </Badge>
                           )}
                         </div>
-                        <p className="truncate text-xs text-muted-foreground">
+                        <p className="text-muted-foreground truncate text-xs">
                           {employee.specialty}
                         </p>
                       </div>
@@ -465,7 +465,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   </div>
 
                   {/* Description */}
-                  <p className="mb-4 line-clamp-2 flex-grow text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mb-4 line-clamp-2 flex-grow text-sm">
                     {employee.description}
                   </p>
 
@@ -490,18 +490,18 @@ export const MarketplacePublicPage: React.FC = () => {
                   </div>
 
                   {/* Fit Level */}
-                  <div className="mb-4 flex items-center gap-2 border-b border-border pb-4">
+                  <div className="border-border mb-4 flex items-center gap-2 border-b pb-4">
                     {employee.fitLevel === 'excellent' ? (
                       <>
-                        <Zap className="h-4 w-4 text-primary" />
-                        <span className="text-xs font-medium text-primary">
+                        <Zap className="text-primary h-4 w-4" />
+                        <span className="text-primary text-xs font-medium">
                           Excellent Fit
                         </span>
                       </>
                     ) : (
                       <>
-                        <TrendingUp className="h-4 w-4 text-accent" />
-                        <span className="text-xs font-medium text-accent">
+                        <TrendingUp className="text-accent h-4 w-4" />
+                        <span className="text-accent text-xs font-medium">
                           Great Fit
                         </span>
                       </>
@@ -518,7 +518,7 @@ export const MarketplacePublicPage: React.FC = () => {
                         <div className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-2xl font-bold text-transparent">
                           $0
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-muted-foreground text-sm">
                           per month
                         </div>
                       </div>
@@ -531,7 +531,7 @@ export const MarketplacePublicPage: React.FC = () => {
                             Limited time offer
                           </Badge>
                         </div>
-                        <div className="text-xs font-semibold text-foreground">
+                        <div className="text-foreground text-xs font-semibold">
                           Hire now for{' '}
                           <span className="text-green-600">FREE</span>
                         </div>
@@ -546,7 +546,7 @@ export const MarketplacePublicPage: React.FC = () => {
                       className={cn(
                         'btn-glow w-full',
                         isPurchased(employee.id)
-                          ? 'cursor-default bg-success hover:bg-success'
+                          ? 'bg-success hover:bg-success cursor-default'
                           : 'gradient-primary text-white'
                       )}
                     >
@@ -578,13 +578,13 @@ export const MarketplacePublicPage: React.FC = () => {
         >
           <Card className="glass-strong">
             <CardContent className="flex flex-col items-center justify-center py-20">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted/20">
-                <Search className="h-10 w-10 text-muted-foreground" />
+              <div className="bg-muted/20 mb-6 flex h-20 w-20 items-center justify-center rounded-full">
+                <Search className="text-muted-foreground h-10 w-10" />
               </div>
               <h3 className="mb-2 text-2xl font-semibold">
                 No Employees Found
               </h3>
-              <p className="mb-6 max-w-md text-center text-muted-foreground">
+              <p className="text-muted-foreground mb-6 max-w-md text-center">
                 We couldn't find any AI employees matching your criteria. Try
                 adjusting your search or filters.
               </p>
@@ -611,14 +611,14 @@ export const MarketplacePublicPage: React.FC = () => {
           className="mt-12"
         >
           <Card className="card-premium relative overflow-hidden">
-            <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl"></div>
+            <div className="bg-primary/10 absolute top-0 right-0 h-96 w-96 rounded-full blur-3xl"></div>
             <CardContent className="relative z-10 p-6 text-center sm:p-8 md:p-12">
-              <Sparkles className="mx-auto mb-4 h-12 w-12 text-primary" />
+              <Sparkles className="text-primary mx-auto mb-4 h-12 w-12" />
               <h3 className="mb-4 text-xl font-bold sm:text-2xl md:text-3xl">
                 You've Hired {purchasedEmployees.size} AI{' '}
                 {purchasedEmployees.size === 1 ? 'Employee' : 'Employees'}!
               </h3>
-              <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
+              <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
                 Your AI workforce is ready. Start delegating tasks and watch
                 them execute autonomously.
               </p>

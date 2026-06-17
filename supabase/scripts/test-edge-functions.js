@@ -110,14 +110,11 @@ async function testBlogPostsFunction() {
     }
 
     // Test with filters
-    const { status: filterStatus } = await callEdgeFunction(
-      'blog-posts',
-      {
-        limit: 5,
-        category: 'ai',
-        published: true,
-      }
-    );
+    const { status: filterStatus } = await callEdgeFunction('blog-posts', {
+      limit: 5,
+      category: 'ai',
+      published: true,
+    });
 
     if (filterStatus === 200) {
       logTest('Blog Posts - Filter by category', true);
@@ -161,13 +158,10 @@ async function testContactFormFunction() {
     }
 
     // Test invalid form submission (missing required fields)
-    const { status: invalidStatus } = await callEdgeFunction(
-      'contact-form',
-      {
-        firstName: 'John',
-        // Missing required fields
-      }
-    );
+    const { status: invalidStatus } = await callEdgeFunction('contact-form', {
+      firstName: 'John',
+      // Missing required fields
+    });
 
     if (invalidStatus === 400) {
       logTest('Contact Form - Invalid submission rejected', true);

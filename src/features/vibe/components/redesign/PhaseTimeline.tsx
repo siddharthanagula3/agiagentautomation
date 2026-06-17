@@ -181,7 +181,7 @@ export function PhaseTimeline({
 
   return (
     <div
-      className={cn('rounded-lg border border-border bg-card p-4', className)}
+      className={cn('border-border bg-card rounded-lg border p-4', className)}
     >
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
@@ -214,7 +214,7 @@ export function PhaseTimeline({
       {/* Phase steps */}
       <div className="relative">
         {/* Connection line */}
-        <div className="absolute left-4 top-0 h-full w-0.5 bg-border" />
+        <div className="bg-border absolute top-0 left-4 h-full w-0.5" />
 
         <div className="space-y-3">
           {phases.map((phase, index) => {
@@ -270,12 +270,12 @@ export function PhaseTimeline({
                       {phase.name}
                     </span>
                     {state === 'current' && session?.currentFile && (
-                      <span className="truncate text-xs text-muted-foreground">
+                      <span className="text-muted-foreground truncate text-xs">
                         {session.currentFile}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {phase.description}
                   </p>
                 </div>
@@ -287,8 +287,8 @@ export function PhaseTimeline({
 
       {/* Error message */}
       {currentStatus === 'error' && session?.phase.error && (
-        <div className="mt-4 rounded-md border border-destructive/50 bg-destructive/10 p-3">
-          <p className="text-sm text-destructive">{session.phase.error}</p>
+        <div className="border-destructive/50 bg-destructive/10 mt-4 rounded-md border p-3">
+          <p className="text-destructive text-sm">{session.phase.error}</p>
         </div>
       )}
     </div>
@@ -331,7 +331,7 @@ function CompactTimeline({
               className={cn(
                 'h-2 w-2 rounded-full transition-all',
                 state === 'completed' && 'bg-green-500',
-                state === 'current' && 'animate-pulse bg-primary',
+                state === 'current' && 'bg-primary animate-pulse',
                 state === 'upcoming' && 'bg-muted-foreground/30',
                 state === 'error' && 'bg-destructive'
               )}
@@ -342,7 +342,7 @@ function CompactTimeline({
       </div>
 
       {/* Current phase name */}
-      <span className="text-xs text-muted-foreground">
+      <span className="text-muted-foreground text-xs">
         {phases[currentPhaseIndex]?.name || 'Ready'}
       </span>
 
@@ -356,7 +356,7 @@ function CompactTimeline({
 
       {/* Timer */}
       {elapsedTime > 0 && (
-        <span className="text-xs tabular-nums text-muted-foreground">
+        <span className="text-muted-foreground text-xs tabular-nums">
           {formatTime(elapsedTime)}
         </span>
       )}

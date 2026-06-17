@@ -44,7 +44,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-muted-foreground text-sm font-medium">
           {title}
         </CardTitle>
         {icon}
@@ -55,11 +55,11 @@ export const StatCard: React.FC<StatCardProps> = ({
           <div className={`flex items-center text-xs ${getChangeColor()}`}>
             {getChangeIcon()}
             <span className="ml-1">{Math.abs(change)}%</span>
-            <span className="ml-1 text-muted-foreground">from last month</span>
+            <span className="text-muted-foreground ml-1">from last month</span>
           </div>
         )}
         {description && (
-          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+          <p className="text-muted-foreground mt-1 text-xs">{description}</p>
         )}
       </CardContent>
     </Card>

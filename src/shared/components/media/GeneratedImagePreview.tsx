@@ -82,7 +82,7 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
 
             {/* Overlay with actions */}
             <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/40">
-              <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <div className="absolute top-2 right-2 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <Button
                   size="sm"
                   variant="secondary"
@@ -139,14 +139,14 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
       {/* Fullscreen Modal */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-modal flex items-center justify-center bg-black/95 p-4"
+          className="z-modal fixed inset-0 flex items-center justify-center bg-black/95 p-4"
           onClick={handleCloseFullscreen}
         >
           <Button
             size="sm"
             variant="ghost"
             onClick={handleCloseFullscreen}
-            className="absolute right-4 top-4 text-white hover:bg-white/10"
+            className="absolute top-4 right-4 text-white hover:bg-white/10"
           >
             <X className="h-6 w-6" />
           </Button>

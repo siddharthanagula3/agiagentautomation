@@ -453,14 +453,14 @@ describe('Agent Metrics Store', () => {
       const { setBackgroundServiceRunning } = useAgentMetricsStore.getState();
 
       setBackgroundServiceRunning(true);
-      expect(
-        useAgentMetricsStore.getState().isBackgroundServiceRunning
-      ).toBe(true);
+      expect(useAgentMetricsStore.getState().isBackgroundServiceRunning).toBe(
+        true
+      );
 
       setBackgroundServiceRunning(false);
-      expect(
-        useAgentMetricsStore.getState().isBackgroundServiceRunning
-      ).toBe(false);
+      expect(useAgentMetricsStore.getState().isBackgroundServiceRunning).toBe(
+        false
+      );
     });
   });
 

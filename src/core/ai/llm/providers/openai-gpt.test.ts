@@ -4,11 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  OpenAIProvider,
-  OpenAIError,
-  OpenAIMessage,
-} from './openai-gpt';
+import { OpenAIProvider, OpenAIError, OpenAIMessage } from './openai-gpt';
 
 // Mock external dependencies
 vi.mock('@shared/lib/supabase-client', () => ({
@@ -363,7 +359,11 @@ describe('OpenAIProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Test response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -388,7 +388,11 @@ describe('OpenAIProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
             id: 'resp-123',
           }),
       });
@@ -502,7 +506,7 @@ describe('OpenAIProvider', () => {
       await provider.sendMessage(mockMessages);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/openai-proxy',
+        '/api/llm-proxies/openai-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -528,7 +532,11 @@ describe('OpenAIProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -592,7 +600,11 @@ describe('OpenAIProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -618,7 +630,12 @@ describe('OpenAIProvider', () => {
 
   describe('OpenAIError', () => {
     it('should create error with correct properties', () => {
-      const error = new OpenAIError('Test error', 'PAYMENT_REQUIRED', false, 402);
+      const error = new OpenAIError(
+        'Test error',
+        'PAYMENT_REQUIRED',
+        false,
+        402
+      );
 
       expect(error.message).toBe('Test error');
       expect(error.code).toBe('PAYMENT_REQUIRED');
@@ -628,7 +645,12 @@ describe('OpenAIProvider', () => {
     });
 
     it('should create retryable error', () => {
-      const error = new OpenAIError('Rate limited', 'RATE_LIMIT_EXCEEDED', true, 429);
+      const error = new OpenAIError(
+        'Rate limited',
+        'RATE_LIMIT_EXCEEDED',
+        true,
+        429
+      );
 
       expect(error.retryable).toBe(true);
     });

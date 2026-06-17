@@ -157,7 +157,9 @@ export const useArtifactStore = create<ArtifactState>()(
 
         try {
           // Get current user for tracking
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
 
           // Persist to Supabase for sharing across sessions
           const { error } = await supabase.from('shared_artifacts').insert({
@@ -167,12 +169,17 @@ export const useArtifactStore = create<ArtifactState>()(
             artifact_id: artifactId,
             artifact_data: artifact,
             created_at: new Date().toISOString(),
-            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days expiry
+            expires_at: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000
+            ).toISOString(), // 30 days expiry
           });
 
           if (error) {
             // If table doesn't exist, fall back to local storage only
-            console.warn('Could not persist shared artifact to database:', error.message);
+            console.warn(
+              'Could not persist shared artifact to database:',
+              error.message
+            );
           }
         } catch (dbError) {
           // Non-critical - continue with local sharing
@@ -212,7 +219,8 @@ export const useArtifactStore = create<ArtifactState>()(
           if (!error && data?.artifact_data) {
             // Cache locally
             set((state) => {
-              state.sharedArtifacts[shareId] = data.artifact_data as ArtifactData;
+              state.sharedArtifacts[shareId] =
+                data.artifact_data as ArtifactData;
             });
             return data.artifact_data as ArtifactData;
           }

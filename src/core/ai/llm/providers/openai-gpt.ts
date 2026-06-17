@@ -26,7 +26,7 @@ async function getAuthToken(): Promise<string | null> {
 }
 
 // All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/llm-proxies/openai-proxy
+// Proxy endpoints: /api/llm-proxies/openai-proxy
 
 export interface OpenAIMessage {
   role: 'user' | 'assistant' | 'system';
@@ -252,10 +252,7 @@ export class OpenAIProvider {
         return await this.executeRequest(messages, sessionId, userId);
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        logger.error(
-          `[OpenAI Provider] Attempt ${attempt + 1} failed:`,
-          error
-        );
+        logger.error(`[OpenAI Provider] Attempt ${attempt + 1} failed:`, error);
 
         // Check if error is retryable (rate limit)
         if (error instanceof OpenAIError && error.statusCode === 429) {
@@ -304,7 +301,7 @@ export class OpenAIProvider {
       const openaiMessages = this.convertMessagesToOpenAI(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/openai-proxy';
+      const proxyUrl = '/api/llm-proxies/openai-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -501,7 +498,7 @@ export class OpenAIProvider {
       const openaiMessages = this.convertMessagesToOpenAI(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/openai-proxy';
+      const proxyUrl = '/api/llm-proxies/openai-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -656,10 +653,7 @@ export class OpenAIProvider {
         logger.error('[OpenAI Provider] Error saving message:', error);
       }
     } catch (error) {
-      logger.error(
-        '[OpenAI Provider] Unexpected error saving message:',
-        error
-      );
+      logger.error('[OpenAI Provider] Unexpected error saving message:', error);
     }
   }
 

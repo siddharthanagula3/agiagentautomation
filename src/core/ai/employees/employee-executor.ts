@@ -1,12 +1,7 @@
 // AI Employee Executor
 // Handles AI Employee task execution and tool invocation
 
-import {
-  AIEmployee,
-  ToolResult,
-  ExecutionContext,
-  Job,
-} from '../../types';
+import { AIEmployee, ToolResult, ExecutionContext, Job } from '../../types';
 import { toolInvocationService } from '../tools/tool-invocation-handler';
 import { aiEmployeeService } from './ai-employee-service';
 import { logger } from '@shared/lib/logger';
@@ -58,7 +53,10 @@ export class AIEmployeeExecutor {
           toolsUsed.push(toolId);
           totalCost += toolResult.cost;
         } catch (error) {
-          logger.error(`[Employee Executor] Tool ${toolId} execution failed:`, error);
+          logger.error(
+            `[Employee Executor] Tool ${toolId} execution failed:`,
+            error
+          );
           // Continue with other tools even if one fails
         }
       }
@@ -77,7 +75,10 @@ export class AIEmployeeExecutor {
         cost: totalCost,
       };
     } catch (error) {
-      logger.error(`[Employee Executor] Task execution failed for ${this.employee.name}:`, error);
+      logger.error(
+        `[Employee Executor] Task execution failed for ${this.employee.name}:`,
+        error
+      );
 
       // Update employee performance with failure
       await this.updatePerformance(false, Date.now() - startTime);
@@ -429,7 +430,10 @@ export class AIEmployeeExecutor {
         last_updated: updatedMetrics.lastUpdated,
       });
     } catch (error) {
-      logger.error('[Employee Executor] Failed to update performance metrics:', error);
+      logger.error(
+        '[Employee Executor] Failed to update performance metrics:',
+        error
+      );
     }
   }
 

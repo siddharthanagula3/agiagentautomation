@@ -70,7 +70,8 @@ class VibeFileSyncService {
   private pendingOperations: Map<string, SyncOperation> = new Map();
   private operationQueue: SyncOperation[] = [];
   private isProcessing = false;
-  private debounceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  private debounceTimers: Map<string, ReturnType<typeof setTimeout>> =
+    new Map();
   private currentSessionId: string | null = null;
   private abortController: AbortController | null = null;
 
@@ -193,12 +194,18 @@ class VibeFileSyncService {
               retryCount: 0,
             });
           } catch (err) {
-            console.error(`[FileSyncService] Failed to restore file ${path}:`, err);
+            console.error(
+              `[FileSyncService] Failed to restore file ${path}:`,
+              err
+            );
           }
         }
       }
     } catch (error) {
-      console.error('[FileSyncService] Error loading files from database:', error);
+      console.error(
+        '[FileSyncService] Error loading files from database:',
+        error
+      );
       throw error;
     }
   }
@@ -323,13 +330,13 @@ class VibeFileSyncService {
     try {
       // Get the file ID if it exists in the store
       const store = useVibeFileStore.getState();
-      const existingFile = Object.values(store.files).find(
-        (f) => {
-          const metadata = (f as VibeFile & { metadata?: Record<string, unknown> }).metadata;
-          const filePath = metadata?.original_path || metadata?.path || f.name;
-          return filePath === path || `/${filePath}` === path;
-        }
-      );
+      const existingFile = Object.values(store.files).find((f) => {
+        const metadata = (
+          f as VibeFile & { metadata?: Record<string, unknown> }
+        ).metadata;
+        const filePath = metadata?.original_path || metadata?.path || f.name;
+        return filePath === path || `/${filePath}` === path;
+      });
 
       const fileId = existingFile?.id || crypto.randomUUID();
       const fileName = path.split('/').pop() || 'untitled';
@@ -372,7 +379,8 @@ class VibeFileSyncService {
 
       return true;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
 
       // Check if we should retry
       if (retryCount < this.config.maxRetries) {
@@ -596,10 +604,7 @@ class VibeFileSyncService {
   /**
    * Update sync state for a file
    */
-  private updateSyncState(
-    path: string,
-    updates: Partial<FileSyncState>
-  ): void {
+  private updateSyncState(path: string, updates: Partial<FileSyncState>): void {
     const existing = this.syncStates.get(path);
     const newState: FileSyncState = {
       path,

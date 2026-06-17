@@ -164,7 +164,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 p-2',
+        'border-border bg-muted/30 flex flex-wrap items-center gap-2 rounded-lg border p-2',
         className
       )}
     >
@@ -208,14 +208,14 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
             <FileText className="mr-2 h-4 w-4" />
             <div className="flex flex-col">
               <span>Markdown</span>
-              <span className="text-xs text-muted-foreground">.md file</span>
+              <span className="text-muted-foreground text-xs">.md file</span>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleExport('pdf')}>
             <File className="mr-2 h-4 w-4" />
             <div className="flex flex-col">
               <span>PDF</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 Portable document
               </span>
             </div>
@@ -224,7 +224,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
             <FileCode className="mr-2 h-4 w-4" />
             <div className="flex flex-col">
               <span>Word Document</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 .docx format
               </span>
             </div>
@@ -235,7 +235,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
       {/* Enhancement Options (if callback provided) */}
       {onEnhance && (
         <>
-          <div className="h-6 w-px bg-border" />
+          <div className="bg-border h-6 w-px" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-8">
@@ -250,7 +250,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
                 <Check className="mr-2 h-4 w-4" />
                 <div className="flex flex-col">
                   <span>Proofread</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     Fix errors
                   </span>
                 </div>
@@ -259,7 +259,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
                 <RefreshCw className="mr-2 h-4 w-4" />
                 <div className="flex flex-col">
                   <span>Expand</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     Add details
                   </span>
                 </div>
@@ -268,7 +268,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
                 <FileText className="mr-2 h-4 w-4" />
                 <div className="flex flex-col">
                   <span>Summarize</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     Make concise
                   </span>
                 </div>
@@ -277,7 +277,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
                 <Edit className="mr-2 h-4 w-4" />
                 <div className="flex flex-col">
                   <span>Restructure</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     Better flow
                   </span>
                 </div>
@@ -290,7 +290,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
       {/* Share (if supported) */}
       {navigator.share && (
         <>
-          <div className="h-6 w-px bg-border" />
+          <div className="bg-border h-6 w-px" />
           <Button
             variant="outline"
             size="sm"

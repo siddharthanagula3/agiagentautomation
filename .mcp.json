@@ -2,11 +2,10 @@
   "mcpServers": {
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp"
-    },
-    "netlify": {
-      "command": "npx",
-      "args": ["-y", "@netlify/mcp"]
+      "url": "https://mcp.supabase.com/mcp?project_ref=alqsyznfyktruhverenu",
+      "headers": {
+        "Authorization": "Bearer sbp_e688c865f9168d08a5f1d430384aebd1b6a570b0"
+      }
     }
   }
 }

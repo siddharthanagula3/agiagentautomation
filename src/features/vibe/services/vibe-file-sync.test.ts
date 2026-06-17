@@ -267,9 +267,15 @@ describe('VibeFileSyncService', () => {
       await service.initSession('session-123');
 
       // Test various file types
-      expect(service['inferMimeType']('test.ts')).toBe('application/typescript');
-      expect(service['inferMimeType']('test.tsx')).toBe('application/typescript');
-      expect(service['inferMimeType']('test.js')).toBe('application/javascript');
+      expect(service['inferMimeType']('test.ts')).toBe(
+        'application/typescript'
+      );
+      expect(service['inferMimeType']('test.tsx')).toBe(
+        'application/typescript'
+      );
+      expect(service['inferMimeType']('test.js')).toBe(
+        'application/javascript'
+      );
       expect(service['inferMimeType']('test.json')).toBe('application/json');
       expect(service['inferMimeType']('test.html')).toBe('text/html');
       expect(service['inferMimeType']('test.css')).toBe('text/css');
@@ -312,4 +318,3 @@ describe('VibeFileSyncService', () => {
     });
   });
 });
-

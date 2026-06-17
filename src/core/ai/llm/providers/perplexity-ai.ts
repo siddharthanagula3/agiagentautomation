@@ -24,7 +24,7 @@ async function getAuthToken(): Promise<string | null> {
 }
 
 // All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/llm-proxies/perplexity-proxy
+// Proxy endpoints: /api/llm-proxies/perplexity-proxy
 
 export interface PerplexityMessage {
   role: 'user' | 'assistant' | 'system';
@@ -121,7 +121,7 @@ export class PerplexityProvider {
   ): Promise<PerplexityResponse> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/llm-proxies/perplexity-proxy';
+      const proxyUrl = '/api/llm-proxies/perplexity-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -256,7 +256,7 @@ export class PerplexityProvider {
    * authenticated Netlify proxy functions to keep API keys secure on the server side.
    *
    * TODO: To enable streaming in the future:
-   * 1. Implement Server-Sent Events (SSE) in /.netlify/functions/llm-proxies/perplexity-proxy
+   * 1. Implement Server-Sent Events (SSE) in /api/llm-proxies/perplexity-proxy
    * 2. Update this method to consume the SSE stream from the proxy
    * 3. Remove the DIRECT_API_DISABLED error below
    *
@@ -279,7 +279,7 @@ export class PerplexityProvider {
   }> {
     // SECURITY: Direct API calls are disabled - use Netlify proxy instead
     throw new PerplexityError(
-      'Direct Perplexity streaming is disabled for security. Use /.netlify/functions/llm-proxies/perplexity-proxy instead.',
+      'Direct Perplexity streaming is disabled for security. Use /api/llm-proxies/perplexity-proxy instead.',
       'DIRECT_API_DISABLED'
     );
 
@@ -287,7 +287,7 @@ export class PerplexityProvider {
      * TODO: Future proxy-based streaming implementation
      * When SSE streaming is added to the Netlify proxy, replace the throw above with:
      *
-     * const proxyUrl = '/.netlify/functions/llm-proxies/perplexity-proxy';
+     * const proxyUrl = '/api/llm-proxies/perplexity-proxy';
      * const authToken = await getAuthToken();
      * if (!authToken) {
      *   throw new PerplexityError('User not authenticated.', 'NOT_AUTHENTICATED');

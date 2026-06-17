@@ -264,7 +264,9 @@ export type FullUserSettingsFormData = z.infer<typeof fullUserSettingsSchema>;
 export function validateFormData<T>(
   schema: z.ZodSchema<T>,
   data: unknown
-): { success: true; data: T } | { success: false; errors: Record<string, string> } {
+):
+  | { success: true; data: T }
+  | { success: false; errors: Record<string, string> } {
   const result = schema.safeParse(data);
 
   if (result.success) {
@@ -273,7 +275,12 @@ export function validateFormData<T>(
 
   const errors: Record<string, string> = {};
   // Zod v4 uses issues property
-  const issues = (result.error as { issues?: Array<{ path: (string | number)[]; message: string }> }).issues || [];
+  const issues =
+    (
+      result.error as {
+        issues?: Array<{ path: (string | number)[]; message: string }>;
+      }
+    ).issues || [];
 
   for (const issue of issues) {
     const path = issue.path.join('.');
@@ -295,7 +302,8 @@ export function validateFormData<T>(
  * Compatible with Zod v4
  */
 export function getFirstError(error: z.ZodError): string {
-  const issues = (error as { issues?: Array<{ message: string }> }).issues || [];
+  const issues =
+    (error as { issues?: Array<{ message: string }> }).issues || [];
   return issues[0]?.message || 'Validation failed';
 }
 

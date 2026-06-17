@@ -139,7 +139,7 @@ export function EmployeeWorkStream({
                   'flex items-start space-x-3 rounded-lg p-3 transition-all duration-200',
                   getItemColor(item.type),
                   item.status === 'active' &&
-                    'ring-2 ring-blue-500 ring-opacity-50'
+                    'ring-opacity-50 ring-2 ring-blue-500'
                 )}
               >
                 <div className="mt-0.5 flex-shrink-0">

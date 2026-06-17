@@ -90,10 +90,10 @@ const DocumentationPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <Particles className="absolute inset-0 -z-10" quantity={40} />
 
-      <section className="px-4 pb-20 pt-32 sm:px-6 lg:px-8">
+      <section className="px-4 pt-32 pb-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -104,10 +104,10 @@ const DocumentationPage: React.FC = () => {
               <BookOpen className="mr-2 h-4 w-4" />
               Documentation
             </Badge>
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+            <h1 className="from-primary via-accent to-secondary mb-6 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
               Everything You Need to Know
             </h1>
-            <p className="mb-8 text-xl text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-xl">
               Comprehensive guides, tutorials, and API documentation to help you
               build with AGI Workforce
             </p>
@@ -115,7 +115,7 @@ const DocumentationPage: React.FC = () => {
               <Button
                 size="lg"
                 asChild
-                className="bg-gradient-to-r from-primary to-accent"
+                className="from-primary to-accent bg-gradient-to-r"
               >
                 <Link to="#quick-start">Quick Start Guide</Link>
               </Button>
@@ -141,7 +141,7 @@ const DocumentationPage: React.FC = () => {
             <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Quick Start
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-xl">
               Get up and running in minutes
             </p>
           </motion.div>
@@ -155,17 +155,17 @@ const DocumentationPage: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
               >
-                <Card className="group cursor-pointer border-2 border-border/50 p-6 transition-all hover:border-primary/50">
+                <Card className="group border-border/50 hover:border-primary/50 cursor-pointer border-2 p-6 transition-all">
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="rounded-lg bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
-                      <item.icon className="h-5 w-5 text-primary" />
+                    <div className="bg-primary/10 group-hover:bg-primary/20 rounded-lg p-2 transition-colors">
+                      <item.icon className="text-primary h-5 w-5" />
                     </div>
                     <Badge variant="secondary">{item.time}</Badge>
                   </div>
-                  <h3 className="mb-2 font-semibold transition-colors group-hover:text-primary">
+                  <h3 className="group-hover:text-primary mb-2 font-semibold transition-colors">
                     {item.title}
                   </h3>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="text-muted-foreground h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Card>
               </motion.div>
             ))}
@@ -195,19 +195,19 @@ const DocumentationPage: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
               >
-                <Card className="group h-full border-2 border-border/50 p-6 transition-all hover:border-primary/50">
-                  <div className="mb-4 w-fit rounded-xl bg-primary/10 p-3 transition-transform group-hover:scale-110">
-                    <category.icon className="h-6 w-6 text-primary" />
+                <Card className="group border-border/50 hover:border-primary/50 h-full border-2 p-6 transition-all">
+                  <div className="bg-primary/10 mb-4 w-fit rounded-xl p-3 transition-transform group-hover:scale-110">
+                    <category.icon className="text-primary h-6 w-6" />
                   </div>
                   <h3 className="mb-2 text-xl font-bold">{category.title}</h3>
-                  <p className="mb-4 text-muted-foreground">
+                  <p className="text-muted-foreground mb-4">
                     {category.description}
                   </p>
                   <ul className="space-y-2">
                     {category.articles.map((article, i) => (
                       <li
                         key={i}
-                        className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+                        className="text-muted-foreground hover:text-primary flex cursor-pointer items-center gap-2 text-sm transition-colors"
                       >
                         <ArrowRight className="h-3 w-3" />
                         {article}
@@ -221,18 +221,18 @@ const DocumentationPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 px-4 py-20 sm:px-6 lg:px-8">
+      <section className="from-primary/10 via-accent/10 to-secondary/10 bg-gradient-to-br px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <HelpCircle className="mx-auto mb-4 h-12 w-12 text-primary" />
+            <HelpCircle className="text-primary mx-auto mb-4 h-12 w-12" />
             <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Need Help?
             </h2>
-            <p className="mb-8 text-lg text-muted-foreground">
+            <p className="text-muted-foreground mb-8 text-lg">
               Can't find what you're looking for? Our support team is here to
               help.
             </p>

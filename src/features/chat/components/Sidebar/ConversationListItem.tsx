@@ -94,13 +94,10 @@ export const ConversationListItem = memo(function ConversationListItem({
     [onClick]
   );
 
-  const handleDeleteClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setShowDeleteDialog(true);
-    },
-    []
-  );
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDeleteDialog(true);
+  }, []);
 
   const handleConfirmDelete = useCallback(
     (e: React.MouseEvent) => {
@@ -130,7 +127,7 @@ export const ConversationListItem = memo(function ConversationListItem({
       >
         {/* Pin indicator - subtle left border */}
         {isPinned && (
-          <div className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-yellow-500" />
+          <div className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-yellow-500" />
         )}
 
         {/* Main content */}
@@ -148,7 +145,7 @@ export const ConversationListItem = memo(function ConversationListItem({
           </div>
 
           {/* Time - always visible but subtle */}
-          <div className="text-[11px] text-muted-foreground/70">
+          <div className="text-muted-foreground/70 text-[11px]">
             {formatDistanceToNow(updatedAt, { addSuffix: true })}
           </div>
         </div>

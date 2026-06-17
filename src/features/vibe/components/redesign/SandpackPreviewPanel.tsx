@@ -263,7 +263,7 @@ function SandpackPreviewInner({ showConsole }: { showConsole: boolean }) {
         />
       </div>
       {showConsole && (
-        <div className="flex-[0.35] border-t border-border">
+        <div className="border-border flex-[0.35] border-t">
           <SandpackConsole style={{ height: '100%' }} showHeader={false} />
         </div>
       )}
@@ -312,7 +312,7 @@ export function SandpackPreviewPanel({
   // If no files, show empty state
   if (!hasFiles) {
     return (
-      <div className={cn('flex h-full flex-col bg-background', className)}>
+      <div className={cn('bg-background flex h-full flex-col', className)}>
         <PreviewToolbar
           viewport={appViewerState.viewport}
           onViewportChange={setViewport}
@@ -333,9 +333,9 @@ export function SandpackPreviewPanel({
   return (
     <div
       className={cn(
-        'flex h-full flex-col bg-background',
+        'bg-background flex h-full flex-col',
         className,
-        isFullscreen && 'fixed inset-0 z-modal'
+        isFullscreen && 'z-modal fixed inset-0'
       )}
     >
       <PreviewToolbar
@@ -354,11 +354,11 @@ export function SandpackPreviewPanel({
       />
 
       {/* Preview Area */}
-      <div className="flex-1 overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
+      <div className="from-muted/20 to-muted/40 flex-1 overflow-hidden bg-gradient-to-br">
         <div className="flex h-full items-center justify-center p-4">
           <div
             className={cn(
-              'relative overflow-hidden rounded-lg border border-border bg-background shadow-2xl transition-all duration-300',
+              'border-border bg-background relative overflow-hidden rounded-lg border shadow-2xl transition-all duration-300',
               isFullscreen && 'rounded-none border-0'
             )}
             style={{
@@ -394,10 +394,10 @@ export function SandpackPreviewPanel({
 
             {/* Refreshing overlay */}
             {isRefreshing && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+              <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">
+                  <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                  <span className="text-muted-foreground text-sm">
                     Refreshing...
                   </span>
                 </div>
@@ -443,7 +443,7 @@ function PreviewToolbar({
   onAutoRefreshChange,
 }: PreviewToolbarProps) {
   return (
-    <div className="border-b border-border bg-muted/30 px-3 py-2">
+    <div className="border-border bg-muted/30 border-b px-3 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           {/* Viewport Selector */}
@@ -574,16 +574,16 @@ function EmptyPreviewState() {
   return (
     <div className="flex flex-1 items-center justify-center p-8 text-center">
       <div>
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <Monitor className="h-8 w-8 text-muted-foreground" />
+        <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <Monitor className="text-muted-foreground h-8 w-8" />
         </div>
-        <h3 className="mb-2 text-sm font-medium text-foreground">
+        <h3 className="text-foreground mb-2 text-sm font-medium">
           No preview available
         </h3>
-        <p className="mb-1 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mb-1 text-xs">
           Start building to see your app come to life
         </p>
-        <p className="text-xs text-muted-foreground/70">
+        <p className="text-muted-foreground/70 text-xs">
           Powered by Sandpack (open source, works everywhere)
         </p>
       </div>

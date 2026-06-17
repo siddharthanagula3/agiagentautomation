@@ -276,7 +276,11 @@ describe('DeepSeekProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Test response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -377,7 +381,7 @@ describe('DeepSeekProvider', () => {
       await provider.sendMessage(mockMessages);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/.netlify/functions/llm-proxies/deepseek-proxy',
+        '/api/llm-proxies/deepseek-proxy',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -396,7 +400,9 @@ describe('DeepSeekProvider', () => {
   });
 
   describe('streamMessage', () => {
-    const mockMessages: DeepSeekMessage[] = [{ role: 'user', content: 'Hello' }];
+    const mockMessages: DeepSeekMessage[] = [
+      { role: 'user', content: 'Hello' },
+    ];
 
     it('should yield chunks from simulated stream', async () => {
       mockFetch.mockResolvedValueOnce({
@@ -404,7 +410,11 @@ describe('DeepSeekProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed response' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -456,7 +466,11 @@ describe('DeepSeekProvider', () => {
         json: () =>
           Promise.resolve({
             choices: [{ message: { content: 'Streamed' } }],
-            usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            usage: {
+              prompt_tokens: 5,
+              completion_tokens: 10,
+              total_tokens: 15,
+            },
           }),
       });
 
@@ -491,7 +505,11 @@ describe('DeepSeekProvider', () => {
     });
 
     it('should create non-retryable error', () => {
-      const error = new DeepSeekError('Auth failed', 'NOT_AUTHENTICATED', false);
+      const error = new DeepSeekError(
+        'Auth failed',
+        'NOT_AUTHENTICATED',
+        false
+      );
 
       expect(error.retryable).toBe(false);
     });
@@ -552,7 +570,9 @@ describe('DeepSeekProvider', () => {
     });
 
     it('should handle database save error gracefully', async () => {
-      const insertMock = vi.fn().mockResolvedValue({ error: new Error('DB error') });
+      const insertMock = vi
+        .fn()
+        .mockResolvedValue({ error: new Error('DB error') });
       vi.mocked(supabase.from).mockReturnValue({
         insert: insertMock,
       } as never);

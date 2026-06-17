@@ -70,18 +70,8 @@ describe('Token Usage Tracker', () => {
     });
 
     it('should accumulate tokens for same session', async () => {
-      await tokenLogger.logTokenUsage(
-        'gpt-4o',
-        100,
-        'user-123',
-        'session-1'
-      );
-      await tokenLogger.logTokenUsage(
-        'gpt-4o',
-        150,
-        'user-123',
-        'session-1'
-      );
+      await tokenLogger.logTokenUsage('gpt-4o', 100, 'user-123', 'session-1');
+      await tokenLogger.logTokenUsage('gpt-4o', 150, 'user-123', 'session-1');
 
       const summary = tokenLogger.getSessionSummary('session-1');
 
@@ -206,7 +196,11 @@ describe('Token Usage Tracker', () => {
     });
 
     it('should calculate Gemini cost correctly', () => {
-      const cost = tokenLogger.calculateCost('gemini-2.0-flash', 1000000, 1000000);
+      const cost = tokenLogger.calculateCost(
+        'gemini-2.0-flash',
+        1000000,
+        1000000
+      );
 
       // Input: $0.1/1M, Output: $0.4/1M
       expect(cost).toBe(0.5);
@@ -352,11 +346,14 @@ describe('Token Usage Tracker', () => {
     // Define interface for static methods on TokenLoggerService constructor
     interface TokenLoggerServiceStatic {
       getSupportedModels(): string[];
-      getModelPricing(model: string): { input: number; output: number; provider: string } | null;
+      getModelPricing(
+        model: string
+      ): { input: number; output: number; provider: string } | null;
     }
 
     it('should return supported models', () => {
-      const TokenLoggerClass = tokenLogger.constructor as unknown as TokenLoggerServiceStatic;
+      const TokenLoggerClass =
+        tokenLogger.constructor as unknown as TokenLoggerServiceStatic;
       const models = TokenLoggerClass.getSupportedModels();
 
       expect(models).toContain('gpt-4o');
@@ -365,7 +362,8 @@ describe('Token Usage Tracker', () => {
     });
 
     it('should return model pricing', () => {
-      const TokenLoggerClass = tokenLogger.constructor as unknown as TokenLoggerServiceStatic;
+      const TokenLoggerClass =
+        tokenLogger.constructor as unknown as TokenLoggerServiceStatic;
       const pricing = TokenLoggerClass.getModelPricing('gpt-4o');
 
       expect(pricing?.input).toBe(2.5);
@@ -374,7 +372,8 @@ describe('Token Usage Tracker', () => {
     });
 
     it('should return null for unknown model pricing', () => {
-      const TokenLoggerClass = tokenLogger.constructor as unknown as TokenLoggerServiceStatic;
+      const TokenLoggerClass =
+        tokenLogger.constructor as unknown as TokenLoggerServiceStatic;
       const pricing = TokenLoggerClass.getModelPricing('unknown-model');
 
       expect(pricing).toBeNull();
@@ -534,9 +533,10 @@ describe('Token Usage Tracker', () => {
 
     it('should handle database persistence errors gracefully', async () => {
       // Get the mock from the module
-      const { __getMockTrackAPICall } = await import(
-        '@features/billing/services/usage-monitor'
-      ) as { __getMockTrackAPICall: () => ReturnType<typeof vi.fn> };
+      const { __getMockTrackAPICall } =
+        (await import('@features/billing/services/usage-monitor')) as {
+          __getMockTrackAPICall: () => ReturnType<typeof vi.fn>;
+        };
       const mockTrackAPICall = __getMockTrackAPICall();
 
       // Make the mock trackAPICall reject for this test
@@ -545,7 +545,12 @@ describe('Token Usage Tracker', () => {
       const errorSpy = vi.spyOn(console, 'error');
 
       // Should not throw
-      await tokenLogger.logTokenUsage('gpt-4o', 100, 'user-123', 'session-db-error');
+      await tokenLogger.logTokenUsage(
+        'gpt-4o',
+        100,
+        'user-123',
+        'session-db-error'
+      );
 
       // In-memory tracking should still work
       const summary = tokenLogger.getSessionSummary('session-db-error');
